@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012 GRNET S.A. All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or
+  ~ without modification, are permitted provided that the following
+  ~ conditions are met:
+  ~
+  ~   1. Redistributions of source code must retain the above
+  ~      copyright notice, this list of conditions and the following
+  ~      disclaimer.
+  ~
+  ~   2. Redistributions in binary form must reproduce the above
+  ~      copyright notice, this list of conditions and the following
+  ~      disclaimer in the documentation and/or other materials
+  ~      provided with the distribution.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY GRNET S.A. ``AS IS'' AND ANY EXPRESS
+  ~ OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  ~ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  ~ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL GRNET S.A OR
+  ~ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ~ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ~ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+  ~ USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+  ~ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  ~ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+  ~ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  ~ POSSIBILITY OF SUCH DAMAGE.
+  ~
+  ~ The views and conclusions contained in the software and
+  ~ documentation are those of the authors and should not be
+  ~ interpreted as representing official policies, either expressed
+  ~ or implied, of GRNET S.A.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>gr.grnet</groupId>
+  <artifactId>pithosj</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+
+  <!-- Project details-->
+  <name>PithosJ</name>
+  <description>
+    JVM library for the Pithos+ service of GRNET
+  </description>
+  <url>https://github.com/grnet/pithos-j</url>
+  <inceptionYear>2011</inceptionYear>
+  <organization>
+    <name>GRNET</name>
+    <url>http://www.grnet.gr/</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>loverdos</id>
+      <name>Christos KK Loverdos</name>
+      <email>loverdos@grnet.gr</email>
+    </developer>
+  </developers>
+
+  <!--Common project settings-->
+  <properties>
+    <scala.version>2.9.2</scala.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
+  </properties>
+
+  <!-- Master properties (inherited by modules) -->
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <!--Build configuration-->
+  <build>
+    <sourceDirectory>src/main/scala</sourceDirectory>
+    <testSourceDirectory>src/test/scala</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/resources</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>${basedir}/src/test/resources</directory>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <recompileMode>incremental</recompileMode>
+          <javacArgs>
+            <!--<javacArg>-Xlint:unchecked</javacArg>-->
+            <javacArg>-Xlint:deprecation</javacArg>
+          </javacArgs>
+
+          <charset>${project.build.sourceEncoding}</charset>
+
+          <jvmArgs>
+            <jvmArg>-Xmx1024m</jvmArg>
+          </jvmArgs>
+
+          <args>
+            <arg>-deprecation</arg>
+            <arg>-unchecked</arg>
+            <arg>-explaintypes</arg>
+          </args>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Make sure tests display failures at the console-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12.4</version>
+        <configuration>
+          <useFile>false</useFile>
+          <reportFormat>plain</reportFormat>
+        </configuration>
+      </plugin>
+
+      <!-- Bundle up source code on release/snapshot -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Release plug-in configuration -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <preparationGoals>clean verify</preparationGoals>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
