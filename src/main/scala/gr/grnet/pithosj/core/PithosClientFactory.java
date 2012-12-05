@@ -33,8 +33,21 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet
+package gr.grnet.pithosj.core;
 
-package object pithosj {
-  final val Version = "0.1.0-SNAPSHOT"
+import com.ning.http.client.AsyncHttpClient;
+
+/**
+ * @author Christos KK Loverdos <loverdos@gmail.com>
+ */
+public final class PithosClientFactory {
+  private PithosClientFactory() {}
+
+  public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
+    return new AsyncHttpPithosClient(asyncHttp);
+  }
+
+  public static Pithos newPithosClient() {
+    return newPithosClient(new AsyncHttpClient());
+  }
 }

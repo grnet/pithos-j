@@ -33,8 +33,24 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet
+package gr.grnet.pithosj.core
 
-package object pithosj {
-  final val Version = "0.1.0-SNAPSHOT"
+import Const.Headers
+import com.ning.http.client.Response
+
+/**
+ *
+ * @author Christos KK Loverdos <loverdos@gmail.com>
+ */
+final object Helpers {
+  def copyResponseHeader(header: String, response: Response, meta: MetaData) {
+    meta.set(header, response.getHeader(header))
+  }
+
+  def copyResponseHeaders(response: Response, meta: MetaData) {
+    copyResponseHeader(Headers.Pithos.X_Account_Bytes_Used, response, meta)
+    copyResponseHeader(Headers.Pithos.X_Account_Container_Count, response, meta)
+    copyResponseHeader(Headers.Pithos.X_Account_Policy_Quota, response, meta)
+    copyResponseHeader(Headers.Pithos.X_Account_Policy_Versioning, response, meta)
+  }
 }

@@ -33,8 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet
+package gr.grnet.pithosj.core;
 
-package object pithosj {
-  final val Version = "0.1.0-SNAPSHOT"
+/**
+ * @author Christos KK Loverdos <loverdos@gmail.com>
+ */
+public class PithosException extends RuntimeException {
+  public PithosException(Throwable cause, String fmt, Object... args) {
+    super(String.format(fmt, args), cause);
+  }
+
+  public PithosException(String fmt, Object... args) {
+    super(String.format(fmt, args));
+  }
 }

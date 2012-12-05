@@ -33,8 +33,19 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet
+package gr.grnet.pithosj.core
 
-package object pithosj {
-  final val Version = "0.1.0-SNAPSHOT"
+/**
+ *
+ * @author Christos KK Loverdos <loverdos@gmail.com>
+ */
+final object Paths {
+
+  def build(paths: String*): String = {
+    paths.mkString("/")
+  }
+
+  def build(paths: Array[String]): String = {
+    build(paths:_*)
+  }
 }
