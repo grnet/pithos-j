@@ -48,39 +48,19 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def ping(connInfo: ConnectionInfo) = ???
 
   def getAccountInfo(connInfo: ConnectionInfo) = {
-    val getBuilder = http.prepareHead(Paths.build(connInfo.baseURL, connInfo.userID))
-    getBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
     val startMillis = System.currentTimeMillis()
-    getBuilder.execute(new AsyncCompletionHandler[AccountInfoResult] {
-      def onCompleted(response: Response) = {
-        val completionMillis = System.currentTimeMillis() - startMillis
-        val headers = response.getHeaders
-        val keys = headers.keySet().iterator()
-        while(keys.hasNext) {
-          val key = keys.next()
-          System.out.println("%s: %s".format(key, headers.getJoinedValue(key, ",")))
-        }
+    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
 
-        val body = response.getResponseBody
-        System.out.println("")
-        System.out.println("===================================")
-        System.out.println(body)
-        System.out.println("===================================")
+    Helpers.execAsyncCompletionHandler(reqBuilder) { response =>
+      val completionMillis = System.currentTimeMillis() - startMillis
+      val statusCode = response.getStatusCode
+      val statusText = response.getStatusText
 
-        val statusCode = response.getStatusCode
-        val statusText = response.getStatusText
-        System.out.println("")
-        System.out.println("===================================")
-        System.out.println("%s %s".format(statusCode, statusText))
-        System.out.println("Completion time: %s ms".format(completionMillis))
-        System.out.println("===================================")
+      val meta = new MetaData
+      Helpers.copyPithosResponseHeaders(response, meta)
 
-        val meta = new MetaData
-        Helpers.copyResponseHeaders(response, meta)
-
-        new AccountInfoResult(statusCode, statusText, meta, completionMillis)
-      }
-    })
+      new AccountInfoResult(statusCode, statusText, meta, completionMillis)
+    }
   }
 
   def replaceAccountMeta(connInfo: ConnectionInfo, meta: MetaData) = ???

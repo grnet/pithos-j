@@ -36,21 +36,38 @@
 package gr.grnet.pithosj.core
 
 import Const.Headers
-import com.ning.http.client.Response
+import com.ning.http.client.{ListenableFuture, AsyncCompletionHandler, AsyncHttpClient, Response}
+import java.util.concurrent.Future
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final object Helpers {
-  def copyResponseHeader(header: String, response: Response, meta: MetaData) {
+  @inline final def copyResponseHeader(header: String, response: Response, meta: MetaData) {
     meta.set(header, response.getHeader(header))
   }
 
-  def copyResponseHeaders(response: Response, meta: MetaData) {
+  final def copyPithosResponseHeaders(response: Response, meta: MetaData) {
     copyResponseHeader(Headers.Pithos.X_Account_Bytes_Used, response, meta)
     copyResponseHeader(Headers.Pithos.X_Account_Container_Count, response, meta)
     copyResponseHeader(Headers.Pithos.X_Account_Policy_Quota, response, meta)
     copyResponseHeader(Headers.Pithos.X_Account_Policy_Versioning, response, meta)
+  }
+
+  final def prepareHead(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+    val reqBuilder = http.prepareGet(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+    reqBuilder
+  }
+
+  final def execAsyncCompletionHandler[Result](
+      reqBuilder: AsyncHttpClient#BoundRequestBuilder
+  )(  f: Response => Result): Future[Result] = {
+    val handler = new AsyncCompletionHandler[Result] {
+      def onCompleted(response: Response) = f(response)
+    }
+
+    reqBuilder.execute(handler)
   }
 }

@@ -41,6 +41,14 @@ package gr.grnet.pithosj.core
  */
 final object Paths {
 
+  def buildWithFirst(first: String, others: String*): String = {
+    (Seq(first) ++ others).mkString("/")
+  }
+
+  def buildWithFirst(first: String, others: Array[String]): String = {
+    (Array(first) ++ others).mkString("/")
+  }
+
   def build(paths: String*): String = {
     paths.mkString("/")
   }
