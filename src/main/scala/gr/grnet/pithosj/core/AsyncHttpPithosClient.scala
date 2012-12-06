@@ -45,7 +45,7 @@ import java.io.InputStream
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
-  def ping(connInfo: ConnectionInfo) = null
+  def ping(connInfo: ConnectionInfo) = ???
 
   def getAccountInfo(connInfo: ConnectionInfo) = {
     val getBuilder = http.prepareHead(Paths.build(connInfo.baseURL, connInfo.userID))
@@ -83,33 +83,33 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     })
   }
 
-  def replaceAccountMeta(connInfo: ConnectionInfo, meta: MetaData) = null
+  def replaceAccountMeta(connInfo: ConnectionInfo, meta: MetaData) = ???
 
-  def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String) = null
+  def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String) = ???
 
-  def listContainers(connInfo: ConnectionInfo) = null
+  def listContainers(connInfo: ConnectionInfo) = ???
 
-  def createContainer(connInfo: ConnectionInfo, container: String) = null
+  def createContainer(connInfo: ConnectionInfo, container: String) = ???
 
-  def getContainerInfo(connInfo: ConnectionInfo, container: String) = null
+  def getContainerInfo(connInfo: ConnectionInfo, container: String) = ???
 
-  def deleteContainer(connInfo: ConnectionInfo, container: String) = null
+  def deleteContainer(connInfo: ConnectionInfo, container: String) = ???
 
-  def createDirectory(connInfo: ConnectionInfo, directory: String) = null
+  def createDirectory(connInfo: ConnectionInfo, directory: String) = ???
 
-  def getObjectMeta(connInfo: ConnectionInfo, obj: String) = null
+  def getObjectMeta(connInfo: ConnectionInfo, obj: String) = ???
 
-  def deleteObjectMeta(connInfo: ConnectionInfo, obj: String, metaKey: String) = null
+  def deleteObjectMeta(connInfo: ConnectionInfo, obj: String, metaKey: String) = ???
 
-  def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData) = null
+  def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData) = ???
 
-  def getObjectInfo(connInfo: ConnectionInfo, obj: String) = null
+  def getObjectInfo(connInfo: ConnectionInfo, obj: String) = ???
 
-  def getObject(connInfo: ConnectionInfo, obj: String) = null
+  def getObject(connInfo: ConnectionInfo, obj: String) = ???
 
-  def uploadObject(connInfo: ConnectionInfo, obj: String, in: InputStream, size: Long) = null
+  def uploadObject(connInfo: ConnectionInfo, obj: String, in: InputStream, size: Long) = ???
 
-  def deleteObject(connInfo: ConnectionInfo, obj: String) = null
+  def deleteObject(connInfo: ConnectionInfo, obj: String) = ???
 
   def copyObject(
       connInfo: ConnectionInfo,
@@ -117,7 +117,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       fromObj: String,
       toContainer: String,
       toObj: String
-  ) = null
+  ) = ???
 
   def moveObject(
       connInfo: ConnectionInfo,
@@ -125,9 +125,9 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       fromObj: String,
       toContainer: String,
       toObj: String
-  ) = null
+  ) = ???
 
-  def listObjects(connInfo: ConnectionInfo) = null
+  def listObjects(connInfo: ConnectionInfo) = ???
 
   def listObjectsInPath(connInfo: ConnectionInfo, pathPrefix: String) {}
 }
