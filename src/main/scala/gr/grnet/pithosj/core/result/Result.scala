@@ -60,20 +60,14 @@ sealed trait Result {
   def is503: Boolean
 }
 
-abstract class ResultSkeleton(
-    _statusCode: Int,
-    _statusText: String,
-    _headers: MetaData,
-    _completionMillis: Long
-) extends Result {
-  def statusCode = _statusCode
-  def statusText = _statusText
-  def headers = _headers
-  def completionMillis = _completionMillis
+final case class BaseResult(
+    statusCode: Int,
+    statusText: String,
+    headers: MetaData,
+    completionMillis: Int
+) {
 
-  def disposeResources() {}
-
-  def contentType = headers.get(Const.Headers.Content_Type)
+  def contentType = headers.getOne(Const.Headers.Content_Type)
 
   def is204 = statusCode == 204
   def is400 = statusCode == 400
@@ -83,33 +77,44 @@ abstract class ResultSkeleton(
   def is503 = statusCode == 503
 }
 
-final class MetaDataResult(
-    statusCode: Int,
-    statusText: String,
-    headers: MetaData,
-    completionMillis: Long
-) extends ResultSkeleton(statusCode, statusText, headers, completionMillis)
+abstract class ExtendedResultSkeleton(
+    baseResult: BaseResult
+) extends Result {
+  def statusCode = baseResult.statusCode
+  def statusText = baseResult.statusText
+  def headers = baseResult.headers
+  def completionMillis = baseResult.completionMillis
 
-final class AccountInfoResult(
-    statusCode: Int,
-    statusText: String,
-    headers: MetaData,
-    completionMillis: Long
-) extends ResultSkeleton(statusCode, statusText, headers, completionMillis) {
+  def contentType = baseResult.contentType
 
-  def bytesUsed: Long = headers.get(Const.Headers.Pithos.X_Account_Bytes_Used).toLong
-  def containerCount: Int = headers.get(Const.Headers.Pithos.X_Account_Container_Count).toInt
-  def policyQuota: Long = headers.get(Const.Headers.Pithos.X_Account_Policy_Quota).toLong
-  def policyVersioning: String = headers.get(Const.Headers.Pithos.X_Account_Policy_Versioning)
+  def is204 = baseResult.is204
+  def is400 = baseResult.is400
+  def is401 = baseResult.is401
+  def is403 = baseResult.is403
+  def is404 = baseResult.is404
+  def is503 = baseResult.is503
+
+  def disposeResources() {}
+}
+
+final case class BareExtendedResult(
+    baseResult: BaseResult
+) extends ExtendedResultSkeleton(baseResult)
+
+final case class AccountInfoResult(
+    baseResult: BaseResult
+) extends ExtendedResultSkeleton(baseResult) {
+
+  def bytesUsed: Long = headers.getOne(Const.Headers.Pithos.X_Account_Bytes_Used).toLong
+  def containerCount: Int = headers.getOne(Const.Headers.Pithos.X_Account_Container_Count).toInt
+  def policyQuota: Long = headers.getOne(Const.Headers.Pithos.X_Account_Policy_Quota).toLong
+  def policyVersioning: String = headers.getOne(Const.Headers.Pithos.X_Account_Policy_Versioning)
   def usageRatio: Double = bytesUsed.toDouble / policyQuota.toDouble
 }
 
-final class ListContainersResult(
-    statusCode: Int,
-    statusText: String,
-    headers: MetaData,
-    completionMillis: Long,
-    val containers: Array[String]
-) extends ResultSkeleton(statusCode, statusText, headers, completionMillis)
+final case class ListContainersResult(
+    baseResult: BaseResult,
+    containers: List[ContainerInfo]
+) extends ExtendedResultSkeleton(baseResult)
 
 

@@ -34,7 +34,13 @@
  */
 
 package gr.grnet.pithosj
+import scala.collection.mutable
+import scala.collection.{JavaConversions => JC}
 
 package object core {
   @inline final def ??? = throw new PithosNotImplementedException
+
+  @inline final def asScala[K, V](jmap: java.util.Map[K, V]): mutable.Map[K, V] = {
+    JC.mapAsScalaMap(jmap)
+  }
 }

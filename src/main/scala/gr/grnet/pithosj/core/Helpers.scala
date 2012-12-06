@@ -36,16 +36,34 @@
 package gr.grnet.pithosj.core
 
 import Const.Headers
-import com.ning.http.client.{ListenableFuture, AsyncCompletionHandler, AsyncHttpClient, Response}
+import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, Response}
+import java.util
 import java.util.concurrent.Future
+import gr.grnet.pithosj.core.result.BaseResult
+import org.slf4j.LoggerFactory
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final object Helpers {
+  private[this] val logger = LoggerFactory.getLogger(this.getClass)
+
+  @inline def jListOne[T](item: T): util.List[T] = {
+    val list = new util.ArrayList[T]()
+    list.add(item)
+    list
+  }
+
   @inline final def copyResponseHeader(header: String, response: Response, meta: MetaData) {
-    meta.set(header, response.getHeader(header))
+    meta.set(header, response.getHeaders(header))
+  }
+
+  final def copyAllResponseHeaders(response: Response, meta: MetaData) {
+    val headers = asScala(response.getHeaders)
+    for(k<- headers.keysIterator) {
+      copyResponseHeader(k, response, meta)
+    }
   }
 
   final def copyPithosResponseHeaders(response: Response, meta: MetaData) {
@@ -56,39 +74,58 @@ final object Helpers {
   }
 
   final def prepareHead(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val reqBuilder = http.prepareGet(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
+    logger.debug("prepareHead({})", url)
+    val reqBuilder = http.prepareHead(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
   }
 
   final def prepareGet(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val reqBuilder = http.prepareGet(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
+    logger.debug("prepareGet({})", url)
+    val reqBuilder = http.prepareGet(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
   }
 
   final def preparePost(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val reqBuilder = http.preparePost(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
+    logger.debug("preparePost({})", url)
+    val reqBuilder = http.preparePost(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
   }
 
   final def preparePut(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val reqBuilder = http.preparePut(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
+    logger.debug("preparePut({})", url)
+    val reqBuilder = http.preparePut(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
   }
 
   final def prepareDelete(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val reqBuilder = http.prepareDelete(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
+    logger.debug("prepareDelete({})", url)
+    val reqBuilder = http.prepareDelete(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
   }
 
   final def execAsyncCompletionHandler[Result](
       reqBuilder: AsyncHttpClient#BoundRequestBuilder
-  )(  f: (Response, Long) => Result): Future[Result] = {
+  )(  f: (Response, BaseResult) => Result): Future[Result] = {
 
     val startMillis = System.currentTimeMillis()
 
     val handler = new AsyncCompletionHandler[Result] {
       def onCompleted(response: Response) = {
-        f(response, System.currentTimeMillis() - startMillis)
+        val meta = new MetaData
+        copyAllResponseHeaders(response, meta)
+
+        val baseResult = new BaseResult(
+          response.getStatusCode,
+          response.getStatusText,
+          meta,
+          (System.currentTimeMillis() - startMillis).toInt
+        )
+        f(response, baseResult)
       }
     }
 

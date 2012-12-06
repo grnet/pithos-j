@@ -33,62 +33,56 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.ning.http.client.FluentCaseInsensitiveStringsMap
+import com.ning.http.client.simple.HeaderMap
+import java.util
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class MetaData {
-  private final Map<String, String> meta = new HashMap<String, String>();
+final class MetaData {
+  private[this] val map = new FluentCaseInsensitiveStringsMap()
 
-  public int size() {
-    return this.meta.size();
-  }
+  def isEmpty = map.isEmpty
 
-  public boolean isEmpty() {
-    return this.meta.isEmpty();
-  }
-
-  public boolean has(String name) {
-    return this.meta.containsKey(name);
-  }
-
-  public String get(String name) {
-    final String value = this.meta.get(name);
-    if(value == null) {
-      throw new PithosException("Key '%s' does not exist", name);
-    }
-    return value;
-  }
-
-  public void set(String name, String value) {
-    if(value != null) {
-      this.meta.put(name, value);
+  def setOne(key: String, value: String) {
+    require(key ne null, "key ne null")
+    if(value ne null) {
+      map.put(key, Helpers.jListOne(value))
     }
   }
 
-  public Set<String> keys() {
-    final Set<String> set = new HashSet<String>(this.meta.keySet());
-    return set;
+  def set(key: String, value: util.List[String]) {
+    require(key ne null, "key ne null")
+    if((value ne null) && !value.isEmpty) {
+      map.put(key, value)
+    }
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if(this == o) return true;
-    if(o == null || getClass() != o.getClass()) return false;
-
-    final MetaData MetaData = (MetaData) o;
-
-    return meta.equals(MetaData.meta);
+  def has(key: String): Boolean = {
+    require(key ne null, "key ne null")
+    map.containsKey(key)
   }
 
-  @Override
-  public int hashCode() {
-    return meta.hashCode();
+  def get(key: String): util.List[String] = {
+    require(key ne null, "key ne null")
+    if(!has(key)) {
+      throw new PithosException("Key '%s' does not exist", key)
+    }
+    val list = map.get(key)
+    new util.ArrayList[String](list)
+  }
+
+  def getOne(key: String): String = {
+    get(key).get(0)
+  }
+
+  def size = map.size()
+
+  override def toString = {
+    "MetaData(%s)".format(asScala(map).mkString(", "))
   }
 }

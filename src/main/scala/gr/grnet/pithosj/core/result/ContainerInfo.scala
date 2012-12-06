@@ -33,45 +33,20 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core.result
 
-import java.text.SimpleDateFormat;
+import java.util.Date
+import gr.grnet.pithosj.core.MetaData
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Const {
-  private Const() {}
+case class ContainerInfo(
+    name: String,
+    count: Int,
+    lastModified: Date,
+    bytes: Long,
+    policy: MetaData
+)
 
-  public static final class Dates {
-    private Dates() {}
-
-    public static final SimpleDateFormat ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX");
-  }
-
-  public static final class Params {
-    private Params() {}
-
-    public static final String format = "format";
-  }
-
-  public static final class Headers {
-    private Headers() {}
-
-    public static final String Content_Type = "Content-Type";
-    public static final String Date = "Date"; // Wed, 05 Dec 2012 14:29:28 GMT
-    public static final String Content_Language= "Content-Language";
-    public static final String Last_Modified = "Last-Modified";
-    public static final String Server = "Server";
-
-    public static final class Pithos {
-      private Pithos() {}
-
-      public static final String X_Auth_Token = "X_Auth_Token";
-      public static final String X_Account_Bytes_Used = "X_Account_Bytes_Used";
-      public static final String X_Account_Container_Count = "X-Account-Container-Count";
-      public static final String X_Account_Policy_Quota = "X-Account-Policy-Quota";
-      public static final String X_Account_Policy_Versioning = "X-Account-Policy-Versioning";
-    }
-  }
-}

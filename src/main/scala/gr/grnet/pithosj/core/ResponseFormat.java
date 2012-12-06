@@ -35,43 +35,29 @@
 
 package gr.grnet.pithosj.core;
 
-import java.text.SimpleDateFormat;
-
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Const {
-  private Const() {}
+public enum ResponseFormat {
+  NOFORMAT(""),
+  XML("xml"),
+  JSON("json");
 
-  public static final class Dates {
-    private Dates() {}
+  public final String parameterValue;
 
-    public static final SimpleDateFormat ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX");
+  private ResponseFormat(String parameterValue) {
+    this.parameterValue = parameterValue;
   }
 
-  public static final class Params {
-    private Params() {}
-
-    public static final String format = "format";
+  public final boolean hasValue() {
+    return this != NOFORMAT;
   }
 
-  public static final class Headers {
-    private Headers() {}
+  public final boolean isXML() {
+    return this == XML;
+  }
 
-    public static final String Content_Type = "Content-Type";
-    public static final String Date = "Date"; // Wed, 05 Dec 2012 14:29:28 GMT
-    public static final String Content_Language= "Content-Language";
-    public static final String Last_Modified = "Last-Modified";
-    public static final String Server = "Server";
-
-    public static final class Pithos {
-      private Pithos() {}
-
-      public static final String X_Auth_Token = "X_Auth_Token";
-      public static final String X_Account_Bytes_Used = "X_Account_Bytes_Used";
-      public static final String X_Account_Container_Count = "X-Account-Container-Count";
-      public static final String X_Account_Policy_Quota = "X-Account-Policy-Quota";
-      public static final String X_Account_Policy_Versioning = "X-Account-Policy-Versioning";
-    }
+  public final boolean isJSON() {
+    return this == JSON;
   }
 }

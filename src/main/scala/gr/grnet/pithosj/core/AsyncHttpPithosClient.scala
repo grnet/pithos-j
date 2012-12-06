@@ -35,30 +35,26 @@
 
 package gr.grnet.pithosj.core
 
-import Const.Headers
-import com.ning.http.client.{Response, AsyncCompletionHandler, AsyncHttpClient}
-import gr.grnet.pithosj.core.result.{ListContainersResult, AccountInfoResult}
+import com.ning.http.client.AsyncHttpClient
+import gr.grnet.pithosj.core.result.{ContainerInfo, ListContainersResult, AccountInfoResult}
 import java.io.InputStream
-import scala.io.Source
+import org.slf4j.LoggerFactory
+import scala.xml.XML
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
+  private[this] val logger = LoggerFactory.getLogger(this.getClass)
+
   def ping(connInfo: ConnectionInfo) = ???
 
   def getAccountInfo(connInfo: ConnectionInfo) = {
     val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
 
-    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, completionMillis) =>
-      val statusCode = response.getStatusCode
-      val statusText = response.getStatusText
-
-      val meta = new MetaData
-      Helpers.copyPithosResponseHeaders(response, meta)
-
-      new AccountInfoResult(statusCode, statusText, meta, completionMillis)
+    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
+      new AccountInfoResult(baseResult)
     }
   }
 
@@ -67,18 +63,56 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String) = ???
 
   def listContainers(connInfo: ConnectionInfo) = {
-    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
+    val reqBuilder = Helpers.
+      prepareGet(http, connInfo, connInfo.userID).
+      addQueryParameter(Const.Params.format, ResponseFormat.XML.parameterValue)
 
-    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, completionMillis) =>
-      val statusCode = response.getStatusCode
-      val statusText = response.getStatusText
+    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
       val body = response.getResponseBody
-      val containers = Source.fromString(body).getLines().toArray
+      val xml = XML.loadString(body)
 
-      val meta = new MetaData
-      Helpers.copyPithosResponseHeaders(response, meta)
+      val containerInfos = for {
+        container          <- xml \ "container"
+        count              <- container \ "count"
+        last_modified      <- container \ "last_modified"
+        bytes              <- container \ "bytes"
+        name               <- container \ "name"
+        x_container_policy <- container \ "x_container_policy"
+      } yield {
+        // parse:
+        //  <x_container_policy>
+        //    <key>quota</key>
+        //    <value>53687091200</value>
+        //    <key>versioning</key>
+        //
+        //    <value>auto</value>
+        //  </x_container_policy>
+        val kvPairs = for {
+          child <- x_container_policy.nonEmptyChildren if Set("key", "value").contains(child.label.toLowerCase())
+        } yield {
+          child.text
+        }
 
-      new ListContainersResult(statusCode, statusText, meta, completionMillis, containers)
+        // A key is at an even index, a value is at an odd index
+        val (keys_i, values_i) = kvPairs.zipWithIndex.partition { case (s, index) => index % 2 == 0}
+        val keys = keys_i.map(_._1) // throw away the index
+        val values = values_i.map(_._1)
+
+        val policy = new MetaData
+        for((k, v) <- keys.zip(values)) {
+          policy.setOne(k,v)
+        }
+
+        ContainerInfo(
+          name.text,
+          count.text.toInt,
+          Const.Dates.ISO.parse(last_modified.text),
+          bytes.text.toLong,
+          policy
+        )
+      }
+
+      new ListContainersResult(baseResult, containerInfos.toList)
     }
   }
 
