@@ -37,8 +37,9 @@ package gr.grnet.pithosj.core
 
 import Const.Headers
 import com.ning.http.client.{Response, AsyncCompletionHandler, AsyncHttpClient}
-import gr.grnet.pithosj.core.result.{AccountInfoResult}
+import gr.grnet.pithosj.core.result.{ListContainersResult, AccountInfoResult}
 import java.io.InputStream
+import scala.io.Source
 
 /**
  *
@@ -48,11 +49,9 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def ping(connInfo: ConnectionInfo) = ???
 
   def getAccountInfo(connInfo: ConnectionInfo) = {
-    val startMillis = System.currentTimeMillis()
     val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
 
-    Helpers.execAsyncCompletionHandler(reqBuilder) { response =>
-      val completionMillis = System.currentTimeMillis() - startMillis
+    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, completionMillis) =>
       val statusCode = response.getStatusCode
       val statusText = response.getStatusText
 
@@ -67,7 +66,21 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String) = ???
 
-  def listContainers(connInfo: ConnectionInfo) = ???
+  def listContainers(connInfo: ConnectionInfo) = {
+    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, completionMillis) =>
+      val statusCode = response.getStatusCode
+      val statusText = response.getStatusText
+      val body = response.getResponseBody
+      val containers = Source.fromString(body).getLines().toArray
+
+      val meta = new MetaData
+      Helpers.copyPithosResponseHeaders(response, meta)
+
+      new ListContainersResult(statusCode, statusText, meta, completionMillis, containers)
+    }
+  }
 
   def createContainer(connInfo: ConnectionInfo, container: String) = ???
 

@@ -71,6 +71,8 @@ abstract class ResultSkeleton(
   def headers = _headers
   def completionMillis = _completionMillis
 
+  def disposeResources() {}
+
   def contentType = headers.get(Const.Headers.Content_Type)
 
   def is204 = statusCode == 204
@@ -86,10 +88,7 @@ final class MetaDataResult(
     statusText: String,
     headers: MetaData,
     completionMillis: Long
-) extends ResultSkeleton(statusCode, statusText, headers, completionMillis) {
-
-  def disposeResources() {}
-}
+) extends ResultSkeleton(statusCode, statusText, headers, completionMillis)
 
 final class AccountInfoResult(
     statusCode: Int,
@@ -97,7 +96,6 @@ final class AccountInfoResult(
     headers: MetaData,
     completionMillis: Long
 ) extends ResultSkeleton(statusCode, statusText, headers, completionMillis) {
-  def disposeResources() {}
 
   def bytesUsed: Long = headers.get(Const.Headers.Pithos.X_Account_Bytes_Used).toLong
   def containerCount: Int = headers.get(Const.Headers.Pithos.X_Account_Container_Count).toInt
@@ -105,5 +103,13 @@ final class AccountInfoResult(
   def policyVersioning: String = headers.get(Const.Headers.Pithos.X_Account_Policy_Versioning)
   def usageRatio: Double = bytesUsed.toDouble / policyQuota.toDouble
 }
+
+final class ListContainersResult(
+    statusCode: Int,
+    statusText: String,
+    headers: MetaData,
+    completionMillis: Long,
+    val containers: Array[String]
+) extends ResultSkeleton(statusCode, statusText, headers, completionMillis)
 
 

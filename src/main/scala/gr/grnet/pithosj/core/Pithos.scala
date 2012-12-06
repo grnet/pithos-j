@@ -37,7 +37,7 @@ package gr.grnet.pithosj.core
 
 import java.io.InputStream
 import java.util.concurrent.Future
-import gr.grnet.pithosj.core.result.{AccountInfoResult, MetaDataResult}
+import gr.grnet.pithosj.core.result.{ListContainersResult, AccountInfoResult, MetaDataResult}
 
 
 /**
@@ -54,7 +54,7 @@ trait Pithos {
 
   def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String): Future[MetaDataResult]
 
-  def listContainers(connInfo: ConnectionInfo): Future[MetaDataResult]
+  def listContainers(connInfo: ConnectionInfo): Future[ListContainersResult]
 
   def createContainer(connInfo: ConnectionInfo, container: String): Future[MetaDataResult]
 

@@ -58,14 +58,38 @@ final object Helpers {
   final def prepareHead(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val reqBuilder = http.prepareGet(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
-    reqBuilder
+  }
+
+  final def prepareGet(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+    val reqBuilder = http.prepareGet(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+  }
+
+  final def preparePost(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+    val reqBuilder = http.preparePost(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+  }
+
+  final def preparePut(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+    val reqBuilder = http.preparePut(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+  }
+
+  final def prepareDelete(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+    val reqBuilder = http.prepareDelete(Paths.buildWithFirst(connInfo.baseURL, paths:_*))
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
   }
 
   final def execAsyncCompletionHandler[Result](
       reqBuilder: AsyncHttpClient#BoundRequestBuilder
-  )(  f: Response => Result): Future[Result] = {
+  )(  f: (Response, Long) => Result): Future[Result] = {
+
+    val startMillis = System.currentTimeMillis()
+
     val handler = new AsyncCompletionHandler[Result] {
-      def onCompleted(response: Response) = f(response)
+      def onCompleted(response: Response) = {
+        f(response, System.currentTimeMillis() - startMillis)
+      }
     }
 
     reqBuilder.execute(handler)
