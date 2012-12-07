@@ -150,8 +150,6 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
       def h(name: String) = baseResult.getHeader(name)
 
-      val date = h(Headers.Pithos.X_Object_Version_Timestamp.header)
-      System.out.printf("Date: '%s'\n", date)
       val objectInfo = ObjectInfo(
         h(Headers.Standard.Content_Type.header),
         h(Headers.Standard.Content_Length.header).toLong,
