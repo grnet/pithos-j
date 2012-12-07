@@ -37,16 +37,17 @@ package gr.grnet.pithosj.core
 
 import Const.Headers
 import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, Response}
+import gr.grnet.pithosj.core.result.info.Info
+import gr.grnet.pithosj.core.result.{Result, BaseResult}
 import java.util
 import java.util.concurrent.Future
-import gr.grnet.pithosj.core.result.BaseResult
 import org.slf4j.LoggerFactory
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final object Helpers {
+class Helpers {
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
 
   @inline def jListOne[T](item: T): util.List[T] = {
@@ -67,54 +68,54 @@ final object Helpers {
   }
 
   final def copyPithosResponseHeaders(response: Response, meta: MetaData) {
-    copyResponseHeader(Headers.Pithos.X_Account_Bytes_Used, response, meta)
-    copyResponseHeader(Headers.Pithos.X_Account_Container_Count, response, meta)
-    copyResponseHeader(Headers.Pithos.X_Account_Policy_Quota, response, meta)
-    copyResponseHeader(Headers.Pithos.X_Account_Policy_Versioning, response, meta)
+    copyResponseHeader(Headers.Pithos.X_Account_Bytes_Used.header, response, meta)
+    copyResponseHeader(Headers.Pithos.X_Account_Container_Count.header, response, meta)
+    copyResponseHeader(Headers.Pithos.X_Account_Policy_Quota.header, response, meta)
+    copyResponseHeader(Headers.Pithos.X_Account_Policy_Versioning.header, response, meta)
   }
 
   final def prepareHead(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("prepareHead({})", url)
     val reqBuilder = http.prepareHead(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
   final def prepareGet(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("prepareGet({})", url)
     val reqBuilder = http.prepareGet(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
   final def preparePost(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("preparePost({})", url)
     val reqBuilder = http.preparePost(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
   final def preparePut(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("preparePut({})", url)
     val reqBuilder = http.preparePut(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
   final def prepareDelete(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("prepareDelete({})", url)
     val reqBuilder = http.prepareDelete(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token, connInfo.userToken)
+    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
-  final def execAsyncCompletionHandler[Result](
+  final def execAsyncCompletionHandler[I <: Info](
       reqBuilder: AsyncHttpClient#BoundRequestBuilder
-  )(  f: (Response, BaseResult) => Result): Future[Result] = {
+  )(  f: (Response, BaseResult) =>  Result[I]): Future[Result[I]] = {
 
     val startMillis = System.currentTimeMillis()
 
-    val handler = new AsyncCompletionHandler[Result] {
+    val handler = new AsyncCompletionHandler[Result[I]] {
       def onCompleted(response: Response) = {
         val meta = new MetaData
         copyAllResponseHeaders(response, meta)
@@ -132,3 +133,5 @@ final object Helpers {
     reqBuilder.execute(handler)
   }
 }
+
+final object Helpers extends Helpers

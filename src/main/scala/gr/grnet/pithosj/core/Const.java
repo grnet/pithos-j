@@ -46,7 +46,8 @@ public final class Const {
   public static final class Dates {
     private Dates() {}
 
-    public static final SimpleDateFormat ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX");
+    public static final SimpleDateFormat Format1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX");
+    public static final SimpleDateFormat Format2 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
   }
 
   public static final class Params {
@@ -58,20 +59,49 @@ public final class Const {
   public static final class Headers {
     private Headers() {}
 
-    public static final String Content_Type = "Content-Type";
-    public static final String Date = "Date"; // Wed, 05 Dec 2012 14:29:28 GMT
-    public static final String Content_Language= "Content-Language";
-    public static final String Last_Modified = "Last-Modified";
-    public static final String Server = "Server";
+    public enum Standard {
+      Content_Type ("Content-Type"),
+      Content_Length("Content-Length"),
+      Content_Encoding ("Content-Encoding"),
+      Content_Disposition("Content-Disposition"),
+      Content_Language("Content-Language"),
+      Date("Date"),
+      Last_Modified("Last-Modified"),
+      ETag("ETag"),
+      Server("Server");
 
-    public static final class Pithos {
-      private Pithos() {}
+      public final String header;
 
-      public static final String X_Auth_Token = "X_Auth_Token";
-      public static final String X_Account_Bytes_Used = "X_Account_Bytes_Used";
-      public static final String X_Account_Container_Count = "X-Account-Container-Count";
-      public static final String X_Account_Policy_Quota = "X-Account-Policy-Quota";
-      public static final String X_Account_Policy_Versioning = "X-Account-Policy-Versioning";
+      Standard(String header) {
+        this.header = header;
+      }
+    }
+
+    public enum Pithos {
+      X_Auth_Token("X_Auth_Token"),
+
+      X_Account_Bytes_Used("X_Account_Bytes_Used"),
+      X_Account_Container_Count("X-Account-Container-Count"),
+      X_Account_Policy_Quota("X-Account-Policy-Quota"),
+      X_Account_Policy_Versioning("X-Account-Policy-Versioning"),
+
+      X_Object_Hash("X-Object-Hash"),
+      X_Object_UUID("X-Object-UUID"),
+      X_Object_Version("X-Object-Version"),
+      X_Object_Version_Timestamp("X-Object-Version-Timestamp"),
+      X_Object_Modified_By("X-Object-Modified-By"),
+      X_Object_Manifest("X-Object-Manifest"),
+      X_Object_Sharing("X-Object-Sharing"),
+      X_Object_Shared_By("X-Object-Shared-By"),
+      X_Object_Allowed_To("X-Object-Allowed-To"),
+      X_Object_Public("X-Object-Public"),
+      X_Object_Meta_Star("X-Object-Meta-*");
+
+
+      public final String header;
+      Pithos(String header) {
+        this.header = header;
+      }
     }
   }
 }

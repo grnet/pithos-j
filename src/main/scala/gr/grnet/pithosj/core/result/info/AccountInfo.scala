@@ -33,20 +33,18 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.result
-
-import java.util.Date
-import gr.grnet.pithosj.core.MetaData
+package gr.grnet.pithosj.core.result.info
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ContainerInfo(
-    name: String,
-    count: Int,
-    lastModified: Date,
-    bytes: Long,
-    policy: MetaData
-)
+case class AccountInfo(
+    xAccountBytesUsed: Long,
+    xAccountContainerCount: Int,
+    xAccountPolicyQuota: Long,
+    xAccountPolicyVersioning: String
+) extends Info {
 
+  def usageRatio: Double = xAccountBytesUsed.toDouble / xAccountPolicyQuota.toDouble
+}

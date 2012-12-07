@@ -36,7 +36,10 @@
 package gr.grnet.pithosj.core
 
 import com.ning.http.client.AsyncHttpClient
-import gr.grnet.pithosj.core.result.{ContainerInfo, ListContainersResult, AccountInfoResult}
+import gr.grnet.pithosj.core.result.Result
+import gr.grnet.pithosj.core.result.info.{ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
+import gr.grnet.pithosj.core.Const.Headers
+import gr.grnet.pithosj.core.Const.Headers
 import java.io.InputStream
 import org.slf4j.LoggerFactory
 import scala.xml.XML
@@ -54,7 +57,16 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
 
     Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
-      new AccountInfoResult(baseResult)
+      def h(name: String) = baseResult.getHeader(name)
+
+      val accountInfo = AccountInfo(
+        h(Headers.Pithos.X_Account_Bytes_Used.header).toLong,
+        h(Headers.Pithos.X_Account_Container_Count.header).toInt,
+        h(Headers.Pithos.X_Account_Policy_Quota.header).toLong,
+        h(Headers.Pithos.X_Account_Policy_Versioning.header)
+      )
+
+      Result(accountInfo, baseResult)
     }
   }
 
@@ -106,13 +118,13 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         ContainerInfo(
           name.text,
           count.text.toInt,
-          Const.Dates.ISO.parse(last_modified.text),
+          Const.Dates.Format1.parse(last_modified.text),
           bytes.text.toLong,
           policy
         )
       }
 
-      new ListContainersResult(baseResult, containerInfos.toList)
+      Result(ContainersInfo(containerInfos.toList), baseResult)
     }
   }
 
@@ -130,9 +142,32 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData) = ???
 
-  def getObjectInfo(connInfo: ConnectionInfo, obj: String) = ???
-
   def getObject(connInfo: ConnectionInfo, obj: String) = ???
+
+  def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String) = {
+    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID, container, obj)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
+      def h(name: String) = baseResult.getHeader(name)
+
+      val date = h(Headers.Pithos.X_Object_Version_Timestamp.header)
+      System.out.printf("Date: '%s'\n", date)
+      val objectInfo = ObjectInfo(
+        h(Headers.Standard.Content_Type.header),
+        h(Headers.Standard.Content_Length.header).toLong,
+        // Wed, 19 Sep 2012 08:18:23 GMT
+        Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified.header)),
+        h(Headers.Pithos.X_Object_Hash.header),
+        h(Headers.Pithos.X_Object_Modified_By.header),
+        Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp.header)),
+        h(Headers.Pithos.X_Object_UUID.header),
+        h(Headers.Pithos.X_Object_Version.header).toInt,
+        h(Headers.Standard.ETag.header)
+      )
+
+      Result(objectInfo, baseResult)
+    }
+  }
 
   def uploadObject(connInfo: ConnectionInfo, obj: String, in: InputStream, size: Long) = ???
 

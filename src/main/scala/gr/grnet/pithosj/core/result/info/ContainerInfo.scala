@@ -33,45 +33,22 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
-package result
+package gr.grnet.pithosj.core.result.info
 
 import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.result.info.Info
+import java.util.Date
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final case class Result[I <: Info](
-    info: I,
-    baseResult: BaseResult
-) {
+case class ContainerInfo(
+    name: String,
+    count: Int,
+    lastModified: Date,
+    bytes: Long,
+    policy: MetaData
+) extends Info
 
-  def statusCode = baseResult.statusCode
-  def statusText = baseResult.statusText
-  def headers = baseResult.headers
-  def completionMillis = baseResult.completionMillis
-
-  final def isStatusCode(statusCode: Int): Boolean = statusCode == this.statusCode
-
-  @inline final def is200 = isStatusCode(200)
-  @inline final def is204 = isStatusCode(204)
-  @inline final def is400 = isStatusCode(400)
-  @inline final def is401 = isStatusCode(401)
-  @inline final def is403 = isStatusCode(403)
-  @inline final def is404 = isStatusCode(404)
-  @inline final def is503 = isStatusCode(503)
-}
-
-final case class BaseResult(
-    statusCode: Int,
-    statusText: String,
-    headers: MetaData,
-    completionMillis: Int
-) {
-
-  def getHeader(name: String) = headers.getOne(name)
-  def getHeaders(name: String) = headers.get(name)
-}
+case class ContainersInfo(containers: List[ContainerInfo]) extends Info
 

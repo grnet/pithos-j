@@ -34,6 +34,9 @@
  */
 
 package gr.grnet.pithosj
+
+import gr.grnet.pithosj.core.result.Result
+import gr.grnet.pithosj.core.result.info.NoInfo
 import scala.collection.mutable
 import scala.collection.{JavaConversions => JC}
 

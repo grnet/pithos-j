@@ -33,45 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
-package result
+package gr.grnet.pithosj.core.result.info
 
-import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.result.info.Info
+import java.io.Closeable
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final case class Result[I <: Info](
-    info: I,
-    baseResult: BaseResult
-) {
-
-  def statusCode = baseResult.statusCode
-  def statusText = baseResult.statusText
-  def headers = baseResult.headers
-  def completionMillis = baseResult.completionMillis
-
-  final def isStatusCode(statusCode: Int): Boolean = statusCode == this.statusCode
-
-  @inline final def is200 = isStatusCode(200)
-  @inline final def is204 = isStatusCode(204)
-  @inline final def is400 = isStatusCode(400)
-  @inline final def is401 = isStatusCode(401)
-  @inline final def is403 = isStatusCode(403)
-  @inline final def is404 = isStatusCode(404)
-  @inline final def is503 = isStatusCode(503)
+trait Info extends Closeable {
+  def close(): Unit = {}
 }
 
-final case class BaseResult(
-    statusCode: Int,
-    statusText: String,
-    headers: MetaData,
-    completionMillis: Int
-) {
-
-  def getHeader(name: String) = headers.getOne(name)
-  def getHeaders(name: String) = headers.get(name)
-}
-
+sealed trait NoInfo extends Info
+final object NoInfo extends NoInfo
