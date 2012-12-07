@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-class Helpers {
+sealed class Helpers {
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
 
   @inline def jListOne[T](item: T): util.List[T] = {
