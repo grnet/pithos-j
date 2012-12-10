@@ -37,7 +37,7 @@ package gr.grnet.pithosj.core
 
 import gr.grnet.pithosj.core.result.Result
 import gr.grnet.pithosj.core.result.info.{ObjectInfo, ContainersInfo, AccountInfo, NoInfo}
-import java.io.InputStream
+import java.io.{OutputStream, InputStream}
 import java.util.concurrent.Future
 
 /**
@@ -70,7 +70,7 @@ trait Pithos {
 
   def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData): Future[Result[NoInfo]]
 
-  def getObject(connInfo: ConnectionInfo, obj: String): Future[Result[NoInfo]]
+  def getObject(connInfo: ConnectionInfo, container: String, obj: String, out: OutputStream): Future[Result[ObjectInfo]]
 
   def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String): Future[Result[ObjectInfo]]
 

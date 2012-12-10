@@ -78,9 +78,9 @@ public final class Const {
     }
 
     public enum Pithos {
-      X_Auth_Token("X_Auth_Token"),
+      X_Auth_Token("X-Auth-Token"),
 
-      X_Account_Bytes_Used("X_Account_Bytes_Used"),
+      X_Account_Bytes_Used("X-Account-Bytes-Used"),
       X_Account_Container_Count("X-Account-Container-Count"),
       X_Account_Policy_Quota("X-Account-Policy-Quota"),
       X_Account_Policy_Versioning("X-Account-Policy-Versioning"),

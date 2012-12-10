@@ -37,12 +37,13 @@ package gr.grnet.pithosj.core
 
 import com.ning.http.client.AsyncHttpClient
 import gr.grnet.pithosj.core.result.Result
-import gr.grnet.pithosj.core.result.info.{ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
+import gr.grnet.pithosj.core.result.info.{NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
 import gr.grnet.pithosj.core.Const.Headers
 import gr.grnet.pithosj.core.Const.Headers
-import java.io.InputStream
+import java.io.{OutputStream, InputStream}
 import org.slf4j.LoggerFactory
 import scala.xml.XML
+import com.ning.http.client.AsyncHandler.STATE
 
 /**
  *
@@ -56,7 +57,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def getAccountInfo(connInfo: ConnectionInfo) = {
     val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
 
-    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
+    Helpers.execAsyncCompletionHandler(reqBuilder)(){ (response, baseResult) =>
       def h(name: String) = baseResult.getHeader(name)
 
       val accountInfo = AccountInfo(
@@ -79,7 +80,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       prepareGet(http, connInfo, connInfo.userID).
       addQueryParameter(Const.Params.format, ResponseFormat.XML.parameterValue)
 
-    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
       val body = response.getResponseBody
       val xml = XML.loadString(body)
 
@@ -142,12 +143,12 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData) = ???
 
-  def getObject(connInfo: ConnectionInfo, obj: String) = ???
-
-  def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String) = {
-    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID, container, obj)
-
-    Helpers.execAsyncCompletionHandler(reqBuilder) { (response, baseResult) =>
+  def getObject(connInfo: ConnectionInfo, container: String, obj: String, out: OutputStream) = {
+    val reqBuilder = Helpers.prepareGet(http, connInfo, connInfo.userID, container, obj)
+    Helpers.execAsyncCompletionHandler(reqBuilder) { bodyPart =>
+      bodyPart.writeTo(out)
+      STATE.CONTINUE;
+    }{ (response, baseResult) =>
       def h(name: String) = baseResult.getHeader(name)
 
       val objectInfo = ObjectInfo(
@@ -160,7 +161,34 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp.header)),
         h(Headers.Pithos.X_Object_UUID.header),
         h(Headers.Pithos.X_Object_Version.header).toInt,
-        h(Headers.Standard.ETag.header)
+        h(Headers.Standard.ETag.header),
+        container,
+        obj
+      )
+      
+      Result(objectInfo, baseResult)
+    }
+  }
+
+  def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String) = {
+    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID, container, obj)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
+      def h(name: String) = baseResult.getHeader(name)
+
+      val objectInfo = ObjectInfo(
+        h(Headers.Standard.Content_Type.header),
+        h(Headers.Standard.Content_Length.header).toLong,
+        // Wed, 19 Sep 2012 08:18:23 GMT
+        Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified.header)),
+        h(Headers.Pithos.X_Object_Hash.header),
+        h(Headers.Pithos.X_Object_Modified_By.header),
+        Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp.header)),
+        h(Headers.Pithos.X_Object_UUID.header),
+        h(Headers.Pithos.X_Object_Version.header).toInt,
+        h(Headers.Standard.ETag.header),
+        container,
+        obj
       )
 
       Result(objectInfo, baseResult)

@@ -46,4 +46,4 @@ trait Info extends Closeable {
 }
 
 sealed trait NoInfo extends Info
-final object NoInfo extends NoInfo
+final case object NoInfo extends NoInfo

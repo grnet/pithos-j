@@ -80,6 +80,11 @@ final class MetaData {
     get(key).get(0)
   }
 
+  def keys(): util.Set[String] = {
+    val set = new util.HashSet[String](map.keySet())
+    set
+  }
+
   def size = map.size()
 
   override def toString = {

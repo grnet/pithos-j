@@ -50,5 +50,7 @@ case class ObjectInfo(
     xObjectVersionTimestamp: Date,
     xObjectUUID: String,
     xObjectVersion: Int,
-    eTag: String
+    eTag: String,
+    container: String,
+    path: String
 ) extends Info

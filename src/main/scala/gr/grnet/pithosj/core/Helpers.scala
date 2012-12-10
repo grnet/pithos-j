@@ -36,12 +36,13 @@
 package gr.grnet.pithosj.core
 
 import Const.Headers
-import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, Response}
+import com.ning.http.client.{HttpResponseBodyPart, AsyncCompletionHandler, AsyncHttpClient, Response}
 import gr.grnet.pithosj.core.result.info.Info
 import gr.grnet.pithosj.core.result.{Result, BaseResult}
 import java.util
 import java.util.concurrent.Future
 import org.slf4j.LoggerFactory
+import com.ning.http.client.AsyncHandler.STATE
 
 /**
  *
@@ -111,11 +112,17 @@ sealed class Helpers {
 
   final def execAsyncCompletionHandler[I <: Info](
       reqBuilder: AsyncHttpClient#BoundRequestBuilder
-  )(  f: (Response, BaseResult) =>  Result[I]): Future[Result[I]] = {
+  )(  p: (HttpResponseBodyPart) => STATE = null)
+   (  f: (Response, BaseResult) => Result[I]): Future[Result[I]] = {
 
     val startMillis = System.currentTimeMillis()
 
     val handler = new AsyncCompletionHandler[Result[I]] {
+      override def onBodyPartReceived(content: HttpResponseBodyPart) = {
+        if(p eq null ) super.onBodyPartReceived(content)
+        else           p(content)
+      }
+
       def onCompleted(response: Response) = {
         val meta = new MetaData
         copyAllResponseHeaders(response, meta)
