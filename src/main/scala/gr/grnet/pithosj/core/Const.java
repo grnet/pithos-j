@@ -54,12 +54,17 @@ public final class Const {
     private Params() {}
 
     public static final String format = "format";
+    public static final String version = "version";
+  }
+
+  public static interface IHeader {
+    public String header();
   }
 
   public static final class Headers {
     private Headers() {}
 
-    public enum Standard {
+    public enum Standard implements IHeader {
       Content_Type ("Content-Type"),
       Content_Length("Content-Length"),
       Content_Encoding ("Content-Encoding"),
@@ -70,14 +75,18 @@ public final class Const {
       ETag("ETag"),
       Server("Server");
 
-      public final String header;
+      private final String header;
 
       Standard(String header) {
         this.header = header;
       }
+
+      public String header() {
+        return header;
+      }
     }
 
-    public enum Pithos {
+    public enum Pithos implements IHeader {
       X_Auth_Token("X-Auth-Token"),
 
       X_Account_Bytes_Used("X-Account-Bytes-Used"),
@@ -98,9 +107,13 @@ public final class Const {
       X_Object_Meta_Star("X-Object-Meta-*");
 
 
-      public final String header;
+      private  final String header;
       Pithos(String header) {
         this.header = header;
+      }
+
+      public String header() {
+        return header;
       }
     }
   }

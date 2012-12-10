@@ -70,7 +70,7 @@ trait Pithos {
 
   def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData): Future[Result[NoInfo]]
 
-  def getObject(connInfo: ConnectionInfo, container: String, obj: String, out: OutputStream): Future[Result[ObjectInfo]]
+  def getObject(connInfo: ConnectionInfo, container: String, obj: String, version: String, out: OutputStream): Future[Result[ObjectInfo]]
 
   def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String): Future[Result[ObjectInfo]]
 

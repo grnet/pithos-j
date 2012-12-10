@@ -38,8 +38,7 @@ package gr.grnet.pithosj.core
 import com.ning.http.client.AsyncHttpClient
 import gr.grnet.pithosj.core.result.Result
 import gr.grnet.pithosj.core.result.info.{NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
-import gr.grnet.pithosj.core.Const.Headers
-import gr.grnet.pithosj.core.Const.Headers
+import gr.grnet.pithosj.core.Const.{IHeader, Headers}
 import java.io.{OutputStream, InputStream}
 import org.slf4j.LoggerFactory
 import scala.xml.XML
@@ -58,16 +57,23 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)(){ (response, baseResult) =>
-      def h(name: String) = baseResult.getHeader(name)
+      val infoOpt = if(baseResult.is204) {
+        def h(header: IHeader) = baseResult.getHeader(header)
 
-      val accountInfo = AccountInfo(
-        h(Headers.Pithos.X_Account_Bytes_Used.header).toLong,
-        h(Headers.Pithos.X_Account_Container_Count.header).toInt,
-        h(Headers.Pithos.X_Account_Policy_Quota.header).toLong,
-        h(Headers.Pithos.X_Account_Policy_Versioning.header)
-      )
+        val accountInfo = AccountInfo(
+          h(Headers.Pithos.X_Account_Bytes_Used).toLong,
+          h(Headers.Pithos.X_Account_Container_Count).toInt,
+          h(Headers.Pithos.X_Account_Policy_Quota).toLong,
+          h(Headers.Pithos.X_Account_Policy_Versioning)
+        )
 
-      Result(accountInfo, baseResult)
+        Some(accountInfo)
+      }
+      else {
+        None
+      }
+
+      Result(infoOpt, baseResult)
     }
   }
 
@@ -81,51 +87,62 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       addQueryParameter(Const.Params.format, ResponseFormat.XML.parameterValue)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
-      val body = response.getResponseBody
-      val xml = XML.loadString(body)
+      val infoOpt = if(baseResult.is200) {
+        val body = response.getResponseBody
+        val xml = XML.loadString(body)
 
-      val containerInfos = for {
-        container          <- xml \ "container"
-        count              <- container \ "count"
-        last_modified      <- container \ "last_modified"
-        bytes              <- container \ "bytes"
-        name               <- container \ "name"
-        x_container_policy <- container \ "x_container_policy"
-      } yield {
-        // parse:
-        //  <x_container_policy>
-        //    <key>quota</key>
-        //    <value>53687091200</value>
-        //    <key>versioning</key>
-        //
-        //    <value>auto</value>
-        //  </x_container_policy>
-        val kvPairs = for {
-          child <- x_container_policy.nonEmptyChildren if Set("key", "value").contains(child.label.toLowerCase())
+        val containerInfos = for {
+          container <- xml \ "container"
+          count <- container \ "count"
+          last_modified <- container \ "last_modified"
+          bytes <- container \ "bytes"
+          name <- container \ "name"
+          x_container_policy <- container \ "x_container_policy"
         } yield {
-          child.text
+          // parse:
+          //  <x_container_policy>
+          //    <key>quota</key>
+          //    <value>53687091200</value>
+          //    <key>versioning</key>
+          //
+          //    <value>auto</value>
+          //  </x_container_policy>
+          val kvPairs = for {
+            child <- x_container_policy.nonEmptyChildren if Set("key", "value").contains(child.label.toLowerCase())
+          } yield {
+            child.text
+          }
+
+          // A key is at an even index, a value is at an odd index
+          val (keys_i, values_i) = kvPairs.zipWithIndex.partition {
+            case (s, index) => index % 2 == 0
+          }
+          val keys = keys_i.map(_._1) // throw away the index
+          val values = values_i.map(_._1)
+
+          val policy = new MetaData
+          for((k, v) <- keys.zip(values)) {
+            policy.setOne(k, v)
+          }
+
+          val containerInfo = ContainerInfo(
+            name.text,
+            count.text.toInt,
+            Const.Dates.Format1.parse(last_modified.text),
+            bytes.text.toLong,
+            policy
+          )
+
+          containerInfo
         }
 
-        // A key is at an even index, a value is at an odd index
-        val (keys_i, values_i) = kvPairs.zipWithIndex.partition { case (s, index) => index % 2 == 0}
-        val keys = keys_i.map(_._1) // throw away the index
-        val values = values_i.map(_._1)
-
-        val policy = new MetaData
-        for((k, v) <- keys.zip(values)) {
-          policy.setOne(k,v)
-        }
-
-        ContainerInfo(
-          name.text,
-          count.text.toInt,
-          Const.Dates.Format1.parse(last_modified.text),
-          bytes.text.toLong,
-          policy
-        )
+        Some(ContainersInfo(containerInfos.toList))
+      }
+      else {
+        None
       }
 
-      Result(ContainersInfo(containerInfos.toList), baseResult)
+      Result(infoOpt, baseResult)
     }
   }
 
@@ -143,30 +160,41 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData) = ???
 
-  def getObject(connInfo: ConnectionInfo, container: String, obj: String, out: OutputStream) = {
+  def getObject(connInfo: ConnectionInfo, container: String, obj: String, version: String, out: OutputStream) = {
     val reqBuilder = Helpers.prepareGet(http, connInfo, connInfo.userID, container, obj)
+    if(version ne null) {
+      reqBuilder.addQueryParameter(Const.Params.version, version)
+    }
+
     Helpers.execAsyncCompletionHandler(reqBuilder) { bodyPart =>
       bodyPart.writeTo(out)
       STATE.CONTINUE;
     }{ (response, baseResult) =>
-      def h(name: String) = baseResult.getHeader(name)
+      val infoOpt = if(baseResult.is200) {
+        def h(name: IHeader) = baseResult.getHeader(name)
 
-      val objectInfo = ObjectInfo(
-        h(Headers.Standard.Content_Type.header),
-        h(Headers.Standard.Content_Length.header).toLong,
-        // Wed, 19 Sep 2012 08:18:23 GMT
-        Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified.header)),
-        h(Headers.Pithos.X_Object_Hash.header),
-        h(Headers.Pithos.X_Object_Modified_By.header),
-        Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp.header)),
-        h(Headers.Pithos.X_Object_UUID.header),
-        h(Headers.Pithos.X_Object_Version.header).toInt,
-        h(Headers.Standard.ETag.header),
-        container,
-        obj
-      )
-      
-      Result(objectInfo, baseResult)
+        val objectInfo = ObjectInfo(
+          h(Headers.Standard.Content_Type),
+          h(Headers.Standard.Content_Length).toLong,
+          // Wed, 19 Sep 2012 08:18:23 GMT
+          Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
+          h(Headers.Pithos.X_Object_Hash),
+          h(Headers.Pithos.X_Object_Modified_By),
+          Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
+          h(Headers.Pithos.X_Object_UUID),
+          h(Headers.Pithos.X_Object_Version),
+          h(Headers.Standard.ETag),
+          container,
+          obj
+        )
+
+        Some(objectInfo)
+      }
+      else {
+        None
+      }
+
+      Result(infoOpt, baseResult)
     }
   }
 
@@ -174,24 +202,31 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID, container, obj)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
-      def h(name: String) = baseResult.getHeader(name)
+      val infoOpt = if(baseResult.is200) {
+        def h(name: IHeader) = baseResult.getHeader(name)
 
-      val objectInfo = ObjectInfo(
-        h(Headers.Standard.Content_Type.header),
-        h(Headers.Standard.Content_Length.header).toLong,
-        // Wed, 19 Sep 2012 08:18:23 GMT
-        Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified.header)),
-        h(Headers.Pithos.X_Object_Hash.header),
-        h(Headers.Pithos.X_Object_Modified_By.header),
-        Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp.header)),
-        h(Headers.Pithos.X_Object_UUID.header),
-        h(Headers.Pithos.X_Object_Version.header).toInt,
-        h(Headers.Standard.ETag.header),
-        container,
-        obj
-      )
+        val objectInfo = ObjectInfo(
+          h(Headers.Standard.Content_Type),
+          h(Headers.Standard.Content_Length).toLong,
+          // Wed, 19 Sep 2012 08:18:23 GMT
+          Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
+          h(Headers.Pithos.X_Object_Hash),
+          h(Headers.Pithos.X_Object_Modified_By),
+          Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
+          h(Headers.Pithos.X_Object_UUID),
+          h(Headers.Pithos.X_Object_Version),
+          h(Headers.Standard.ETag),
+          container,
+          obj
+        )
 
-      Result(objectInfo, baseResult)
+        Some(objectInfo)
+      }
+      else {
+        None
+      }
+
+      Result(infoOpt, baseResult)
     }
   }
 

@@ -49,7 +49,7 @@ case class ObjectInfo(
     xObjectModifiedBy: String,
     xObjectVersionTimestamp: Date,
     xObjectUUID: String,
-    xObjectVersion: Int,
+    xObjectVersion: String,
     eTag: String,
     container: String,
     path: String

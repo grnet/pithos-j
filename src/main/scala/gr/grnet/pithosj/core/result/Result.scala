@@ -38,20 +38,51 @@ package result
 
 import gr.grnet.pithosj.core.MetaData
 import gr.grnet.pithosj.core.result.info.Info
+import gr.grnet.pithosj.core.Const.IHeader
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final case class Result[I <: Info](
-    info: I,
+    infoOpt: Option[I],
     baseResult: BaseResult
 ) {
+
+  def hasInfo = infoOpt.isDefined
+  def info = infoOpt.get
 
   def statusCode = baseResult.statusCode
   def statusText = baseResult.statusText
   def headers = baseResult.headers
   def completionMillis = baseResult.completionMillis
+
+  final def isStatusCode(statusCode: Int): Boolean = baseResult.isStatusCode(statusCode)
+
+  @inline final def is200 = baseResult.is200
+  @inline final def is204 = baseResult.is204
+  @inline final def is400 = baseResult.is400
+  @inline final def is401 = baseResult.is401
+  @inline final def is403 = baseResult.is403
+  @inline final def is404 = baseResult.is404
+  @inline final def is503 = baseResult.is503
+}
+
+final case class BaseResult(
+    statusCode: Int,
+    statusText: String,
+    headers: MetaData,
+    completionMillis: Int
+) {
+
+  def getHeader(name: String): String = headers.getOne(name)
+  def getIntHeader(name: String): Int = getHeader(name).toInt
+  def getLongHeader(name: String): Long = getHeader(name).toLong
+  def getHeaders(name: String): java.util.List[String] = headers.get(name)
+  def getHeader(name: IHeader): String = headers.getOne(name)
+  def getIntHeader(name: IHeader): Int = getHeader(name).toInt
+  def getLongHeader(name: IHeader): Long = getHeader(name).toLong
+  def getHeaders(name: IHeader): java.util.List[String] = headers.get(name)
 
   final def isStatusCode(statusCode: Int): Boolean = statusCode == this.statusCode
 
@@ -62,16 +93,6 @@ final case class Result[I <: Info](
   @inline final def is403 = isStatusCode(403)
   @inline final def is404 = isStatusCode(404)
   @inline final def is503 = isStatusCode(503)
-}
 
-final case class BaseResult(
-    statusCode: Int,
-    statusText: String,
-    headers: MetaData,
-    completionMillis: Int
-) {
-
-  def getHeader(name: String) = headers.getOne(name)
-  def getHeaders(name: String) = headers.get(name)
 }
 

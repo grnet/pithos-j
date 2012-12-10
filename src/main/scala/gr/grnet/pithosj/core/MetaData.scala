@@ -36,7 +36,7 @@
 package gr.grnet.pithosj.core
 
 import com.ning.http.client.FluentCaseInsensitiveStringsMap
-import com.ning.http.client.simple.HeaderMap
+import gr.grnet.pithosj.core.Const.IHeader
 import java.util
 
 /**
@@ -78,6 +78,14 @@ final class MetaData {
 
   def getOne(key: String): String = {
     get(key).get(0)
+  }
+
+  def get(header: IHeader): util.List[String] = {
+    this get header.header()
+  }
+
+  def getOne(header: IHeader): String = {
+    this getOne header.header()
   }
 
   def keys(): util.Set[String] = {
