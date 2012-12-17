@@ -60,6 +60,7 @@ final case class Result[I <: Info](
   final def isStatusCode(statusCode: Int): Boolean = baseResult.isStatusCode(statusCode)
 
   @inline final def is200 = baseResult.is200
+  @inline final def is201 = baseResult.is201
   @inline final def is204 = baseResult.is204
   @inline final def is400 = baseResult.is400
   @inline final def is401 = baseResult.is401
@@ -87,6 +88,7 @@ final case class BaseResult(
   final def isStatusCode(statusCode: Int): Boolean = statusCode == this.statusCode
 
   @inline final def is200 = isStatusCode(200)
+  @inline final def is201 = isStatusCode(201)
   @inline final def is204 = isStatusCode(204)
   @inline final def is400 = isStatusCode(400)
   @inline final def is401 = isStatusCode(401)

@@ -36,13 +36,13 @@
 package gr.grnet.pithosj.core
 
 import Const.Headers
+import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.{HttpResponseBodyPart, AsyncCompletionHandler, AsyncHttpClient, Response}
 import gr.grnet.pithosj.core.result.info.Info
 import gr.grnet.pithosj.core.result.{Result, BaseResult}
 import java.util
 import java.util.concurrent.Future
 import org.slf4j.LoggerFactory
-import com.ning.http.client.AsyncHandler.STATE
 
 /**
  *
@@ -68,42 +68,35 @@ sealed class Helpers {
     }
   }
 
-  final def copyPithosResponseHeaders(response: Response, meta: MetaData) {
-    copyResponseHeader(Headers.Pithos.X_Account_Bytes_Used.header, response, meta)
-    copyResponseHeader(Headers.Pithos.X_Account_Container_Count.header, response, meta)
-    copyResponseHeader(Headers.Pithos.X_Account_Policy_Quota.header, response, meta)
-    copyResponseHeader(Headers.Pithos.X_Account_Policy_Versioning.header, response, meta)
-  }
-
-  final def prepareHead(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+  final def prepareHEAD(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("prepareHead({})", url)
     val reqBuilder = http.prepareHead(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
-  final def prepareGet(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+  final def prepareGET(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("prepareGet({})", url)
     val reqBuilder = http.prepareGet(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
-  final def preparePost(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+  final def preparePOST(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("preparePost({})", url)
     val reqBuilder = http.preparePost(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
-  final def preparePut(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+  final def preparePUT(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("preparePut({})", url)
     val reqBuilder = http.preparePut(url)
     reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
   }
 
-  final def prepareDelete(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+  final def prepareDELETE(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
     logger.debug("prepareDelete({})", url)
     val reqBuilder = http.prepareDelete(url)

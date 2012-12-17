@@ -35,14 +35,14 @@
 
 package gr.grnet.pithosj.core
 
+import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.AsyncHttpClient
+import gr.grnet.pithosj.core.Const.{IHeader, Headers}
 import gr.grnet.pithosj.core.result.Result
 import gr.grnet.pithosj.core.result.info.{NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
-import gr.grnet.pithosj.core.Const.{IHeader, Headers}
-import java.io.{OutputStream, InputStream}
+import java.io.{File, OutputStream}
 import org.slf4j.LoggerFactory
 import scala.xml.XML
-import com.ning.http.client.AsyncHandler.STATE
 
 /**
  *
@@ -54,7 +54,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def ping(connInfo: ConnectionInfo) = ???
 
   def getAccountInfo(connInfo: ConnectionInfo) = {
-    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID)
+    val reqBuilder = Helpers.prepareHEAD(http, connInfo, connInfo.userID)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)(){ (response, baseResult) =>
       val infoOpt = if(baseResult.is204) {
@@ -83,7 +83,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def listContainers(connInfo: ConnectionInfo) = {
     val reqBuilder = Helpers.
-      prepareGet(http, connInfo, connInfo.userID).
+      prepareGET(http, connInfo, connInfo.userID).
       addQueryParameter(Const.Params.format, ResponseFormat.XML.parameterValue)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
@@ -161,7 +161,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData) = ???
 
   def getObject(connInfo: ConnectionInfo, container: String, obj: String, version: String, out: OutputStream) = {
-    val reqBuilder = Helpers.prepareGet(http, connInfo, connInfo.userID, container, obj)
+    val reqBuilder = Helpers.prepareGET(http, connInfo, connInfo.userID, container, obj)
     if(version ne null) {
       reqBuilder.addQueryParameter(Const.Params.version, version)
     }
@@ -199,7 +199,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   }
 
   def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String) = {
-    val reqBuilder = Helpers.prepareHead(http, connInfo, connInfo.userID, container, obj)
+    val reqBuilder = Helpers.prepareHEAD(http, connInfo, connInfo.userID, container, obj)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
       val infoOpt = if(baseResult.is200) {
@@ -230,7 +230,33 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     }
   }
 
-  def uploadObject(connInfo: ConnectionInfo, obj: String, in: InputStream, size: Long) = ???
+  def putObject(
+      connInfo: ConnectionInfo,
+      container: String,
+      obj: String,
+      in: File,
+      contentType: String
+  ) = {
+    val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, container, obj)
+    reqBuilder.setHeader(Headers.Standard.Content_Type.header(), contentType)
+    reqBuilder.setBody(in)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
+      val infoOpt = if(baseResult.is201) { // CREATED
+//        val keys = baseResult.headers.keys().iterator()
+//        while(keys.hasNext) {
+//          val key = keys.next()
+//          val value = baseResult.headers.getOne(key)
+//          logger.info("{} -> {}", key, value)
+//        }
+        Some(NoInfo)
+      }
+      else {
+        None
+      }
+      Result(infoOpt, baseResult)
+    }
+  }
 
   def deleteObject(connInfo: ConnectionInfo, obj: String) = ???
 

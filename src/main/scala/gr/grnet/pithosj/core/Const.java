@@ -104,7 +104,8 @@ public final class Const {
       X_Object_Shared_By("X-Object-Shared-By"),
       X_Object_Allowed_To("X-Object-Allowed-To"),
       X_Object_Public("X-Object-Public"),
-      X_Object_Meta_Star("X-Object-Meta-*");
+      X_Object_Meta_Star("X-Object-Meta-*"),
+      X_Source_Account("X-Source-Account");
 
 
       private  final String header;

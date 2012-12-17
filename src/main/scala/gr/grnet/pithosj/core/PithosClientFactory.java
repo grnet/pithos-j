@@ -36,6 +36,7 @@
 package gr.grnet.pithosj.core;
 
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
 
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
@@ -43,11 +44,22 @@ import com.ning.http.client.AsyncHttpClient;
 public final class PithosClientFactory {
   private PithosClientFactory() {}
 
+  public static AsyncHttpClient newDefaultAsyncHttpClient() {
+    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
+      setAllowPoolingConnection(true).
+      setAllowSslConnectionPool(true).
+      setCompressionEnabled(true).
+      setFollowRedirects(true).
+      setMaximumConnectionsTotal(20);
+
+    return new AsyncHttpClient(builder.build());
+  }
+
   public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
     return new AsyncHttpPithosClient(asyncHttp);
   }
 
   public static Pithos newPithosClient() {
-    return newPithosClient(new AsyncHttpClient());
+    return newPithosClient(newDefaultAsyncHttpClient());
   }
 }

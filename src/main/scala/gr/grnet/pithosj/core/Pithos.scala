@@ -37,7 +37,7 @@ package gr.grnet.pithosj.core
 
 import gr.grnet.pithosj.core.result.Result
 import gr.grnet.pithosj.core.result.info.{ObjectInfo, ContainersInfo, AccountInfo, NoInfo}
-import java.io.{OutputStream, InputStream}
+import java.io.{File, OutputStream}
 import java.util.concurrent.Future
 
 /**
@@ -70,11 +70,23 @@ trait Pithos {
 
   def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData): Future[Result[NoInfo]]
 
-  def getObject(connInfo: ConnectionInfo, container: String, obj: String, version: String, out: OutputStream): Future[Result[ObjectInfo]]
+  def getObject(
+      connInfo: ConnectionInfo,
+      container: String,
+      obj: String,
+      version: String,
+      out: OutputStream
+  ): Future[Result[ObjectInfo]]
 
   def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String): Future[Result[ObjectInfo]]
 
-  def uploadObject(connInfo: ConnectionInfo, obj: String, in: InputStream, size: Long): Future[Result[NoInfo]]
+  def putObject(
+      connInfo: ConnectionInfo,
+      container: String,
+      obj: String,
+      in: File,
+      contentType: String
+  ): Future[Result[NoInfo]]
 
   def deleteObject(connInfo: ConnectionInfo, obj: String): Future[Result[NoInfo]]
 
