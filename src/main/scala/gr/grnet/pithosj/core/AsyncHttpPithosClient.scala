@@ -37,7 +37,7 @@ package gr.grnet.pithosj.core
 
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.AsyncHttpClient
-import gr.grnet.pithosj.core.Const.{IHeader, Headers}
+import gr.grnet.pithosj.core.Const.{IHeader, Headers, ContentTypes}
 import gr.grnet.pithosj.core.result.Result
 import gr.grnet.pithosj.core.result.info.{ObjectsInfo, NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
 import java.io.{File, OutputStream}
@@ -153,7 +153,27 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def deleteContainer(connInfo: ConnectionInfo, container: String) = ???
 
-  def createDirectory(connInfo: ConnectionInfo, directory: String) = ???
+  def createDirectory(connInfo: ConnectionInfo, container: String, path: String) = {
+    val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, container, path)
+    reqBuilder.setHeader(
+      Headers.Standard.Content_Type.header(),
+      ContentTypes.Application_Directory.contentType()
+    )
+    reqBuilder.setHeader(
+      Headers.Standard.Content_Length.header(),
+      "0"
+    )
+
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
+      val infoOpt = if(baseResult.is201) {
+        Some(NoInfo)
+      } else {
+        None
+      }
+
+      Result(infoOpt, baseResult)
+    }
+  }
 
   def getObjectMeta(connInfo: ConnectionInfo, path: String) = ???
 

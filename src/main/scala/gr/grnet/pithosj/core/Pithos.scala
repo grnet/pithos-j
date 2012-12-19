@@ -62,7 +62,7 @@ trait Pithos {
 
   def deleteContainer(connInfo: ConnectionInfo, container: String): Future[Result[NoInfo]]
 
-  def createDirectory(connInfo: ConnectionInfo, path: String): Future[Result[NoInfo]]
+  def createDirectory(connInfo: ConnectionInfo, container: String, path: String): Future[Result[NoInfo]]
 
   def getObjectMeta(connInfo: ConnectionInfo, path: String): Future[Result[NoInfo]]
 

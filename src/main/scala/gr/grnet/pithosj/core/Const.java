@@ -43,6 +43,20 @@ import java.text.SimpleDateFormat;
 public final class Const {
   private Const() {}
 
+  public static enum ContentTypes {
+    Application_Directory("application/directory");
+
+    private final String contentType;
+
+    private ContentTypes(String contentType) {
+      this.contentType = contentType;
+    }
+
+    public String contentType() {
+      return contentType;
+    }
+  }
+
   public static final class Dates {
     private Dates() {}
 
