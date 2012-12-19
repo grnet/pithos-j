@@ -295,7 +295,9 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       toObj: String
   ) = ???
 
-  def listObjects(connInfo: ConnectionInfo) = ???
+  def listObjectsInContainer(connInfo: ConnectionInfo, container: String) = {
+    listObjectsInPath(connInfo, container, "")
+  }
 
   def listObjectsInPath(
       connInfo: ConnectionInfo,
@@ -304,7 +306,12 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   ) = {
     val reqBuilder = Helpers.prepareGET(http, connInfo, connInfo.userID, container)
     reqBuilder.addQueryParameter("format", "xml")
-    reqBuilder.addQueryParameter("path", path)
+    path match {
+      case null =>
+      case "" =>
+      case path =>
+        reqBuilder.addQueryParameter("path", path)
+    }
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
       val infoOpt = if(baseResult.is200) {

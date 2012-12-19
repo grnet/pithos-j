@@ -104,7 +104,7 @@ trait Pithos {
       toContainer: String,
       toPath: String): Future[Result[NoInfo]]
 
-  def listObjects(connInfo: ConnectionInfo): Future[Result[NoInfo]]
+  def listObjectsInContainer(connInfo: ConnectionInfo, container: String): Future[Result[ObjectsInfo]]
 
   def listObjectsInPath(
       connInfo: ConnectionInfo,
