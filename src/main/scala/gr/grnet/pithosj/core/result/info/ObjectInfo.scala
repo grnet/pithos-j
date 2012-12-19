@@ -42,6 +42,8 @@ import java.util.Date
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class ObjectInfo(
+    container: String,
+    path: String,
     contentType: String,
     contentLength: Long,
     lastModified: Date,
@@ -50,7 +52,9 @@ case class ObjectInfo(
     xObjectVersionTimestamp: Date,
     xObjectUUID: String,
     xObjectVersion: String,
-    eTag: String,
-    container: String,
-    path: String
+    eTag: Option[String] = None
 ) extends Info
+
+case class ObjectsInfo(objects: List[ObjectInfo]) extends Info {
+  def size = objects.size
+}

@@ -36,7 +36,7 @@
 package gr.grnet.pithosj.core
 
 import gr.grnet.pithosj.core.result.Result
-import gr.grnet.pithosj.core.result.info.{ObjectInfo, ContainersInfo, AccountInfo, NoInfo}
+import gr.grnet.pithosj.core.result.info.{ObjectsInfo, ObjectInfo, ContainersInfo, AccountInfo, NoInfo}
 import java.io.{File, OutputStream}
 import java.util.concurrent.Future
 
@@ -106,5 +106,9 @@ trait Pithos {
 
   def listObjects(connInfo: ConnectionInfo): Future[Result[NoInfo]]
 
-  def listObjectsInPath(connInfo: ConnectionInfo, path: String)
+  def listObjectsInPath(
+      connInfo: ConnectionInfo,
+      container: String,
+      path: String
+  ): Future[Result[ObjectsInfo]]
 }

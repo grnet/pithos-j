@@ -50,5 +50,7 @@ case class ContainerInfo(
     policy: MetaData
 ) extends Info
 
-case class ContainersInfo(containers: List[ContainerInfo]) extends Info
+case class ContainersInfo(containers: List[ContainerInfo]) extends Info {
+  def size = containers.size
+}
 

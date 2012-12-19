@@ -39,8 +39,9 @@ import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.AsyncHttpClient
 import gr.grnet.pithosj.core.Const.{IHeader, Headers}
 import gr.grnet.pithosj.core.result.Result
-import gr.grnet.pithosj.core.result.info.{NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
+import gr.grnet.pithosj.core.result.info.{ObjectsInfo, NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
 import java.io.{File, OutputStream}
+import java.util.Date
 import org.slf4j.LoggerFactory
 import scala.xml.XML
 
@@ -174,18 +175,18 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         def h(name: IHeader) = baseResult.getHeader(name)
 
         val objectInfo = ObjectInfo(
-          h(Headers.Standard.Content_Type),
-          h(Headers.Standard.Content_Length).toLong,
+          container = container,
+          path = path,
+          contentType = h(Headers.Standard.Content_Type),
+          contentLength = h(Headers.Standard.Content_Length).toLong,
           // Wed, 19 Sep 2012 08:18:23 GMT
-          Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
-          h(Headers.Pithos.X_Object_Hash),
-          h(Headers.Pithos.X_Object_Modified_By),
-          Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
-          h(Headers.Pithos.X_Object_UUID),
-          h(Headers.Pithos.X_Object_Version),
-          h(Headers.Standard.ETag),
-          container,
-          path
+          lastModified = Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
+          xObjectHash = h(Headers.Pithos.X_Object_Hash),
+          xObjectModifiedBy = h(Headers.Pithos.X_Object_Modified_By),
+          xObjectVersionTimestamp = Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
+          xObjectUUID = h(Headers.Pithos.X_Object_UUID),
+          xObjectVersion = h(Headers.Pithos.X_Object_Version),
+          eTag = Some(h(Headers.Standard.ETag))
         )
 
         Some(objectInfo)
@@ -206,18 +207,18 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         def h(name: IHeader) = baseResult.getHeader(name)
 
         val objectInfo = ObjectInfo(
-          h(Headers.Standard.Content_Type),
-          h(Headers.Standard.Content_Length).toLong,
+          container = container,
+          path = path,
+          contentType = h(Headers.Standard.Content_Type),
+          contentLength = h(Headers.Standard.Content_Length).toLong,
           // Wed, 19 Sep 2012 08:18:23 GMT
-          Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
-          h(Headers.Pithos.X_Object_Hash),
-          h(Headers.Pithos.X_Object_Modified_By),
-          Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
-          h(Headers.Pithos.X_Object_UUID),
-          h(Headers.Pithos.X_Object_Version),
-          h(Headers.Standard.ETag),
-          container,
-          path
+          lastModified = Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
+          xObjectHash = h(Headers.Pithos.X_Object_Hash),
+          xObjectModifiedBy = h(Headers.Pithos.X_Object_Modified_By),
+          xObjectVersionTimestamp = Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
+          xObjectUUID = h(Headers.Pithos.X_Object_UUID),
+          xObjectVersion = h(Headers.Pithos.X_Object_Version),
+          eTag = Some(h(Headers.Standard.ETag))
         )
 
         Some(objectInfo)
@@ -296,5 +297,53 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def listObjects(connInfo: ConnectionInfo) = ???
 
-  def listObjectsInPath(connInfo: ConnectionInfo, pathPrefix: String) {}
+  def listObjectsInPath(
+      connInfo: ConnectionInfo,
+      container: String,
+      path: String
+  ) = {
+    val reqBuilder = Helpers.prepareGET(http, connInfo, connInfo.userID, container)
+    reqBuilder.addQueryParameter("format", "xml")
+    reqBuilder.addQueryParameter("path", path)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
+      val infoOpt = if(baseResult.is200) {
+        val body = XML.loadString(response.getResponseBody)
+
+        val objectInfos = for {
+          obj   <- body \ "object"
+          hash  <- obj \ "hash"
+          name  <- obj \ "name"
+          bytes <- obj \ "bytes"
+          x_object_version_timestamp <- obj \ "x_object_version_timestamp"
+          x_object_uuid <- obj \ "x_object_uuid"
+          last_modified <- obj \ "last_modified"
+          content_type  <- obj \ "content_type"
+          x_object_hash <- obj \ "x_object_hash"
+          x_object_version     <- obj \ "x_object_version"
+          x_object_modified_by <- obj \ "x_object_modified_by"
+        } yield {
+          ObjectInfo(
+            container = container,
+            path = name.text,
+            contentType = content_type.text,
+            contentLength = bytes.text.toLong,
+            lastModified = Const.Dates.Format1.parse(last_modified.text),
+            xObjectHash = x_object_hash.text,
+            xObjectModifiedBy = x_object_modified_by.text,
+            xObjectVersionTimestamp = new Date(x_object_version_timestamp.text.toDouble * 1000 toLong),
+            xObjectUUID = x_object_uuid.text,
+            xObjectVersion = x_object_version.text,
+            eTag = None
+          )
+        }
+
+        Some(ObjectsInfo(objectInfos.toList))
+      }
+      else {
+        None
+      }
+      Result(infoOpt, baseResult)
+    }
+  }
 }
