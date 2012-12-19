@@ -85,7 +85,9 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def listContainers(connInfo: ConnectionInfo) = {
     val reqBuilder = Helpers.
       prepareGET(http, connInfo, connInfo.userID).
-      addQueryParameter(Const.Params.format, ResponseFormat.XML.parameterValue)
+      addQueryParameter(
+        Const.RequestParams.Format.requestParam(),
+        Const.ResponseFormats.XML.responseFormat())
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
       val infoOpt = if(baseResult.is200) {
@@ -184,7 +186,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def getObject(connInfo: ConnectionInfo, container: String, path: String, version: String, out: OutputStream) = {
     val reqBuilder = Helpers.prepareGET(http, connInfo, connInfo.userID, container, path)
     if(version ne null) {
-      reqBuilder.addQueryParameter(Const.Params.version, version)
+      reqBuilder.addQueryParameter(Const.RequestParams.Version.requestParam(), version)
     }
 
     Helpers.execAsyncCompletionHandler(reqBuilder) { bodyPart =>
@@ -263,13 +265,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     reqBuilder.setBody(in)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
-      val infoOpt = if(baseResult.is201) { // CREATED
-//        val keys = baseResult.headers.keys().iterator()
-//        while(keys.hasNext) {
-//          val key = keys.next()
-//          val value = baseResult.headers.getOne(key)
-//          logger.info("{} -> {}", key, value)
-//        }
+      val infoOpt = if(baseResult.is201) {
         Some(NoInfo)
       }
       else {
@@ -325,12 +321,16 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       path: String
   ) = {
     val reqBuilder = Helpers.prepareGET(http, connInfo, connInfo.userID, container)
-    reqBuilder.addQueryParameter("format", "xml")
+    reqBuilder.addQueryParameter(
+      Const.RequestParams.Format.requestParam(),
+      Const.ResponseFormats.XML.responseFormat()
+    )
+
     path match {
       case null =>
       case "" =>
       case path =>
-        reqBuilder.addQueryParameter("path", path)
+        reqBuilder.addQueryParameter(Const.RequestParams.Path.requestParam(), path)
     }
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>

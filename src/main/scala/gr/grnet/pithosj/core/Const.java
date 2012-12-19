@@ -35,6 +35,9 @@
 
 package gr.grnet.pithosj.core;
 
+import scala.util.parsing.json.JSON;
+import scala.xml.XML;
+
 import java.text.SimpleDateFormat;
 
 /**
@@ -64,11 +67,48 @@ public final class Const {
     public static final SimpleDateFormat Format2 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
   }
 
-  public static final class Params {
-    private Params() {}
+  public static enum RequestParams {
+    Format("format"),
+    Version("version"),
+    Path("path");
 
-    public static final String format = "format";
-    public static final String version = "version";
+    private final String requestParam;
+
+    private RequestParams(String requestParam) {
+      this.requestParam = requestParam;
+    }
+
+    public String requestParam() {
+      return requestParam;
+    }
+  }
+
+  public static enum ResponseFormats {
+    NOFORMAT(""),
+    XML("xml"),
+    JSON("json");
+
+    private final String responseFormat;
+
+    private ResponseFormats(String responseFormat) {
+      this.responseFormat = responseFormat;
+    }
+
+    public String responseFormat() {
+      return responseFormat;
+    }
+
+    public final boolean hasValue() {
+      return this != NOFORMAT;
+    }
+
+    public final boolean isXML() {
+      return this == XML;
+    }
+
+    public final boolean isJSON() {
+      return this == JSON;
+    }
   }
 
   public static interface IHeader {
@@ -78,7 +118,7 @@ public final class Const {
   public static final class Headers {
     private Headers() {}
 
-    public enum Standard implements IHeader {
+    public static enum Standard implements IHeader {
       Content_Type ("Content-Type"),
       Content_Length("Content-Length"),
       Content_Encoding ("Content-Encoding"),
@@ -100,7 +140,7 @@ public final class Const {
       }
     }
 
-    public enum Pithos implements IHeader {
+    public static enum Pithos implements IHeader {
       X_Auth_Token("X-Auth-Token"),
 
       X_Account_Bytes_Used("X-Account-Bytes-Used"),
