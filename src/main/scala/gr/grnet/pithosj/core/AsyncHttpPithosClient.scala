@@ -154,14 +154,14 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
 
   def createDirectory(connInfo: ConnectionInfo, directory: String) = ???
 
-  def getObjectMeta(connInfo: ConnectionInfo, obj: String) = ???
+  def getObjectMeta(connInfo: ConnectionInfo, path: String) = ???
 
-  def deleteObjectMeta(connInfo: ConnectionInfo, obj: String, metaKey: String) = ???
+  def deleteObjectMeta(connInfo: ConnectionInfo, path: String, metaKey: String) = ???
 
-  def replaceObjectMeta(connInfo: ConnectionInfo, obj: String, meta: MetaData) = ???
+  def replaceObjectMeta(connInfo: ConnectionInfo, path: String, meta: MetaData) = ???
 
-  def getObject(connInfo: ConnectionInfo, container: String, obj: String, version: String, out: OutputStream) = {
-    val reqBuilder = Helpers.prepareGET(http, connInfo, connInfo.userID, container, obj)
+  def getObject(connInfo: ConnectionInfo, container: String, path: String, version: String, out: OutputStream) = {
+    val reqBuilder = Helpers.prepareGET(http, connInfo, connInfo.userID, container, path)
     if(version ne null) {
       reqBuilder.addQueryParameter(Const.Params.version, version)
     }
@@ -185,7 +185,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
           h(Headers.Pithos.X_Object_Version),
           h(Headers.Standard.ETag),
           container,
-          obj
+          path
         )
 
         Some(objectInfo)
@@ -198,8 +198,8 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     }
   }
 
-  def getObjectInfo(connInfo: ConnectionInfo, container: String, obj: String) = {
-    val reqBuilder = Helpers.prepareHEAD(http, connInfo, connInfo.userID, container, obj)
+  def getObjectInfo(connInfo: ConnectionInfo, container: String, path: String) = {
+    val reqBuilder = Helpers.prepareHEAD(http, connInfo, connInfo.userID, container, path)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
       val infoOpt = if(baseResult.is200) {
@@ -217,7 +217,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
           h(Headers.Pithos.X_Object_Version),
           h(Headers.Standard.ETag),
           container,
-          obj
+          path
         )
 
         Some(objectInfo)
@@ -233,11 +233,11 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def putObject(
       connInfo: ConnectionInfo,
       container: String,
-      obj: String,
+      path: String,
       in: File,
       contentType: String
   ) = {
-    val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, container, obj)
+    val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, container, path)
     reqBuilder.setHeader(Headers.Standard.Content_Type.header(), contentType)
     reqBuilder.setBody(in)
 
@@ -258,7 +258,25 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     }
   }
 
-  def deleteObject(connInfo: ConnectionInfo, obj: String) = ???
+  def deleteObject(connInfo: ConnectionInfo, container: String, path: String) = {
+    val reqBuilder = Helpers.prepareDELETE(http, connInfo, connInfo.userID, container, path)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
+      val infoOpt = if(baseResult.is204) {  // DELETED
+//        val keys = baseResult.headers.keys().iterator()
+//        while(keys.hasNext) {
+//          val key = keys.next()
+//          val value = baseResult.headers.getOne(key)
+//          logger.info("{} -> {}", key, value)
+//        }
+        Some(NoInfo)
+      }
+      else {
+        None
+      }
+      Result(infoOpt, baseResult)
+    }
+  }
 
   def copyObject(
       connInfo: ConnectionInfo,
