@@ -143,6 +143,8 @@ public final class Const {
     public static enum Pithos implements IHeader {
       X_Auth_Token("X-Auth-Token"),
 
+      X_Copy_From("X-Copy-From"),
+
       X_Account_Bytes_Used("X-Account-Bytes-Used"),
       X_Account_Container_Count("X-Account-Container-Count"),
       X_Account_Policy_Quota("X-Account-Policy-Quota"),

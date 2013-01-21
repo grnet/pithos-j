@@ -295,10 +295,20 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   def copyObject(
       connInfo: ConnectionInfo,
       fromContainer: String,
-      fromObj: String,
+      fromPath: String,
       toContainer: String,
-      toObj: String
-  ) = ???
+      toPath: String
+  ) = {
+    val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, toContainer, toPath)
+    reqBuilder.setHeader(Headers.Pithos.X_Copy_From.header(), Paths.build(fromContainer, fromPath))
+    reqBuilder.setHeader(Headers.Standard.Content_Length.header(), 0.toString)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
+      val infoOpt = NoInfo.optionBy(baseResult.is201)
+
+      Result(infoOpt, baseResult, Set(201))
+    }
+  }
 
   def moveObject(
       connInfo: ConnectionInfo,
