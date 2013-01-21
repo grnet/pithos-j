@@ -46,7 +46,8 @@ import gr.grnet.pithosj.core.Const.IHeader
  */
 final case class Result[I <: Info](
     infoOpt: Option[I],
-    baseResult: BaseResult
+    baseResult: BaseResult,
+    successCodes: Set[Int]
 ) {
 
   def hasInfo = infoOpt.isDefined
@@ -56,6 +57,8 @@ final case class Result[I <: Info](
   def statusText = baseResult.statusText
   def headers = baseResult.headers
   def completionMillis = baseResult.completionMillis
+
+  def isSuccess: Boolean = successCodes(statusCode)
 
   final def isStatusCode(statusCode: Int): Boolean = baseResult.isStatusCode(statusCode)
 

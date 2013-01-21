@@ -87,7 +87,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         None
       }
 
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(204))
     }
   }
 
@@ -158,7 +158,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         None
       }
 
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(200))
     }
   }
 
@@ -186,7 +186,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         None
       }
 
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(201))
     }
   }
 
@@ -230,7 +230,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         None
       }
 
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(200))
     }
   }
 
@@ -262,7 +262,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         None
       }
 
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(200))
     }
   }
 
@@ -284,7 +284,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       else {
         None
       }
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(201))
     }
   }
 
@@ -304,7 +304,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       else {
         None
       }
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(204))
     }
   }
 
@@ -383,7 +383,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       else {
         None
       }
-      Result(infoOpt, baseResult)
+      Result(infoOpt, baseResult, Set(200))
     }
   }
 }
