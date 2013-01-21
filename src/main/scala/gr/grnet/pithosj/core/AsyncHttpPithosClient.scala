@@ -44,6 +44,7 @@ import java.io.{File, OutputStream}
 import java.util.Date
 import org.slf4j.LoggerFactory
 import scala.xml.XML
+import java.net.URLConnection
 
 /**
  *
@@ -262,8 +263,14 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       container: String,
       path: String,
       in: File,
-      contentType: String
+      _contentType: String
   ) = {
+    val contentType = _contentType match {
+      case null ⇒
+        URLConnection.guessContentTypeFromName(path)
+      case contentType ⇒
+        contentType
+    }
     val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, container, path)
     reqBuilder.setHeader(Headers.Standard.Content_Type.header(), contentType)
     reqBuilder.setBody(in)
