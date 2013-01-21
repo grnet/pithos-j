@@ -56,12 +56,7 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     val reqBuilder = Helpers.prepareHEAD(http, connInfo, connInfo.userID)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)(){ (response, baseResult) =>
-      val infoOpt = if(baseResult.is204) {
-        Some(NoInfo)
-      }
-      else {
-        None
-      }
+      val infoOpt = NoInfo.optionBy(baseResult.is204)
 
       Result(infoOpt, baseResult, Set(204))
     }
@@ -176,15 +171,11 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     )
     reqBuilder.setHeader(
       Headers.Standard.Content_Length.header(),
-      "0"
+      0.toString
     )
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
-      val infoOpt = if(baseResult.is201) {
-        Some(NoInfo)
-      } else {
-        None
-      }
+      val infoOpt = NoInfo.optionBy(baseResult.is201)
 
       Result(infoOpt, baseResult, Set(201))
     }
@@ -278,12 +269,8 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     reqBuilder.setBody(in)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
-      val infoOpt = if(baseResult.is201) {
-        Some(NoInfo)
-      }
-      else {
-        None
-      }
+      val infoOpt = NoInfo.optionBy(baseResult.is201)
+
       Result(infoOpt, baseResult, Set(201))
     }
   }
@@ -292,18 +279,8 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     val reqBuilder = Helpers.prepareDELETE(http, connInfo, connInfo.userID, container, path)
 
     Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
-      val infoOpt = if(baseResult.is204) {  // DELETED
-//        val keys = baseResult.headers.keys().iterator()
-//        while(keys.hasNext) {
-//          val key = keys.next()
-//          val value = baseResult.headers.getOne(key)
-//          logger.info("{} -> {}", key, value)
-//        }
-        Some(NoInfo)
-      }
-      else {
-        None
-      }
+      val infoOpt = NoInfo.optionBy(baseResult.is204)
+
       Result(infoOpt, baseResult, Set(204))
     }
   }

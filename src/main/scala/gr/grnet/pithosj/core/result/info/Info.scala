@@ -46,4 +46,9 @@ trait Info extends Closeable {
 }
 
 sealed trait NoInfo extends Info
-final case object NoInfo extends NoInfo
+
+final case object NoInfo extends NoInfo {
+  def optionBy(condition: Boolean): Option[NoInfo] = {
+    if(condition) { Some(this) } else { None }
+  }
+}
