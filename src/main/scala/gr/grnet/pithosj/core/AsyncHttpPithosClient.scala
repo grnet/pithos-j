@@ -52,7 +52,20 @@ import scala.xml.XML
 final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
 
-  def ping(connInfo: ConnectionInfo) = ???
+  def ping(connInfo: ConnectionInfo) = {
+    val reqBuilder = Helpers.prepareHEAD(http, connInfo, connInfo.userID)
+
+    Helpers.execAsyncCompletionHandler(reqBuilder)(){ (response, baseResult) =>
+      val infoOpt = if(baseResult.is204) {
+        Some(NoInfo)
+      }
+      else {
+        None
+      }
+
+      Result(infoOpt, baseResult, Set(204))
+    }
+  }
 
   def getAccountInfo(connInfo: ConnectionInfo) = {
     val reqBuilder = Helpers.prepareHEAD(http, connInfo, connInfo.userID)
