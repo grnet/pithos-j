@@ -100,7 +100,7 @@ sealed class Helpers {
   }
 
   final def execAsyncCompletionHandler[I <: Info](
-      reqBuilder: AsyncHttpClient#BoundRequestBuilder
+      reqBuilder: RequestBuilder
   )(  p: (HttpResponseBodyPart) => STATE = null)
    (  f: (Response, BaseResult) => Result[I]): Future[Result[I]] = {
 

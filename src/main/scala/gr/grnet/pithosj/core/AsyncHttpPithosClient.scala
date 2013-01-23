@@ -297,8 +297,15 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       fromContainer: String,
       fromPath: String,
       toContainer: String,
-      toPath: String
+      _toPath: String
   ) = {
+    val toPath = _toPath match {
+      case null ⇒
+        fromPath
+      case toPath ⇒
+        toPath
+    }
+    
     val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, toContainer, toPath)
     reqBuilder.setHeader(Headers.Pithos.X_Copy_From.header(), Paths.build(fromContainer, fromPath))
     reqBuilder.setHeader(Headers.Standard.Content_Length.header(), 0.toString)
