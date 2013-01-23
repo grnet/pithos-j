@@ -309,18 +309,8 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
     toContainer.charAt(0)
     toPath.charAt(0)
 
-    logger.debug("copyObject(%s, %s, %s, %s, %s)".format(connInfo, fromContainer, fromPath, toContainer, toPath))
-
-    val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, toContainer, toPath)
-    reqBuilder.setHeader(Headers.Pithos.X_Copy_From.header(), Paths.build(fromContainer, fromPath))
-    reqBuilder.setHeader(Headers.Standard.Content_Length.header(), 0.toString)
-
-    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) ⇒
-      logger.debug()
-      val infoOpt = NoInfo.optionBy(baseResult.is201)
-
-      Result(infoOpt, baseResult, Set(201))
-    }
+    val command = CopyObject(fromContainer, fromPath, toContainer, toPath)
+    call(connInfo, command)
   }
 
   def moveObject(
@@ -401,10 +391,8 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
           Helpers.knownBadFuture(error)
 
         case None ⇒
-          val adjustedCommand = command.adjustIfNecessary
-          val requestBuilder = adjustedCommand.createRequestBuilder(connInfo, http)
-          adjustedCommand.prepareRequestBuilder(requestBuilder)
-          Helpers.execAsyncCompletionHandler(requestBuilder, adjustedCommand)
+          val adjustedCommand = command.beNiceToInputAndAdjust
+          adjustedCommand.execute(connInfo, http)
       }
     }
     catch {

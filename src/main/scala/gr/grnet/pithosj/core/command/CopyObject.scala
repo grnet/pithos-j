@@ -53,19 +53,11 @@ case class CopyObject(
     fromPath: String,
     toContainer: String,
     toPath: String
-) extends CommandSkeleton[NoInfo](HTTPMethod.PUT, Set(201)) {
+) extends CommandSkeleton[NoInfo] {
 
-  override def adjustIfNecessary = {
-    if((toContainer eq null) || (toPath eq null)) {
-      this.copy(
-        toContainer = Helpers.ifNull(toContainer, fromContainer),
-        toPath = Helpers.ifNull(toPath, fromPath)
-      )
-    }
-    else {
-      this
-    }
-  }
+  val httpMethod = HTTPMethod.PUT
+
+  val successCodes = Set(201)
 
   override def prepareRequestBuilder(requestBuilder: RequestBuilder) {
     requestBuilder.setHeader(Headers.Pithos.X_Copy_From.header(), Paths.build(fromContainer, fromPath))
@@ -79,6 +71,6 @@ case class CopyObject(
   def extractResult(response: Response, baseResult: BaseResult) = {
     val infoOpt = NoInfo.optionBy(baseResult.is201)
 
-    Result(infoOpt, baseResult, this)
+    Result(this, baseResult, infoOpt)
   }
 }

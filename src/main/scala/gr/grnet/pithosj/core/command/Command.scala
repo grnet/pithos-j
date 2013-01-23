@@ -36,7 +36,7 @@
 package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.{HttpResponseBodyPart, AsyncHttpClient, Response}
-import gr.grnet.pithosj.core.{Paths, ConnectionInfo}
+import gr.grnet.pithosj.core.{Helpers, Paths, ConnectionInfo}
 import gr.grnet.pithosj.core.Const.Headers
 import gr.grnet.pithosj.core.Helpers.RequestBuilder
 import gr.grnet.pithosj.core.http.HTTPMethod
@@ -44,6 +44,7 @@ import gr.grnet.pithosj.core.http.HTTPMethod._
 import gr.grnet.pithosj.core.result.info.Info
 import gr.grnet.pithosj.core.result.{Result, BaseResult}
 import com.ning.http.client.AsyncHandler.STATE
+import java.util.concurrent.Future
 
 /**
  * A command to be executed via the Pithos+ REST API.
@@ -58,30 +59,6 @@ trait Command[I <: Info] {
    */
   def successCodes: Set[Int]
 
-  def adjustIfNecessary: Command[I] = this
-
-  def prepareRequestBuilder(requestBuilder: RequestBuilder) {}
-
-  /**
-   * Creates a request builder for this command.
-   */
-  def createRequestBuilder(connInfo: ConnectionInfo, http: AsyncHttpClient): RequestBuilder = {
-    val url = this.computeURL(connInfo)
-
-    val requestBuilder = httpMethod match {
-      case HEAD    ⇒ http.prepareHead(url)
-      case GET     ⇒ http.prepareGet(url)
-      case PUT     ⇒ http.preparePut(url)
-      case POST    ⇒ http.preparePost(url)
-      case DELETE  ⇒ http.prepareDelete(url)
-      case OPTIONS ⇒ http.prepareOptions(url)
-    }
-
-    requestBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
-  }
-
-  def extractResult(response: Response, baseResult: BaseResult): Result[I]
-
   /**
    * Validates this command. Returns some error iff there is any.
    */
@@ -93,7 +70,5 @@ trait Command[I <: Info] {
 
   def computePathElements(connInfo: ConnectionInfo): Seq[String]
 
-  def onBodyPartReceived: HttpResponseBodyPart ⇒ STATE = null
+  def execute(connInfo: ConnectionInfo, http: AsyncHttpClient): Future[Result[I]]
 }
-
-abstract class CommandSkeleton[I <: Info](val httpMethod: HTTPMethod, val successCodes: Set[Int]) extends Command[I]

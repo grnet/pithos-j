@@ -138,15 +138,6 @@ sealed class Helpers {
   }
 
   final def execAsyncCompletionHandler[I <: Info](
-      requestBuilder: RequestBuilder,
-      command: Command[I]
-  ): Future[Result[I]] = {
-    val p = command.onBodyPartReceived
-    val f = command.extractResult(_, _)
-    execAsyncCompletionHandler(requestBuilder)(p)(f)
-  }
-
-  final def execAsyncCompletionHandler[I <: Info](
       requestBuilder: RequestBuilder
   )(  p: (HttpResponseBodyPart) ⇒ STATE = null)
    (  f: (Response, BaseResult) ⇒ Result[I]): Future[Result[I]] = {
