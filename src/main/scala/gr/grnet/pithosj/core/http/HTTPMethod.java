@@ -33,27 +33,11 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
+package gr.grnet.pithosj.core.http;
 
 /**
- *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final object Paths {
-
-  def buildWithFirst(first: String, others: String*): String = {
-    (Seq(first) ++ others).mkString("/")
-  }
-
-  def buildWithFirst(first: String, others: Array[String]): String = {
-    build(Array(first) ++ others)
-  }
-
-  def build(paths: String*): String = {
-    paths.mkString("/")
-  }
-
-  def build(paths: Array[String]): String = {
-    build(paths:_*)
-  }
+public enum HTTPMethod {
+  HEAD, GET, POST, PUT, DELETE, OPTIONS
 }

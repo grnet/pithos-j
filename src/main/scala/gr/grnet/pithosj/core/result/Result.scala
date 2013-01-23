@@ -39,15 +39,16 @@ package result
 import gr.grnet.pithosj.core.MetaData
 import gr.grnet.pithosj.core.result.info.Info
 import gr.grnet.pithosj.core.Const.IHeader
+import gr.grnet.pithosj.core.command.Command
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final case class Result[I <: Info](
-    infoOpt: Option[I],
+    command: Command[I],
     baseResult: BaseResult,
-    successCodes: Set[Int]
+    infoOpt: Option[I]
 ) {
 
   def hasInfo = infoOpt.isDefined
@@ -58,7 +59,7 @@ final case class Result[I <: Info](
   def headers = baseResult.headers
   def completionMillis = baseResult.completionMillis
 
-  def isSuccess: Boolean = successCodes(statusCode)
+  def isSuccess: Boolean = command.successCodes(statusCode)
 
   final def isStatusCode(statusCode: Int): Boolean = baseResult.isStatusCode(statusCode)
 

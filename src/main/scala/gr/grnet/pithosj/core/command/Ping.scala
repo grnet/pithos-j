@@ -33,27 +33,24 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
+package gr.grnet.pithosj.core.command
+
+import gr.grnet.pithosj.core.result.info.NoInfo
+import gr.grnet.pithosj.core.http.HTTPMethod
+import gr.grnet.pithosj.core.{Helpers, ConnectionInfo}
+import com.ning.http.client.Response
+import gr.grnet.pithosj.core.result.{Result, BaseResult}
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final object Paths {
+case class Ping() extends CommandSkeleton[NoInfo](HTTPMethod.HEAD, Set(204)) {
+  def extractResult(response: Response, baseResult: BaseResult) = {
+    val infoOpt = NoInfo.optionBy(baseResult.is204)
 
-  def buildWithFirst(first: String, others: String*): String = {
-    (Seq(first) ++ others).mkString("/")
+    Result(infoOpt, baseResult, this)
   }
 
-  def buildWithFirst(first: String, others: Array[String]): String = {
-    build(Array(first) ++ others)
-  }
-
-  def build(paths: String*): String = {
-    paths.mkString("/")
-  }
-
-  def build(paths: Array[String]): String = {
-    build(paths:_*)
-  }
+  def computePathElements(connInfo: ConnectionInfo) = Seq(connInfo.userID)
 }

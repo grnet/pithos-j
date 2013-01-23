@@ -33,27 +33,52 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
+package gr.grnet.pithosj.core.command
+
+import gr.grnet.pithosj.core.result.info.NoInfo
+import com.ning.http.client.Response
+import gr.grnet.pithosj.core.result.{Result, BaseResult}
+import gr.grnet.pithosj.core.Helpers.RequestBuilder
+import gr.grnet.pithosj.core.Const.Headers
+import gr.grnet.pithosj.core.{ConnectionInfo, Helpers, Paths}
+import gr.grnet.pithosj.core.http.HTTPMethod
 
 /**
+ * Copies an object around.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final object Paths {
+case class CopyObject(
+    fromContainer: String,
+    fromPath: String,
+    toContainer: String,
+    toPath: String
+) extends CommandSkeleton[NoInfo](HTTPMethod.PUT, Set(201)) {
 
-  def buildWithFirst(first: String, others: String*): String = {
-    (Seq(first) ++ others).mkString("/")
+  override def adjustIfNecessary = {
+    if((toContainer eq null) || (toPath eq null)) {
+      this.copy(
+        toContainer = Helpers.ifNull(toContainer, fromContainer),
+        toPath = Helpers.ifNull(toPath, fromPath)
+      )
+    }
+    else {
+      this
+    }
   }
 
-  def buildWithFirst(first: String, others: Array[String]): String = {
-    build(Array(first) ++ others)
+  override def prepareRequestBuilder(requestBuilder: RequestBuilder) {
+    requestBuilder.setHeader(Headers.Pithos.X_Copy_From.header(), Paths.build(fromContainer, fromPath))
+    requestBuilder.setHeader(Headers.Standard.Content_Length.header(), 0.toString)
   }
 
-  def build(paths: String*): String = {
-    paths.mkString("/")
+  def computePathElements(connInfo: ConnectionInfo) = {
+    Seq(connInfo.userID, toContainer, toPath)
   }
 
-  def build(paths: Array[String]): String = {
-    build(paths:_*)
+  def extractResult(response: Response, baseResult: BaseResult) = {
+    val infoOpt = NoInfo.optionBy(baseResult.is201)
+
+    Result(infoOpt, baseResult, this)
   }
 }

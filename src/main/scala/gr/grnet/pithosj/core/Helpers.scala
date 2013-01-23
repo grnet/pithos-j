@@ -41,16 +41,18 @@ import com.ning.http.client.{HttpResponseBodyPart, AsyncCompletionHandler, Async
 import gr.grnet.pithosj.core.result.info.Info
 import gr.grnet.pithosj.core.result.{Result, BaseResult}
 import java.util
-import java.util.concurrent.Future
+import java.util.concurrent.{ExecutionException, TimeUnit, Future}
 import org.slf4j.LoggerFactory
+import gr.grnet.pithosj.core.command.Command
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 sealed class Helpers {
+  import Helpers.RequestBuilder
+
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
-  type RequestBuilder = AsyncHttpClient#BoundRequestBuilder
 
   @inline def jListOne[T](item: T): util.List[T] = {
     val list = new util.ArrayList[T]()
@@ -60,6 +62,42 @@ sealed class Helpers {
 
   @inline final def copyResponseHeader(header: String, response: Response, meta: MetaData) {
     meta.set(header, response.getHeaders(header))
+  }
+
+  @inline final def ifNull(value: String, other: String): String = {
+    if(value ne null) value else other
+  }
+
+  final def knownGoodFuture[V](value: V): Future[V] = {
+    new Future[V] {
+      def isCancelled = false
+
+      def get(timeout: Long, unit: TimeUnit) = value
+
+      def get() = value
+
+      def cancel(mayInterruptIfRunning: Boolean) = false
+
+      def isDone = true
+    }
+  }
+
+  final def knownBadFuture[V](cause: Throwable, message: String): Future[V] = {
+    new Future[V] {
+      def isCancelled = false
+
+      def get(timeout: Long, unit: TimeUnit) = throw new ExecutionException(message, cause)
+
+      def get() = throw new ExecutionException(message, cause)
+
+      def cancel(mayInterruptIfRunning: Boolean) = false
+
+      def isDone = true
+    }
+  }
+
+  final def knownBadFuture[V](message: String): Future[V] = {
+    knownBadFuture(null, message)
   }
 
   final def copyAllResponseHeaders(response: Response, meta: MetaData) {
@@ -100,9 +138,18 @@ sealed class Helpers {
   }
 
   final def execAsyncCompletionHandler[I <: Info](
-      reqBuilder: RequestBuilder
-  )(  p: (HttpResponseBodyPart) => STATE = null)
-   (  f: (Response, BaseResult) => Result[I]): Future[Result[I]] = {
+      requestBuilder: RequestBuilder,
+      command: Command[I]
+  ): Future[Result[I]] = {
+    val p = command.onBodyPartReceived
+    val f = command.extractResult(_, _)
+    execAsyncCompletionHandler(requestBuilder)(p)(f)
+  }
+
+  final def execAsyncCompletionHandler[I <: Info](
+      requestBuilder: RequestBuilder
+  )(  p: (HttpResponseBodyPart) ⇒ STATE = null)
+   (  f: (Response, BaseResult) ⇒ Result[I]): Future[Result[I]] = {
 
     val startMillis = System.currentTimeMillis()
 
@@ -126,8 +173,10 @@ sealed class Helpers {
       }
     }
 
-    reqBuilder.execute(handler)
+    requestBuilder.execute(handler)
   }
 }
 
-final object Helpers extends Helpers
+final object Helpers extends Helpers {
+  type RequestBuilder = AsyncHttpClient#BoundRequestBuilder
+}

@@ -79,4 +79,9 @@ public final class ConnectionInfo {
     result = 31 * result + userToken.hashCode();
     return result;
   }
+
+  @Override
+  public String toString() {
+    return String.format("ConnectionInfo(%s, %s)", baseURL, userID);
+  }
 }

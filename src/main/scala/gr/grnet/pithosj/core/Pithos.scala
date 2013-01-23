@@ -36,9 +36,10 @@
 package gr.grnet.pithosj.core
 
 import gr.grnet.pithosj.core.result.Result
-import gr.grnet.pithosj.core.result.info.{ObjectsInfo, ObjectInfo, ContainersInfo, AccountInfo, NoInfo}
+import gr.grnet.pithosj.core.result.info.{Info, ObjectsInfo, ObjectInfo, ContainersInfo, AccountInfo, NoInfo}
 import java.io.{File, OutputStream}
 import java.util.concurrent.Future
+import gr.grnet.pithosj.core.command.{CopyObject, Command}
 
 /**
  * Provides the Pithos API.
@@ -114,4 +115,6 @@ trait Pithos {
       container: String,
       path: String
   ): Future[Result[ObjectsInfo]]
+
+  def call[I <: Info](connInfo: ConnectionInfo, command: Command[I]): Future[Result[I]]
 }

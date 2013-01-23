@@ -39,12 +39,14 @@ import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.AsyncHttpClient
 import gr.grnet.pithosj.core.Const.{IHeader, Headers, ContentTypes}
 import gr.grnet.pithosj.core.result.Result
-import gr.grnet.pithosj.core.result.info.{ObjectsInfo, NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
+import gr.grnet.pithosj.core.result.info.{Info, ObjectsInfo, NoInfo, ObjectInfo, ContainersInfo, AccountInfo, ContainerInfo}
 import java.io.{File, OutputStream}
 import java.util.Date
 import org.slf4j.LoggerFactory
 import scala.xml.XML
 import java.net.URLConnection
+import gr.grnet.pithosj.core.command.{CopyObject, Command}
+import java.util.concurrent.Future
 
 /**
  *
@@ -296,21 +298,25 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       connInfo: ConnectionInfo,
       fromContainer: String,
       fromPath: String,
-      toContainer: String,
+      _toContainer: String,
       _toPath: String
   ) = {
-    val toPath = _toPath match {
-      case null ⇒
-        fromPath
-      case toPath ⇒
-        toPath
-    }
-    
+    val toPath = Helpers.ifNull(_toPath, fromPath)
+    val toContainer = Helpers.ifNull(_toContainer, fromContainer)
+
+    fromContainer.charAt(0)
+    fromPath.charAt(0)
+    toContainer.charAt(0)
+    toPath.charAt(0)
+
+    logger.debug("copyObject(%s, %s, %s, %s, %s)".format(connInfo, fromContainer, fromPath, toContainer, toPath))
+
     val reqBuilder = Helpers.preparePUT(http, connInfo, connInfo.userID, toContainer, toPath)
     reqBuilder.setHeader(Headers.Pithos.X_Copy_From.header(), Paths.build(fromContainer, fromPath))
     reqBuilder.setHeader(Headers.Standard.Content_Length.header(), 0.toString)
 
-    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) =>
+    Helpers.execAsyncCompletionHandler(reqBuilder)() { (response, baseResult) ⇒
+      logger.debug()
       val infoOpt = NoInfo.optionBy(baseResult.is201)
 
       Result(infoOpt, baseResult, Set(201))
@@ -385,6 +391,25 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
         None
       }
       Result(infoOpt, baseResult, Set(200))
+    }
+  }
+
+  def call[I <: Info](connInfo: ConnectionInfo, command: Command[I]): Future[Result[I]] = {
+    try {
+      command.validate match {
+        case Some(error) ⇒
+          Helpers.knownBadFuture(error)
+
+        case None ⇒
+          val adjustedCommand = command.adjustIfNecessary
+          val requestBuilder = adjustedCommand.createRequestBuilder(connInfo, http)
+          adjustedCommand.prepareRequestBuilder(requestBuilder)
+          Helpers.execAsyncCompletionHandler(requestBuilder, adjustedCommand)
+      }
+    }
+    catch {
+      case e: Throwable ⇒
+        Helpers.knownBadFuture(e, "Internal error")
     }
   }
 }
