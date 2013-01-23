@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory
  */
 sealed class Helpers {
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
+  type RequestBuilder = AsyncHttpClient#BoundRequestBuilder
 
   @inline def jListOne[T](item: T): util.List[T] = {
     val list = new util.ArrayList[T]()
@@ -68,39 +69,34 @@ sealed class Helpers {
     }
   }
 
-  final def prepareHEAD(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+  final def prepareVerb(
+      preparer: String ⇒ RequestBuilder,
+      connInfo: ConnectionInfo,
+      paths: String*
+  ): RequestBuilder = {
     val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
-    logger.debug("prepareHead({})", url)
-    val reqBuilder = http.prepareHead(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
+    val requestBuilder = preparer(url)
+    requestBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
+  }
+
+  final def prepareHEAD(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
+    prepareVerb(http.prepareHead, connInfo, paths: _*)
   }
 
   final def prepareGET(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
-    logger.debug("prepareGet({})", url)
-    val reqBuilder = http.prepareGet(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
+    prepareVerb(http.prepareGet, connInfo, paths: _*)
   }
 
   final def preparePOST(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
-    logger.debug("preparePost({})", url)
-    val reqBuilder = http.preparePost(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
+    prepareVerb(http.preparePost, connInfo, paths: _*)
   }
 
   final def preparePUT(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
-    logger.debug("preparePut({})", url)
-    val reqBuilder = http.preparePut(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
+    prepareVerb(http.preparePut, connInfo, paths: _*)
   }
 
   final def prepareDELETE(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
-    logger.debug("prepareDelete({})", url)
-    val reqBuilder = http.prepareDelete(url)
-    reqBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
+    prepareVerb(http.prepareDelete, connInfo, paths: _*)
   }
 
   final def execAsyncCompletionHandler[I <: Info](
