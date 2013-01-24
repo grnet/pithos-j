@@ -33,55 +33,18 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core.command
+
+import java.util.concurrent.Future
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class ConnectionInfo {
-  public final String baseURL;
-  public final String userID;
-  public final String userToken;
-
-  public ConnectionInfo(String baseURL, String userID, String userToken) {
-    if(baseURL == null) {
-      throw new IllegalArgumentException("null baseURL");
-    }
-    if(userID == null) {
-      throw new IllegalArgumentException("null userID");
-    }
-    if(userToken == null) {
-      throw new IllegalArgumentException("null userToken");
-    }
-    this.baseURL = baseURL;
-    this.userID = userID;
-    this.userToken = userToken;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if(this == o) return true;
-    if(o == null || getClass() != o.getClass()) return false;
-
-    final ConnectionInfo that = (ConnectionInfo) o;
-
-    if(!baseURL.equals(that.baseURL)) return false;
-    if(!userID.equals(that.userID)) return false;
-    if(!userToken.equals(that.userToken)) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = baseURL.hashCode();
-    result = 31 * result + userID.hashCode();
-    result = 31 * result + userToken.hashCode();
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("ConnectionInfo(%s, %s)", baseURL, userID);
-  }
+trait CommandExecutor {
+  /**
+   * Executes the given command and returns a [[java.util.concurrent.Future]]
+   * with the command-specific result.
+   */
+  def execute[R](command: Command[R]): Future[R]
 }

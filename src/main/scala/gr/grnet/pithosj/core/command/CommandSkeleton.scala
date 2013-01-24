@@ -35,66 +35,40 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.result.info.Info
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{Helpers, ConnectionInfo}
-import com.ning.http.client.{Response, HttpResponseBodyPart, AsyncHttpClient}
-import gr.grnet.pithosj.core.Helpers.RequestBuilder
-import gr.grnet.pithosj.core.http.HTTPMethod.{OPTIONS, DELETE, POST, PUT, GET, HEAD}
-import gr.grnet.pithosj.core.Const.Headers
-import java.util.concurrent.Future
-import gr.grnet.pithosj.core.result.{BaseResult, Result}
 import com.ning.http.client.AsyncHandler.STATE
+import com.ning.http.client.HttpResponseBodyPart
+import gr.grnet.pithosj.core.Const.Headers
+import gr.grnet.pithosj.core.MetaData
+import gr.grnet.pithosj.core.http.RequestBody
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait CommandSkeleton[I <: Info] extends Command[I] {
-  val httpMethod: HTTPMethod
-
-  val successCodes: Set[Int]
+trait CommandSkeleton[R] extends Command[R] {
+  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE] = None
 
   /**
-   * Creates a request builder for this command.
+   * The HTTP query parameters that are set by this command.
    */
-  private def createRequestBuilder(connInfo: ConnectionInfo, http: AsyncHttpClient): RequestBuilder = {
-    val url = this.computeURL(connInfo)
+  val queryParameters = MetaData.Empty
 
-    val requestBuilder = httpMethod match {
-      case HEAD    ⇒ http.prepareHead(url)
-      case GET     ⇒ http.prepareGet(url)
-      case PUT     ⇒ http.preparePut(url)
-      case POST    ⇒ http.preparePost(url)
-      case DELETE  ⇒ http.prepareDelete(url)
-      case OPTIONS ⇒ http.prepareOptions(url)
-    }
+  /**
+   * The HTTP request headers that are set by this command.
+   */
+  val requestHeaders = newDefaultRequestHeaders
 
-    requestBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
+  /**
+   * Provides the HTTP request body, if any.
+   */
+  val requestBodyOpt: Option[RequestBody] = None
+
+  protected def newDefaultRequestHeaders: MetaData = {
+    val metadata = new MetaData()
+    metadata.setOne(Headers.Pithos.X_Auth_Token, connectionInfo.userToken)
   }
 
-  private def execAsyncCompletionHandler(requestBuilder: RequestBuilder): Future[Result[I]] = {
-    val p = this.onBodyPartReceived
-    val f = this.extractResult(_, _)
-    Helpers.execAsyncCompletionHandler(requestBuilder)(p)(f)
-  }
-
-  protected def createAndPrepareRequestBuilder(connInfo: ConnectionInfo, http: AsyncHttpClient): RequestBuilder = {
-    val requestBuilder = createRequestBuilder(connInfo, http)
-    prepareRequestBuilder(requestBuilder)
-  }
-
-  protected def prepareRequestBuilder(requestBuilder: RequestBuilder): RequestBuilder = {
-    requestBuilder
-  }
-
-  protected def onBodyPartReceived: HttpResponseBodyPart ⇒ STATE = null
-
-  protected def extractResult(response: Response, baseResult: BaseResult): Result[I]
-
-  def execute(connInfo: ConnectionInfo, http: AsyncHttpClient): Future[Result[I]] = {
-    val requestBuilder = createRequestBuilder(connInfo, http)
-    prepareRequestBuilder(requestBuilder)
-    execAsyncCompletionHandler(requestBuilder)
+  protected def newQueryParameters: MetaData = {
+    new MetaData()
   }
 }

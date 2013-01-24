@@ -35,9 +35,6 @@
 
 package gr.grnet.pithosj.core;
 
-import scala.util.parsing.json.JSON;
-import scala.xml.XML;
-
 import java.text.SimpleDateFormat;
 
 /**

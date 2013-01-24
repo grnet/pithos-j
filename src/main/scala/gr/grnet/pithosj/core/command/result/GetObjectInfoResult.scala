@@ -33,34 +33,22 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core.command.result
 
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import gr.grnet.pithosj.core.asynchttp.AsyncHttpPithosClient;
+import gr.grnet.pithosj.core.MetaData
+import gr.grnet.pithosj.core.command.{GetObjectInfo}
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class PithosClientFactory {
-  private PithosClientFactory() {}
-
-  public static AsyncHttpClient newDefaultAsyncHttpClient() {
-    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
-      setAllowPoolingConnection(true).
-      setAllowSslConnectionPool(true).
-      setCompressionEnabled(true).
-      setFollowRedirects(true).
-      setMaximumConnectionsTotal(20);
-
-    return new AsyncHttpClient(builder.build());
-  }
-
-  public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
-    return new AsyncHttpPithosClient(asyncHttp);
-  }
-
-  public static Pithos newPithosClient() {
-    return newPithosClient(newDefaultAsyncHttpClient());
-  }
+case class GetObjectInfoResult(
+    command: GetObjectInfo,
+    override val responseHeaders: MetaData,
+    override val statusCode: Int,
+    override val statusText: String,
+    override val completionMillis: Long,
+    resultDataOpt: Option[GetObjectInfoResultData]
+) extends ResultSkeleton(responseHeaders, statusCode, statusText, completionMillis) {
+  def isSuccess: Boolean = command.successCodes(statusCode)
 }

@@ -33,34 +33,22 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core.command.result
 
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import gr.grnet.pithosj.core.asynchttp.AsyncHttpPithosClient;
+import gr.grnet.pithosj.core.MetaData
+import java.util.Date
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class PithosClientFactory {
-  private PithosClientFactory() {}
 
-  public static AsyncHttpClient newDefaultAsyncHttpClient() {
-    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
-      setAllowPoolingConnection(true).
-      setAllowSslConnectionPool(true).
-      setCompressionEnabled(true).
-      setFollowRedirects(true).
-      setMaximumConnectionsTotal(20);
+case class ContainerResultData(
+    name: String,
+    count: Int,
+    lastModified: Date,
+    bytes: Long,
+    policy: MetaData
+)
 
-    return new AsyncHttpClient(builder.build());
-  }
-
-  public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
-    return new AsyncHttpPithosClient(asyncHttp);
-  }
-
-  public static Pithos newPithosClient() {
-    return newPithosClient(newDefaultAsyncHttpClient());
-  }
-}
+case class ListContainersResultData(containers: List[ContainerResultData])

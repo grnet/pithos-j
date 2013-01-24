@@ -35,49 +35,35 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.Const.Headers
-import gr.grnet.pithosj.core.command.result.SimpleResult
+import gr.grnet.pithosj.core.Const.{Headers, IHeader}
+import gr.grnet.pithosj.core.command.result.{GetObjectInfoResultData, GetObjectInfoResult}
 import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{MetaData, ConnectionInfo, Paths}
+import gr.grnet.pithosj.core.{Const, MetaData, ConnectionInfo}
 
 /**
- * Copies an object around.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CopyObject(
+case class GetObjectInfo(
     connectionInfo: ConnectionInfo,
-    fromContainer: String,
-    fromPath: String,
-    toContainer: String,
-    toPath: String
-) extends CommandSkeleton[SimpleResult] {
-
+    container: String,
+    path: String
+) extends CommandSkeleton[GetObjectInfoResult] {
   /**
    * The HTTP method by which the command is implemented.
    */
-  val httpMethod = HTTPMethod.PUT
+  def httpMethod = HTTPMethod.HEAD
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  val successCodes = Set(201)
+  def successCodes = Set(200)
 
   /**
-   * The HTTP request headers that are set by this command.
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
    */
-  override val requestHeaders = {
-    newDefaultRequestHeaders.
-      setOne(Headers.Pithos.X_Copy_From, Paths.build(fromContainer, fromPath)).
-      setOne(Headers.Standard.Content_Length, 0.toString)
-  }
-
-  /**
-   * The HTTP request parameters that are set by this command.
-   */
-  override val queryParameters = MetaData.Empty
-
-  def serverURLPathElements = Seq(connectionInfo.userID, toContainer, toPath)
+  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
 
   def buildResult(
       responseHeaders: MetaData,
@@ -86,6 +72,37 @@ case class CopyObject(
       completionMillis: Long,
       getResponseBody: () ⇒ String
   ) = {
-    SimpleResult(this, responseHeaders, statusCode, statusText, completionMillis, successCodes(statusCode))
+    val resultDataOpt = successCodes(statusCode) match {
+      case false ⇒
+        None
+      case true ⇒
+        def h(name: IHeader) = responseHeaders.getOne(name)
+
+        val resultData = GetObjectInfoResultData(
+          container = container,
+          path = path,
+          contentType = h(Headers.Standard.Content_Type),
+          contentLength = h(Headers.Standard.Content_Length).toLong,
+          // Wed, 19 Sep 2012 08:18:23 GMT
+          lastModified = Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
+          xObjectHash = h(Headers.Pithos.X_Object_Hash),
+          xObjectModifiedBy = h(Headers.Pithos.X_Object_Modified_By),
+          xObjectVersionTimestamp = Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
+          xObjectUUID = h(Headers.Pithos.X_Object_UUID),
+          xObjectVersion = h(Headers.Pithos.X_Object_Version),
+          eTag = Some(h(Headers.Standard.ETag))
+        )
+
+        Some(resultData)
+    }
+
+    GetObjectInfoResult(
+      this,
+      responseHeaders,
+      statusCode,
+      statusText,
+      completionMillis,
+      resultDataOpt
+    )
   }
 }

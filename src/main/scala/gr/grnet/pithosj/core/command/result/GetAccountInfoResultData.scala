@@ -33,28 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.result.info
-
-import java.util.Date
+package gr.grnet.pithosj.core.command.result
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ObjectInfo(
-    container: String,
-    path: String,
-    contentType: String,
-    contentLength: Long,
-    lastModified: Date,
-    xObjectHash: String,
-    xObjectModifiedBy: String,
-    xObjectVersionTimestamp: Date,
-    xObjectUUID: String,
-    xObjectVersion: String,
-    eTag: Option[String] = None
-) extends Info
-
-case class ObjectsInfo(objects: List[ObjectInfo]) extends Info {
-  def size = objects.size
+case class GetAccountInfoResultData(
+    xAccountBytesUsed: Long,
+    xAccountContainerCount: Int,
+    xAccountPolicyQuota: Long,
+    xAccountPolicyVersioning: String
+) {
+  def usageRatio: Double = xAccountBytesUsed.toDouble / xAccountPolicyQuota.toDouble
 }

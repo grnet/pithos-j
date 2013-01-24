@@ -33,34 +33,54 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core.command
 
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import gr.grnet.pithosj.core.asynchttp.AsyncHttpPithosClient;
+import gr.grnet.pithosj.core.Const.{ContentTypes, Headers}
+import gr.grnet.pithosj.core.command.result.SimpleResult
+import gr.grnet.pithosj.core.http.HTTPMethod
+import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class PithosClientFactory {
-  private PithosClientFactory() {}
+case class CreateDirectory(
+    connectionInfo: ConnectionInfo,
+    container: String,
+    path: String
+) extends CommandSkeleton[SimpleResult] {
+  /**
+   * The HTTP method by which the command is implemented.
+   */
+  def httpMethod = HTTPMethod.PUT
 
-  public static AsyncHttpClient newDefaultAsyncHttpClient() {
-    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
-      setAllowPoolingConnection(true).
-      setAllowSslConnectionPool(true).
-      setCompressionEnabled(true).
-      setFollowRedirects(true).
-      setMaximumConnectionsTotal(20);
-
-    return new AsyncHttpClient(builder.build());
+  /**
+   * The HTTP request headers that are set by this command.
+   */
+  override val requestHeaders = {
+    newDefaultRequestHeaders.
+      setOne(Headers.Standard.Content_Type, ContentTypes.Application_Directory.contentType()).
+      setOne(Headers.Standard.Content_Length, 0.toString)
   }
 
-  public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
-    return new AsyncHttpPithosClient(asyncHttp);
-  }
+  /**
+   * A set of all the HTTP status codes that are considered a success for this command.
+   */
+  def successCodes = Set(201)
 
-  public static Pithos newPithosClient() {
-    return newPithosClient(newDefaultAsyncHttpClient());
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+
+  def buildResult(
+      responseHeaders: MetaData,
+      statusCode: Int,
+      statusText: String,
+      completionMillis: Long,
+      getResponseBody: () => String
+  ) = {
+    SimpleResult(this, responseHeaders, statusCode, statusText, completionMillis, successCodes(statusCode))
   }
 }

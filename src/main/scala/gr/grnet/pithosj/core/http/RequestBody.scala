@@ -33,34 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core.http
 
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import gr.grnet.pithosj.core.asynchttp.AsyncHttpPithosClient;
+import java.io.{InputStream, File}
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class PithosClientFactory {
-  private PithosClientFactory() {}
+sealed trait RequestBody
 
-  public static AsyncHttpClient newDefaultAsyncHttpClient() {
-    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
-      setAllowPoolingConnection(true).
-      setAllowSslConnectionPool(true).
-      setCompressionEnabled(true).
-      setFollowRedirects(true).
-      setMaximumConnectionsTotal(20);
-
-    return new AsyncHttpClient(builder.build());
-  }
-
-  public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
-    return new AsyncHttpPithosClient(asyncHttp);
-  }
-
-  public static Pithos newPithosClient() {
-    return newPithosClient(newDefaultAsyncHttpClient());
-  }
-}
+case class FileRequestBody(body: File) extends RequestBody
+case class BytesRequestBody(body: Array[Byte]) extends RequestBody
+case class StringRequestBody(body: String) extends RequestBody
+case class InputStreamRequestBody(body: InputStream) extends RequestBody

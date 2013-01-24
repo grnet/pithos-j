@@ -33,22 +33,62 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.result.info
+package gr.grnet.pithosj.core.command
 
-import java.io.Closeable
+import gr.grnet.pithosj.core.Const.{Headers, IHeader}
+import gr.grnet.pithosj.core.command.result.{GetAccountInfoResultData, GetAccountInfoResult}
+import gr.grnet.pithosj.core.http.HTTPMethod
+import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait Info extends Closeable {
-  def close(): Unit = {}
-}
+case class GetAccountInfo(connectionInfo: ConnectionInfo) extends CommandSkeleton[GetAccountInfoResult] {
+  /**
+   * The HTTP method by which the command is implemented.
+   */
+  def httpMethod = HTTPMethod.HEAD
 
-sealed trait NoInfo extends Info
+  /**
+   * A set of all the HTTP status codes that are considered a success for this command.
+   */
+  def successCodes = Set(204)
 
-final case object NoInfo extends NoInfo {
-  def optionBy(condition: Boolean): Option[NoInfo] = {
-    if(condition) { Some(this) } else { None }
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  def serverURLPathElements = Seq(connectionInfo.userID)
+
+  def buildResult(
+      responseHeaders: MetaData,
+      statusCode: Int,
+      statusText: String,
+      completionMillis: Long,
+      getResponseBody: () ⇒ String
+  ) = {
+    def h(header: IHeader) = responseHeaders.getOne(header)
+
+    val resultDataOpt = successCodes(statusCode) match {
+      case false ⇒
+        None
+      case true ⇒
+        Some(GetAccountInfoResultData(
+          h(Headers.Pithos.X_Account_Bytes_Used).toLong,
+          h(Headers.Pithos.X_Account_Container_Count).toInt,
+          h(Headers.Pithos.X_Account_Policy_Quota).toLong,
+          h(Headers.Pithos.X_Account_Policy_Versioning)
+        ))
+    }
+
+    GetAccountInfoResult(
+      this,
+      responseHeaders,
+      statusCode,
+      statusText,
+      completionMillis,
+      resultDataOpt
+    )
   }
 }

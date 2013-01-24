@@ -35,24 +35,40 @@
 
 package gr.grnet.pithosj.core.command
 
-import com.ning.http.client.{HttpResponseBodyPart, AsyncHttpClient, Response}
-import gr.grnet.pithosj.core.{Helpers, Paths, ConnectionInfo}
-import gr.grnet.pithosj.core.Const.Headers
-import gr.grnet.pithosj.core.Helpers.RequestBuilder
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.http.HTTPMethod._
-import gr.grnet.pithosj.core.result.info.Info
-import gr.grnet.pithosj.core.result.{Result, BaseResult}
 import com.ning.http.client.AsyncHandler.STATE
-import java.util.concurrent.Future
+import com.ning.http.client.HttpResponseBodyPart
+import gr.grnet.pithosj.core.http.{RequestBody, HTTPMethod}
+import gr.grnet.pithosj.core.{MetaData, Paths, ConnectionInfo}
 
 /**
  * A command to be executed via the Pithos+ REST API.
+ *  Each command specifies its own input data, which will be used
+ *  to build up an HTTP request. Also, a command has a specific type (`R`)
+ *  of results to be returned from the Pithos+ REST API call.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait Command[I <: Info] {
+trait Command[+R] {
+  /**
+   * Specifies the target against which the command will be executed.
+   * This includes the Pithos+ server and the Pithos+ user id and token.
+   */
+  def connectionInfo: ConnectionInfo
+
+  /**
+   * The HTTP method by which the command is implemented.
+   */
   def httpMethod: HTTPMethod
+
+  /**
+   * The HTTP request headers that are set by this command.
+   */
+  def requestHeaders: MetaData
+
+  /**
+   * The HTTP query parameters that are set by this command.
+   */
+  def queryParameters: MetaData
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -64,11 +80,32 @@ trait Command[I <: Info] {
    */
   def validate: Option[String] = None
 
-  def computeURL(connInfo: ConnectionInfo): String = {
-    Paths.buildWithFirst(connInfo.baseURL, computePathElements(connInfo): _*)
+  /**
+   * Computes the URL that will be used in the HTTP call.
+   * The URL does not contain any needed parameters.
+   */
+  def serverURLExcludingParameters: String = {
+    Paths.buildWithFirst(connectionInfo.serverURL, serverURLPathElements: _*)
   }
 
-  def computePathElements(connInfo: ConnectionInfo): Seq[String]
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  def serverURLPathElements: Seq[String]
 
-  def execute(connInfo: ConnectionInfo, http: AsyncHttpClient): Future[Result[I]]
+  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE]
+
+  /**
+   * Provides the HTTP request body, if any.
+   */
+  def requestBodyOpt: Option[RequestBody]
+
+  def buildResult(
+      responseHeaders: MetaData,
+      statusCode: Int,
+      statusText: String,
+      completionMillis: Long,
+      getResponseBody: () ⇒ String
+  ): R
 }

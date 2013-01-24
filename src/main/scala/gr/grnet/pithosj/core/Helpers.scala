@@ -36,20 +36,17 @@
 package gr.grnet.pithosj.core
 
 import Const.Headers
-import com.ning.http.client.AsyncHandler.STATE
-import com.ning.http.client.{HttpResponseBodyPart, AsyncCompletionHandler, AsyncHttpClient, Response}
-import gr.grnet.pithosj.core.result.info.Info
-import gr.grnet.pithosj.core.result.{Result, BaseResult}
+import com.ning.http.client.{AsyncHttpClient, Response}
 import java.util
 import java.util.concurrent.{ExecutionException, TimeUnit, Future}
 import org.slf4j.LoggerFactory
-import gr.grnet.pithosj.core.command.Command
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 sealed class Helpers {
+
   import Helpers.RequestBuilder
 
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
@@ -102,69 +99,9 @@ sealed class Helpers {
 
   final def copyAllResponseHeaders(response: Response, meta: MetaData) {
     val headers = asScala(response.getHeaders)
-    for(k<- headers.keysIterator) {
+    for(k ← headers.keysIterator) {
       copyResponseHeader(k, response, meta)
     }
-  }
-
-  final def prepareVerb(
-      preparer: String ⇒ RequestBuilder,
-      connInfo: ConnectionInfo,
-      paths: String*
-  ): RequestBuilder = {
-    val url = Paths.buildWithFirst(connInfo.baseURL, paths: _*)
-    val requestBuilder = preparer(url)
-    requestBuilder.addHeader(Headers.Pithos.X_Auth_Token.header, connInfo.userToken)
-  }
-
-  final def prepareHEAD(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    prepareVerb(http.prepareHead, connInfo, paths: _*)
-  }
-
-  final def prepareGET(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    prepareVerb(http.prepareGet, connInfo, paths: _*)
-  }
-
-  final def preparePOST(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    prepareVerb(http.preparePost, connInfo, paths: _*)
-  }
-
-  final def preparePUT(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    prepareVerb(http.preparePut, connInfo, paths: _*)
-  }
-
-  final def prepareDELETE(http: AsyncHttpClient, connInfo: ConnectionInfo, paths: String*) = {
-    prepareVerb(http.prepareDelete, connInfo, paths: _*)
-  }
-
-  final def execAsyncCompletionHandler[I <: Info](
-      requestBuilder: RequestBuilder
-  )(  p: (HttpResponseBodyPart) ⇒ STATE = null)
-   (  f: (Response, BaseResult) ⇒ Result[I]): Future[Result[I]] = {
-
-    val startMillis = System.currentTimeMillis()
-
-    val handler = new AsyncCompletionHandler[Result[I]] {
-      override def onBodyPartReceived(content: HttpResponseBodyPart) = {
-        if(p eq null ) super.onBodyPartReceived(content)
-        else           p(content)
-      }
-
-      def onCompleted(response: Response) = {
-        val meta = new MetaData
-        copyAllResponseHeaders(response, meta)
-
-        val baseResult = new BaseResult(
-          response.getStatusCode,
-          response.getStatusText,
-          meta,
-          (System.currentTimeMillis() - startMillis).toInt
-        )
-        f(response, baseResult)
-      }
-    }
-
-    requestBuilder.execute(handler)
   }
 }
 

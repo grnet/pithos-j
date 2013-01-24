@@ -35,22 +35,39 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.result.info.NoInfo
+import gr.grnet.pithosj.core.command.result.SimpleResult
 import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{Helpers, ConnectionInfo}
-import com.ning.http.client.Response
-import gr.grnet.pithosj.core.result.{Result, BaseResult}
+import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class Ping() extends CommandSkeleton[NoInfo](HTTPMethod.HEAD, Set(204)) {
-  def extractResult(response: Response, baseResult: BaseResult) = {
-    val infoOpt = NoInfo.optionBy(baseResult.is204)
+case class Ping(connectionInfo: ConnectionInfo) extends CommandSkeleton[SimpleResult] {
+  val httpMethod: HTTPMethod = HTTPMethod.HEAD
 
-    Result(infoOpt, baseResult, this)
+  val successCodes: Set[Int] = Set(204)
+
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  val serverURLPathElements = Seq(connectionInfo.userID)
+
+  def buildResult(
+      responseHeaders: MetaData,
+      statusCode: Int,
+      statusText: String,
+      completionMillis: Long,
+      getResponseBody: () ⇒ String
+  ) = {
+    SimpleResult(
+      this,
+      responseHeaders,
+      statusCode,
+      statusText,
+      completionMillis,
+      successCodes(statusCode)
+    )
   }
-
-  def computePathElements(connInfo: ConnectionInfo) = Seq(connInfo.userID)
 }

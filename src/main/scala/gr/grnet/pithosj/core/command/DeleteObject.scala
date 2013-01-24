@@ -33,34 +33,44 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.pithosj.core.command
 
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import gr.grnet.pithosj.core.asynchttp.AsyncHttpPithosClient;
+import gr.grnet.pithosj.core.command.result.SimpleResult
+import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
+import gr.grnet.pithosj.core.http.HTTPMethod
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class PithosClientFactory {
-  private PithosClientFactory() {}
+case class DeleteObject(
+    connectionInfo: ConnectionInfo,
+    container: String,
+    path: String
+) extends CommandSkeleton[SimpleResult] {
+  /**
+   * The HTTP method by which the command is implemented.
+   */
+  def httpMethod = HTTPMethod.DELETE
 
-  public static AsyncHttpClient newDefaultAsyncHttpClient() {
-    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
-      setAllowPoolingConnection(true).
-      setAllowSslConnectionPool(true).
-      setCompressionEnabled(true).
-      setFollowRedirects(true).
-      setMaximumConnectionsTotal(20);
+  /**
+   * A set of all the HTTP status codes that are considered a success for this command.
+   */
+  def successCodes = Set(204)
 
-    return new AsyncHttpClient(builder.build());
-  }
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
 
-  public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
-    return new AsyncHttpPithosClient(asyncHttp);
-  }
-
-  public static Pithos newPithosClient() {
-    return newPithosClient(newDefaultAsyncHttpClient());
+  def buildResult(
+      responseHeaders: MetaData,
+      statusCode: Int,
+      statusText: String,
+      completionMillis: Long,
+      getResponseBody: () => String
+  ) = {
+    SimpleResult(this, responseHeaders, statusCode, statusText, completionMillis, successCodes(statusCode))
   }
 }

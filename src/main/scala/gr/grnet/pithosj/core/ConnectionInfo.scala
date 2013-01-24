@@ -33,34 +33,10 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
-
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import gr.grnet.pithosj.core.asynchttp.AsyncHttpPithosClient;
+package gr.grnet.pithosj.core
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class PithosClientFactory {
-  private PithosClientFactory() {}
-
-  public static AsyncHttpClient newDefaultAsyncHttpClient() {
-    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
-      setAllowPoolingConnection(true).
-      setAllowSslConnectionPool(true).
-      setCompressionEnabled(true).
-      setFollowRedirects(true).
-      setMaximumConnectionsTotal(20);
-
-    return new AsyncHttpClient(builder.build());
-  }
-
-  public static Pithos newPithosClient(AsyncHttpClient asyncHttp) {
-    return new AsyncHttpPithosClient(asyncHttp);
-  }
-
-  public static Pithos newPithosClient() {
-    return newPithosClient(newDefaultAsyncHttpClient());
-  }
-}
+case class ConnectionInfo(serverURL: String, userID: String, userToken: String)
