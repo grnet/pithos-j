@@ -64,19 +64,13 @@ case class ListObjectsInPath(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+  def serverURLPathElements = Seq(connectionInfo.userID, container)
 
 
   override val queryParameters = {
-    val qp = newQueryParameters.
-      setOne(Const.RequestParams.Format.requestParam(), Const.ResponseFormats.XML.responseFormat())
-
-    path match {
-      case null | "" ⇒
-        qp
-      case path ⇒
-        qp.setOne(Const.RequestParams.Path.requestParam(), path)
-    }
+    newQueryParameters.
+      setOne(Const.RequestParams.Format.requestParam(), Const.ResponseFormats.XML.responseFormat()).
+      setOne(Const.RequestParams.Path.requestParam(), path)
   }
 
   def buildResult(
@@ -124,7 +118,7 @@ case class ListObjectsInPath(
         Some(ListObjectsInPathResultData(objectsInPath.toList))
     }
 
-    ListObjectsInPathResult(
+    val result = ListObjectsInPathResult(
       this,
       responseHeaders,
       statusCode,
@@ -132,5 +126,8 @@ case class ListObjectsInPath(
       completionMillis,
       resultDataOpt
     )
+
+    logger.debug(result.toString)
+    result
   }
 }

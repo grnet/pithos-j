@@ -106,7 +106,11 @@ trait Pithos {
   /**
    * Delete a file or folder.
    */
-  def deleteObject(connInfo: ConnectionInfo, container: String, path: String): Future[SimpleResult]
+  def deleteObject(
+      connInfo: ConnectionInfo,
+      container: String,
+      path: String
+  ): Future[SimpleResult]
 
   def copyObject(
       connInfo: ConnectionInfo,

@@ -39,6 +39,7 @@ import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
 import gr.grnet.pithosj.core.http.{RequestBody, HTTPMethod}
 import gr.grnet.pithosj.core.{MetaData, Paths, ConnectionInfo}
+import org.slf4j.LoggerFactory
 
 /**
  * A command to be executed via the Pithos+ REST API.

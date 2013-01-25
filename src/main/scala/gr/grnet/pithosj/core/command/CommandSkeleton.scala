@@ -40,12 +40,15 @@ import com.ning.http.client.HttpResponseBodyPart
 import gr.grnet.pithosj.core.Const.Headers
 import gr.grnet.pithosj.core.MetaData
 import gr.grnet.pithosj.core.http.RequestBody
+import org.slf4j.LoggerFactory
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait CommandSkeleton[R] extends Command[R] {
+  protected val logger = LoggerFactory.getLogger(this.getClass)
+
   def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE] = None
 
   /**

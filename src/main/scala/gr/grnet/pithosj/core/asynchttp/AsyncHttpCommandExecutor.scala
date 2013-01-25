@@ -35,18 +35,20 @@
 
 package gr.grnet.pithosj.core.asynchttp
 
-import com.ning.http.client.{AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
+import com.ning.http.client.{HttpResponseHeaders, AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
 import gr.grnet.pithosj.core.Helpers.RequestBuilder
 import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
 import gr.grnet.pithosj.core.http.HTTPMethod.{OPTIONS, DELETE, POST, PUT, GET, HEAD}
 import gr.grnet.pithosj.core.http.{InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
 import gr.grnet.pithosj.core.{Helpers, MetaData, PithosException}
+import org.slf4j.LoggerFactory
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
+  protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * Creates a request builder for this command.
@@ -97,9 +99,15 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
    * with the command-specific result.
    */
   def execute[R](command: Command[R]) = {
+    logger.debug("Call   : %s".format(command))
+    logger.debug("URL    : %s".format(command.serverURLExcludingParameters))
+    logger.debug("Headers: %s".format(command.requestHeaders))
+    logger.debug("Params : %s".format(command.queryParameters))
+
     val requestBuilder = createRequestBuilder(command)
 
     val startMillis = System.currentTimeMillis()
+    val onBodyPartReceivedOpt = command.onBodyPartReceivedOpt
 
     val handler = new AsyncCompletionHandler[R] {
       override def onBodyPartReceived(content: HttpResponseBodyPart) = {

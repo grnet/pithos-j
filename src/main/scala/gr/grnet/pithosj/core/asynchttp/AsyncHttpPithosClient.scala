@@ -147,6 +147,8 @@ final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
       container: String,
       path: String
   ) = {
+    require(path ne null, "path ne null")
+
     call(ListObjectsInPath(connectionInfo, container, path))
   }
 
