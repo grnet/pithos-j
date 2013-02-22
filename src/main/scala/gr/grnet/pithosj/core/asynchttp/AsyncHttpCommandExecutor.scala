@@ -66,7 +66,7 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
       case OPTIONS ⇒ http.prepareOptions(url)
       case COPY ⇒ http.preparePut(url).setMethod(Method.COPY.name())
       case method ⇒ throw new PithosException(
-        "Unsupported HTTP method %s. All known methods are ",
+        "Unsupported HTTP method %s. All known methods are %s",
         method,
         Method.values().mkString(", ")
       )
