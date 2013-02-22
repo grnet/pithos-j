@@ -45,8 +45,7 @@ import gr.grnet.pithosj.core.command.result.Result
 /**
  * A command to be executed via the Pithos+ REST API.
  * Each command specifies its own input data, which will be used
- * to build up an HTTP request. Also, a command has a specific type (`R`)
- * of results to be returned from the Pithos+ REST API call.
+ * to build up an HTTP request.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
