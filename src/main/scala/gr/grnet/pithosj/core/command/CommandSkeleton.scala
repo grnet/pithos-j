@@ -37,16 +37,17 @@ package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.pithosj.core.Const.Headers
-import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.http.RequestBody
+import gr.grnet.pithosj.core.{Helpers, Paths}
+import gr.grnet.pithosj.core.http.{RequestBody}
+import gr.grnet.pithosj.core.keymap.{ResultKeys, ResultKey, HeaderKey, HeaderKeys, KeyMap}
 import org.slf4j.LoggerFactory
+import gr.grnet.pithosj.core.command.result.Result
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait CommandSkeleton[R] extends Command[R] {
+trait CommandSkeleton extends Command {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE] = None
@@ -54,7 +55,24 @@ trait CommandSkeleton[R] extends Command[R] {
   /**
    * The HTTP query parameters that are set by this command.
    */
-  val queryParameters = MetaData.Empty
+  val queryParameters = newQueryParameters
+
+  /**
+   * Type-safe keys for `HTTP` response headers that are specific to this command.
+   * These usually correspond to Pithos-specific headers, not general-purpose
+   * `HTTP` response headers but there may be exceptions.
+   *
+   * Each command must document which keys it supports.
+   */
+  val responseHeaderKeys = Seq[HeaderKey[_]]()
+
+
+  /**
+   * The keys for extra result data pertaining to this command.
+   * Normally, the data that the keys refer to will be parsed
+   * from the `HTTP` response body (`XML` or `JSON`).
+   */
+  val resultDataKeys = Seq[ResultKey[_]]()
 
   /**
    * The HTTP request headers that are set by this command.
@@ -62,16 +80,118 @@ trait CommandSkeleton[R] extends Command[R] {
   val requestHeaders = newDefaultRequestHeaders
 
   /**
+   * Parse a response header that is specific to this command and whose value must be of non-String type.
+   *
+   * Returns `true` iff the header is parsed.
+   *
+   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `keyMap`.
+   */
+  protected def tryParseNonStringResponseHeader(
+      keyMap: KeyMap,
+      name: String,
+      values: List[String]
+  ): Boolean = {
+    values match {
+      case value :: _ ⇒
+        tryParseNonStringResponseHeader(keyMap, name, value)
+      case _ ⇒
+        false
+    }
+  }
+
+  /**
+   * Parse a response header that is specific to this command and whose value must be of non-String type.
+   *
+   * Returns `true` iff the header is parsed.
+   *
+   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `keyMap`.
+   */
+  protected def tryParseNonStringResponseHeader(
+      keyMap: KeyMap,
+      name: String,
+      value: String
+  ): Boolean = false
+
+  /**
+   * Computes the URL that will be used in the HTTP call.
+   * The URL does not contain any needed parameters.
+   */
+  def serverURLExcludingParameters: String  = {
+    Paths.buildWithFirst(connectionInfo.serverURL, serverURLPathElements: _*)
+  }
+
+  /**
    * Provides the HTTP request body, if any.
    */
   val requestBodyOpt: Option[RequestBody] = None
 
-  protected def newDefaultRequestHeaders: MetaData = {
-    val metadata = new MetaData()
-    metadata.setOne(Headers.Pithos.X_Auth_Token, connectionInfo.userToken)
+  protected def newDefaultRequestHeaders: KeyMap = {
+    KeyMap().
+      set(HeaderKeys.Pithos.X_Auth_Token, connectionInfo.userToken)
   }
 
-  protected def newQueryParameters: MetaData = {
-    new MetaData()
+  protected def newQueryParameters: KeyMap = KeyMap()
+
+  def descriptor: CommandDescriptor = {
+    CommandDescriptor(
+      userID = connectionInfo.userID,
+      requestURL = serverURLExcludingParameters,
+      httpMethod = httpMethod,
+      requestHeaders = requestHeaders,
+      queryParameters = queryParameters,
+      successCodes = successCodes
+    )
+  }
+
+  def parseAllResponseHeaders(responseHeaders: scala.collection.Map[String, List[String]]): KeyMap = {
+    val keyMap = KeyMap()
+    val myKeyNames = this.responseHeaderKeys.map(_.name).toSet
+
+    for(keyName ← responseHeaders.keySet) {
+      val keyValues = responseHeaders(keyName)
+
+      if(myKeyNames.contains(keyName)) {
+        // It is a header specific to this command.
+        // Try parse it specifically
+        if(!tryParseNonStringResponseHeader(keyMap, keyName, keyValues)) {
+          // No specific parsing needed, so just handle it generically.
+          Helpers.parseGenericResponseHeader(keyMap, keyName, keyValues)
+        }
+      }
+      else {
+        Helpers.parseGenericResponseHeader(keyMap, keyName, keyValues)
+      }
+    }
+
+    keyMap
+  }
+
+  def buildResultData(
+      responseHeaders: KeyMap,
+      getResponseBody: () => String
+  ): KeyMap = {
+    val resultData = KeyMap(responseHeaders)
+    resultData.set(ResultKeys.ResponseBody, getResponseBody())
+    resultData
+  }
+
+  def buildResult(
+      responseHeaders: KeyMap,
+      statusCode: Int,
+      statusText: String,
+      startMillis: Long,
+      stopMillis: Long,
+      getResponseBody: () => String
+  ) = {
+    Result(
+      descriptor,
+      statusCode,
+      statusText,
+      startMillis,
+      stopMillis,
+      buildResultData(responseHeaders, getResponseBody)
+    )
   }
 }

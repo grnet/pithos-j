@@ -33,24 +33,23 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
-
-import java.util.Date
+package gr.grnet.pithosj.core.http;
 
 /**
+ * Provides <code>HTTP</code> content types used by the library.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetObjectInfoResultData(
-    container: String,
-    path: String,
-    contentType: String,
-    contentLength: Long,
-    lastModified: Date,
-    xObjectHash: String,
-    xObjectModifiedBy: String,
-    xObjectVersionTimestamp: Date,
-    xObjectUUID: String,
-    xObjectVersion: String,
-    eTag: Option[String] = None
-)
+public enum ContentTypes {
+  Application_Directory("application/directory");
+
+  private final String contentType;
+
+  ContentTypes(String contentType) {
+    this.contentType = contentType;
+  }
+
+  public String contentType() {
+    return contentType;
+  }
+}

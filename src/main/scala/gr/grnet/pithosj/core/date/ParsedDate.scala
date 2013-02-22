@@ -33,22 +33,16 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.date
 
-import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.command.ListObjectsInPath
+import java.util.Date
 
 /**
+ * Represents an attempt to parse a [[java.util.Date]].
+ * An attempt is successful iff `date` is [[scala.Some]] value.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ListObjectsInPathResult(
-    command: ListObjectsInPath,
-    override val responseHeaders: MetaData,
-    override val statusCode: Int,
-    override val statusText: String,
-    override val completionMillis: Long,
-    resultDataOpt: Option[ListObjectsInPathResultData]
-) extends ResultSkeleton(responseHeaders, statusCode, statusText, completionMillis) {
-  def isSuccess: Boolean = command.successCodes(statusCode)
+case class ParsedDate(date: Option[Date], originalValue: String, parser: DateParser) {
+  def isParsed: Boolean = date.isDefined
 }

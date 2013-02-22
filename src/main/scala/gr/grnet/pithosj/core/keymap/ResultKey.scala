@@ -33,22 +33,21 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.keymap
 
-import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.command.{ListContainers}
 
 /**
+ * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for the [[gr.grnet.pithosj.core.command.result.Result]]s
+ * of [[gr.grnet.pithosj.core.command.Command]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ListContainersResult(
-    command: ListContainers,
-    override val responseHeaders: MetaData,
-    override val statusCode: Int,
-    override val statusText: String,
-    override val completionMillis: Long,
-    resultDataOpt: Option[ListContainersResultData]
-) extends ResultSkeleton(responseHeaders, statusCode, statusText, completionMillis) {
-  def isSuccess: Boolean = command.successCodes(statusCode)
+final class ResultKey[T: Manifest] private[keymap](
+    override val name: String
+) extends PithosKey[T](name)
+
+object ResultKey {
+  def apply[T: Manifest](name: String): ResultKey[T] = {
+    new ResultKey[T](name)
+  }
 }

@@ -33,22 +33,13 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
-
-import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.command.{GetObjectInfo}
+package gr.grnet.pithosj.core.http;
 
 /**
+ * Enumeration for HTTP methods.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetObjectInfoResult(
-    command: GetObjectInfo,
-    override val responseHeaders: MetaData,
-    override val statusCode: Int,
-    override val statusText: String,
-    override val completionMillis: Long,
-    resultDataOpt: Option[GetObjectInfoResultData]
-) extends ResultSkeleton(responseHeaders, statusCode, statusText, completionMillis) {
-  def isSuccess: Boolean = command.successCodes(statusCode)
+public enum Method {
+  HEAD, GET, POST, PUT, DELETE, OPTIONS, COPY
 }

@@ -35,10 +35,9 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.Const.Headers
-import gr.grnet.pithosj.core.command.result.SimpleResult
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{MetaData, ConnectionInfo, Paths}
+import gr.grnet.pithosj.core.http.Method
+import gr.grnet.pithosj.core.keymap.{KeyMap, HeaderKeys}
+import gr.grnet.pithosj.core.{ConnectionInfo, Paths}
 
 /**
  * Copies an object around.
@@ -51,12 +50,12 @@ case class CopyObject(
     fromPath: String,
     toContainer: String,
     toPath: String
-) extends CommandSkeleton[SimpleResult] {
+) extends CommandSkeleton {
 
   /**
    * The HTTP method by which the command is implemented.
    */
-  val httpMethod = HTTPMethod.PUT
+  val httpMethod = Method.PUT
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -68,24 +67,19 @@ case class CopyObject(
    */
   override val requestHeaders = {
     newDefaultRequestHeaders.
-      setOne(Headers.Pithos.X_Copy_From, Paths.build(fromContainer, fromPath)).
-      setOne(Headers.Standard.Content_Length, 0.toString)
+      set(HeaderKeys.Pithos.X_Copy_From, Paths.build(fromContainer, fromPath)).
+      set(HeaderKeys.Pithos.Destination, Paths.build(toContainer, toPath)).
+      set(HeaderKeys.Standard.Content_Length, 0L)
   }
 
-  /**
-   * The HTTP request parameters that are set by this command.
-   */
-  override val queryParameters = MetaData.Empty
+  def serverURLPathElements = Seq(account, toContainer, toPath)
 
-  def serverURLPathElements = Seq(connectionInfo.userID, toContainer, toPath)
-
-  def buildResult(
-      responseHeaders: MetaData,
-      statusCode: Int,
-      statusText: String,
-      completionMillis: Long,
-      getResponseBody: () ⇒ String
+  override def buildResult(
+      responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long,
+      stopMillis: Long, getResponseBody: () => String
   ) = {
-    SimpleResult(this, responseHeaders, statusCode, statusText, completionMillis, successCodes(statusCode))
+    val responseBody = getResponseBody()
+    println("responseBody = %s".format(responseBody))
+    super.buildResult(responseHeaders, statusCode, statusText, startMillis, stopMillis, getResponseBody)
   }
 }

@@ -36,8 +36,11 @@
 package gr.grnet.pithosj.core.command
 
 import java.util.concurrent.Future
+import gr.grnet.pithosj.core.command.result.Result
 
 /**
+ * A [[gr.grnet.pithosj.core.command.CommandExecutor]] is responsible to synchronously execute
+ * a given [[gr.grnet.pithosj.core.command.Command]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
@@ -46,5 +49,5 @@ trait CommandExecutor {
    * Executes the given command and returns a [[java.util.concurrent.Future]]
    * with the command-specific result.
    */
-  def execute[R](command: Command[R]): Future[R]
+  def execute(command: Command): Future[Result]
 }

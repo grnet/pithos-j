@@ -35,10 +35,10 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.Const.Headers
-import gr.grnet.pithosj.core.command.result.SimpleResult
-import gr.grnet.pithosj.core.http.{FileRequestBody, HTTPMethod}
-import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
+import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.pithosj.core.http.{FileRequestBody, Method}
+import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
 import java.io.File
 
 /**
@@ -51,15 +51,15 @@ case class PutObject(
     path: String,
     file: File,
     contentType: String
-) extends CommandSkeleton[SimpleResult] {
+) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = HTTPMethod.PUT
+  def httpMethod = Method.PUT
 
   override val requestHeaders = {
     newDefaultRequestHeaders.
-      setOne(Headers.Standard.Content_Type, contentType)
+      set(HeaderKeys.Standard.Content_Type, contentType)
   }
 
   /**
@@ -74,14 +74,4 @@ case class PutObject(
   def serverURLPathElements = Seq(connectionInfo.userID, container, path)
 
   override val requestBodyOpt = Some(FileRequestBody(file))
-
-  def buildResult(
-      responseHeaders: MetaData,
-      statusCode: Int,
-      statusText: String,
-      completionMillis: Long,
-      getResponseBody: () ⇒ String
-  ) = {
-    SimpleResult(this, responseHeaders, statusCode, statusText, completionMillis, successCodes(statusCode))
-  }
 }

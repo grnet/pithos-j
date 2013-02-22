@@ -33,44 +33,35 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
-
-import gr.grnet.pithosj.core.ConnectionInfo
-import gr.grnet.pithosj.core.http.{ContentTypes, Method}
-import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
-import gr.grnet.pithosj.core.command.result.Result
+package gr.grnet.pithosj.core.http;
 
 /**
- *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CreateDirectory(
-    connectionInfo: ConnectionInfo,
-    container: String,
-    path: String
-) extends CommandSkeleton {
-  /**
-   * The HTTP method by which the command is implemented.
-   */
-  def httpMethod = Method.PUT
+public enum ResponseFormats {
+  NOFORMAT(""),
+  XML("xml"),
+  JSON("json");
 
-  /**
-   * The HTTP request headers that are set by this command.
-   */
-  override val requestHeaders = {
-    newDefaultRequestHeaders.
-      set(HeaderKeys.Standard.Content_Type, ContentTypes.Application_Directory.contentType()).
-      set(HeaderKeys.Standard.Content_Length, 0L)
+  private final String responseFormat;
+
+  ResponseFormats(String responseFormat) {
+    this.responseFormat = responseFormat;
   }
 
-  /**
-   * A set of all the HTTP status codes that are considered a success for this command.
-   */
-  def successCodes = Set(201)
+  public String responseFormat() {
+    return responseFormat;
+  }
 
-  /**
-   * Computes that URL path parts that will follow the Pithos+ server URL
-   * in the HTTP call.
-   */
-  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+  public final boolean hasValue() {
+    return this != NOFORMAT;
+  }
+
+  public final boolean isXML() {
+    return this == XML;
+  }
+
+  public final boolean isJSON() {
+    return this == JSON;
+  }
 }

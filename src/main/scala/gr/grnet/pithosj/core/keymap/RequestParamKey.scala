@@ -33,17 +33,38 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.keymap
+
+import gr.grnet.pithosj.core.http.IRequestParam
 
 /**
+ * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for HTTP request parameters.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetAccountInfoResultData(
-    xAccountBytesUsed: Long,
-    xAccountContainerCount: Int,
-    xAccountPolicyQuota: Long,
-    xAccountPolicyVersioning: String
-) {
-  def usageRatio: Double = xAccountBytesUsed.toDouble / xAccountPolicyQuota.toDouble
+final class RequestParamKey private[keymap](
+    override val name: String
+) extends PithosKey[String](name)
+
+/**
+ * Factory for [[gr.grnet.pithosj.core.keymap.RequestParamKey]]s.
+ *
+ * @author Christos KK Loverdos <loverdos@gmail.com>
+ */
+object RequestParamKey {
+  /**
+   * Factory method for a [[gr.grnet.pithosj.core.keymap.RequestParamKey]], given
+   * the key's name.
+   */
+  def apply(name: String): RequestParamKey = {
+    new RequestParamKey(name)
+  }
+
+  /**
+   * Factory method for a [[gr.grnet.pithosj.core.keymap.RequestParamKey]], given
+   * a [[IRequestParam]].
+   */
+  def apply(param: IRequestParam): RequestParamKey = {
+    new RequestParamKey(param.requestParam())
+  }
 }

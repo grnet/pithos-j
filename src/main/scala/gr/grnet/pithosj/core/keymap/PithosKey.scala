@@ -33,22 +33,19 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.keymap
 
-import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.command.{GetAccountInfo}
+import com.ckkloverdos.key.TKeyOnly
 
 /**
+ * Pithos-specific [[com.ckkloverdos.key.TKeyOnly]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetAccountInfoResult(
-    command: GetAccountInfo,
-    override val responseHeaders: MetaData,
-    override val statusCode: Int,
-    override val statusText: String,
-    override val completionMillis: Long,
-    resultDataOpt: Option[GetAccountInfoResultData]
-) extends ResultSkeleton(responseHeaders, statusCode, statusText, completionMillis) {
-  def isSuccess: Boolean = command.successCodes(statusCode)
+class PithosKey[T: Manifest] private[keymap](override val name: String) extends TKeyOnly[T](name)
+
+object PithosKey {
+  def apply[T: Manifest](name: String): PithosKey[T] = {
+    new PithosKey[T](name)
+  }
 }

@@ -35,21 +35,22 @@
 
 package gr.grnet.pithosj.core.command.result
 
-import java.util.Date
+import gr.grnet.pithosj.core.date.ParsedDate
 
 /**
+ * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListObjectsInPath]] command.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetObjectResultData(
+case class ObjectInPathResultData(
     container: String,
     path: String,
     contentType: String,
     contentLength: Long,
-    lastModified: Date,
+    lastModified: ParsedDate,
     xObjectHash: String,
     xObjectModifiedBy: String,
-    xObjectVersionTimestamp: Date,
+    xObjectVersionTimestamp: ParsedDate,
     xObjectUUID: String,
     xObjectVersion: String,
     eTag: Option[String] = None

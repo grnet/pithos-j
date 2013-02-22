@@ -35,11 +35,13 @@
 
 package gr.grnet.pithosj.core
 
-import Const.Headers
 import com.ning.http.client.{AsyncHttpClient, Response}
 import java.util
 import java.util.concurrent.{ExecutionException, TimeUnit, Future}
 import org.slf4j.LoggerFactory
+import gr.grnet.pithosj.core.keymap.{HeaderKey, HeaderKeys, KeyMap}
+import gr.grnet.pithosj.core.date.DateParsers
+import gr.grnet.pithosj.core.http.Headers
 
 /**
  *
@@ -55,10 +57,6 @@ sealed class Helpers {
     val list = new util.ArrayList[T]()
     list.add(item)
     list
-  }
-
-  @inline final def copyResponseHeader(header: String, response: Response, meta: MetaData) {
-    meta.set(header, response.getHeaders(header))
   }
 
   @inline final def ifNull(value: String, other: String): String = {
@@ -79,8 +77,8 @@ sealed class Helpers {
     }
   }
 
-  final def knownBadFuture[V](cause: Throwable, message: String): Future[V] = {
-    new Future[V] {
+  final def knownBadFuture[T](cause: Throwable, message: String): Future[T] = {
+    new Future[T] {
       def isCancelled = false
 
       def get(timeout: Long, unit: TimeUnit) = throw new ExecutionException(message, cause)
@@ -93,15 +91,37 @@ sealed class Helpers {
     }
   }
 
-  final def knownBadFuture[V](message: String): Future[V] = {
+  final def knownBadFuture[T](message: String): Future[T] = {
     knownBadFuture(null, message)
   }
 
-  final def copyAllResponseHeaders(response: Response, meta: MetaData) {
-    val headers = asScala(response.getHeaders)
-    for(k ← headers.keysIterator) {
-      copyResponseHeader(k, response, meta)
+  final def parseGenericResponseHeader(
+      keyMap: KeyMap,
+      name: String,
+      values: List[String]
+  ): KeyMap = {
+    values match {
+      case value :: _ ⇒
+        name match {
+          case HeaderKeys.Standard.Content_Length.name ⇒
+            keyMap.set(HeaderKeys.Standard.Content_Length, value.toLong)
+
+          case HeaderKeys.Standard.Last_Modified.name ⇒
+            val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
+            keyMap.set(HeaderKeys.Standard.Last_Modified, parsedDate)
+
+          case HeaderKeys.Standard.Date.name ⇒
+            val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
+            keyMap.set(HeaderKeys.Standard.Date, parsedDate)
+
+          case name ⇒
+            keyMap.set(HeaderKey[String](name), value)
+        }
+
+      case _ ⇒
     }
+
+    keyMap
   }
 }
 

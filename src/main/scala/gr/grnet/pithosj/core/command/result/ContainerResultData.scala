@@ -33,11 +33,21 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.pithosj.core.command.result
+
+import gr.grnet.pithosj.core.date.ParsedDate
+import gr.grnet.pithosj.core.keymap.KeyMap
 
 /**
+ * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListContainers]] command.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public enum HTTPMethod {
-  HEAD, GET, POST, PUT, DELETE, OPTIONS
-}
+
+case class ContainerResultData(
+    container: String,
+    count: Int,
+    lastModified: ParsedDate,
+    bytes: Long,
+    policy: KeyMap // Use ResultKeys.ContainerQuota to get "quota"
+)

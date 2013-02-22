@@ -33,44 +33,36 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
+package gr.grnet.pithosj.core.date
 
-import gr.grnet.pithosj.core.ConnectionInfo
-import gr.grnet.pithosj.core.http.{ContentTypes, Method}
-import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
-import gr.grnet.pithosj.core.command.result.Result
+import java.text.{SimpleDateFormat, ParseException}
 
 /**
+ * A [[gr.grnet.pithosj.core.date.DateParser]] based on [[java.text.SimpleDateFormat]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CreateDirectory(
-    connectionInfo: ConnectionInfo,
-    container: String,
-    path: String
-) extends CommandSkeleton {
+final class SimpleDateFormatParser(val description: String) extends DateParser {
   /**
-   * The HTTP method by which the command is implemented.
+   * The description of this parser. This can be either a free text description or,
+   * in case of a [[java.text.DateFormat]]-based implementation, the format string.
    */
-  def httpMethod = Method.PUT
+  val dateFormat = new SimpleDateFormat(description)
+
 
   /**
-   * The HTTP request headers that are set by this command.
+   * Tries to parse the given date.
+   * The implementation must not throw an [[java.lang.Exception]]. In particular,
+   * it must not throw a [[java.text.ParseException]], which is common in the case of a
+   * [[java.text.SimpleDateFormat]].
    */
-  override val requestHeaders = {
-    newDefaultRequestHeaders.
-      set(HeaderKeys.Standard.Content_Type, ContentTypes.Application_Directory.contentType()).
-      set(HeaderKeys.Standard.Content_Length, 0L)
+  def parse(source: String) = {
+    try Some(dateFormat.parse(source))
+    catch {
+      case e: ParseException ⇒
+        None
+    }
   }
 
-  /**
-   * A set of all the HTTP status codes that are considered a success for this command.
-   */
-  def successCodes = Set(201)
-
-  /**
-   * Computes that URL path parts that will follow the Pithos+ server URL
-   * in the HTTP call.
-   */
-  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+  override def toString = "%s(%s)".format(getClass.getSimpleName, description)
 }

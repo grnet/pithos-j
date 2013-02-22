@@ -33,138 +33,16 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.asynchttp
+package gr.grnet.pithosj.core
+package asynchttp
 
 import com.ning.http.client.AsyncHttpClient
-import gr.grnet.pithosj.core.command.{ListObjectsInPath, DeleteObject, PutObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, CopyObject, Command}
-import gr.grnet.pithosj.core.{???, MetaData, Helpers, ConnectionInfo, Pithos}
-import java.io.{File, OutputStream}
-import java.net.URLConnection
-import java.util.concurrent.Future
-import org.slf4j.LoggerFactory
 
 /**
+ * Pithos+ client which uses [[com.ning.http.client.AsyncHttpClient]] for the HTTP calls.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final class AsyncHttpPithosClient(http: AsyncHttpClient) extends Pithos {
-  private[this] val logger = LoggerFactory.getLogger(this.getClass)
-  private[this] val executor = new AsyncHttpCommandExecutor(http)
-
-  def ping(connectionInfo: ConnectionInfo) = {
-    call(Ping(connectionInfo))
-  }
-
-  def getAccountInfo(connectionInfo: ConnectionInfo) = {
-    call(GetAccountInfo(connectionInfo))
-  }
-
-  def replaceAccountMeta(connectionInfo: ConnectionInfo, meta: MetaData) = ???
-
-  def deleteAccountMeta(connectionInfo: ConnectionInfo, metaKey: String) = ???
-
-  def listContainers(connectionInfo: ConnectionInfo) = {
-    call(ListContainers(connectionInfo))
-  }
-
-  def createContainer(connectionInfo: ConnectionInfo, container: String) = ???
-
-  def getContainerInfo(connectionInfo: ConnectionInfo, container: String) = ???
-
-  def deleteContainer(connectionInfo: ConnectionInfo, container: String) = ???
-
-  def createDirectory(connectionInfo: ConnectionInfo, container: String, path: String) = {
-    call(CreateDirectory(connectionInfo, container, path))
-  }
-
-  def getObjectMeta(connectionInfo: ConnectionInfo, path: String) = ???
-
-  def deleteObjectMeta(connectionInfo: ConnectionInfo, path: String, metaKey: String) = ???
-
-  def replaceObjectMeta(connectionInfo: ConnectionInfo, path: String, meta: MetaData) = ???
-
-  def getObject(connectionInfo: ConnectionInfo, container: String, path: String, version: String, out: OutputStream) = {
-    call(GetObject(connectionInfo, container, path, version, out))
-  }
-
-  def getObjectInfo(connectionInfo: ConnectionInfo, container: String, path: String) = {
-    call(GetObjectInfo(connectionInfo, container, path))
-  }
-
-  def putObject(
-      connectionInfo: ConnectionInfo,
-      container: String,
-      path: String,
-      file: File,
-      _contentType: String
-  ) = {
-    val contentType = _contentType match {
-      case null ⇒
-        URLConnection.guessContentTypeFromName(path)
-      case contentType ⇒
-        contentType
-    }
-
-    call(PutObject(connectionInfo, container, path, file, contentType))
-  }
-
-  def deleteObject(connectionInfo: ConnectionInfo, container: String, path: String) = {
-    call(DeleteObject(connectionInfo, container, path))
-  }
-
-  def copyObject(
-      connectionInfo: ConnectionInfo,
-      fromContainer: String,
-      fromPath: String,
-      _toContainer: String,
-      _toPath: String
-  ) = {
-    val toPath = Helpers.ifNull(_toPath, fromPath)
-    val toContainer = Helpers.ifNull(_toContainer, fromContainer)
-
-    fromContainer.charAt(0)
-    fromPath.charAt(0)
-    toContainer.charAt(0)
-    toPath.charAt(0)
-
-    call(CopyObject(connectionInfo, fromContainer, fromPath, toContainer, toPath))
-  }
-
-  def moveObject(
-      connectionInfo: ConnectionInfo,
-      fromContainer: String,
-      fromObj: String,
-      toContainer: String,
-      toObj: String
-  ) = ???
-
-  def listObjectsInContainer(connectionInfo: ConnectionInfo, container: String) = {
-    listObjectsInPath(connectionInfo, container, "")
-  }
-
-  def listObjectsInPath(
-      connectionInfo: ConnectionInfo,
-      container: String,
-      path: String
-  ) = {
-    require(path ne null, "path ne null")
-
-    call(ListObjectsInPath(connectionInfo, container, path))
-  }
-
-  def call[R](command: Command[R]): Future[R] = {
-    try {
-      command.validate match {
-        case Some(error) ⇒
-          Helpers.knownBadFuture(error)
-
-        case None ⇒
-          executor.execute(command)
-      }
-    }
-    catch {
-      case e: Throwable ⇒
-        Helpers.knownBadFuture(e, "Internal error")
-    }
-  }
+final class AsyncHttpPithosClient(http: AsyncHttpClient) extends PithosSkeleton {
+  protected val executor = new AsyncHttpCommandExecutor(http)
 }

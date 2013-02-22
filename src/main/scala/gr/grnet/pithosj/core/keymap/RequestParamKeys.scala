@@ -33,44 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
+package gr.grnet.pithosj.core.keymap
 
-import gr.grnet.pithosj.core.ConnectionInfo
-import gr.grnet.pithosj.core.http.{ContentTypes, Method}
-import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
-import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.pithosj.core.http.RequestParams
 
 /**
+ * Type-indexed keys for request parameters used in the Pithos+ REST API.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CreateDirectory(
-    connectionInfo: ConnectionInfo,
-    container: String,
-    path: String
-) extends CommandSkeleton {
-  /**
-   * The HTTP method by which the command is implemented.
-   */
-  def httpMethod = Method.PUT
-
-  /**
-   * The HTTP request headers that are set by this command.
-   */
-  override val requestHeaders = {
-    newDefaultRequestHeaders.
-      set(HeaderKeys.Standard.Content_Type, ContentTypes.Application_Directory.contentType()).
-      set(HeaderKeys.Standard.Content_Length, 0L)
-  }
-
-  /**
-   * A set of all the HTTP status codes that are considered a success for this command.
-   */
-  def successCodes = Set(201)
-
-  /**
-   * Computes that URL path parts that will follow the Pithos+ server URL
-   * in the HTTP call.
-   */
-  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+object RequestParamKeys {
+  final val Version = new RequestParamKey(RequestParams.Version.requestParam())
+  final val Format = new RequestParamKey(RequestParams.Format.requestParam())
+  final val Path = new RequestParamKey(RequestParams.Path.requestParam())
 }

@@ -35,10 +35,11 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.Const.{Headers, IHeader}
-import gr.grnet.pithosj.core.command.result.{GetObjectInfoResultData, GetObjectInfoResult}
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{Const, MetaData, ConnectionInfo}
+import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.pithosj.core.date.DateParsers
+import gr.grnet.pithosj.core.http.Method
+import gr.grnet.pithosj.core.keymap.{ResultKeys, HeaderKeys, HeaderKey, KeyMap}
 
 /**
  *
@@ -48,11 +49,11 @@ case class GetObjectInfo(
     connectionInfo: ConnectionInfo,
     container: String,
     path: String
-) extends CommandSkeleton[GetObjectInfoResult] {
+) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = HTTPMethod.HEAD
+  def httpMethod = Method.HEAD
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -65,44 +66,89 @@ case class GetObjectInfo(
    */
   def serverURLPathElements = Seq(connectionInfo.userID, container, path)
 
-  def buildResult(
-      responseHeaders: MetaData,
+  /**
+   * Type-safe keys for `HTTP` response headers that are specific to this command.
+   * These usually correspond to Pithos-specific headers, not general-purpose
+   * `HTTP` response headers but there may be exceptions.
+   *
+   * Each command must document which keys it supports.
+   */
+  override val responseHeaderKeys = Seq(
+    HeaderKeys.Standard.ETag,
+    HeaderKeys.Standard.Content_Type,
+    HeaderKeys.Standard.Content_Length,
+    HeaderKeys.Standard.Last_Modified,
+    HeaderKeys.Pithos.X_Object_Hash,
+    HeaderKeys.Pithos.X_Object_Modified_By,
+    HeaderKeys.Pithos.X_Object_Version_Timestamp,
+    HeaderKeys.Pithos.X_Object_UUID,
+    HeaderKeys.Pithos.X_Object_UUID,
+    HeaderKeys.Pithos.X_Object_Version
+  )
+
+  override val resultDataKeys = Seq(
+    ResultKeys.Commands.Container,
+    ResultKeys.Commands.Path
+  )
+
+  /**
+   * Parse a response header that is specific to this command and whose value must be of non-String type.
+   *
+   * Returns `true` iff the header is parsed.
+   *
+   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `keyMap`.
+   */
+  override protected def tryParseNonStringResponseHeader(
+      keyMap: KeyMap,
+      name: String,
+      value: String
+  ) = {
+    name match {
+      case HeaderKeys.Standard.Last_Modified.name ⇒
+        // Wed, 19 Sep 2012 08:18:23 GMT
+        val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
+        keyMap.set(
+          HeaderKeys.Standard.Last_Modified,
+          parsedDate)
+        true
+
+      case HeaderKeys.Pithos.X_Object_Version_Timestamp.name ⇒
+        // Wed, 19 Sep 2012 08:18:23 GMT
+        val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
+        keyMap.set(
+          HeaderKeys.Pithos.X_Object_Version_Timestamp,
+          parsedDate)
+        true
+
+      case _ ⇒
+        false
+    }
+  }
+
+  override def buildResult(
+      responseHeaders: KeyMap,
       statusCode: Int,
       statusText: String,
-      completionMillis: Long,
+      startMillis: Long,
+      stopMillis: Long,
       getResponseBody: () ⇒ String
   ) = {
-    val resultDataOpt = successCodes(statusCode) match {
-      case false ⇒
-        None
-      case true ⇒
-        def h(name: IHeader) = responseHeaders.getOne(name)
 
-        val resultData = GetObjectInfoResultData(
-          container = container,
-          path = path,
-          contentType = h(Headers.Standard.Content_Type),
-          contentLength = h(Headers.Standard.Content_Length).toLong,
-          // Wed, 19 Sep 2012 08:18:23 GMT
-          lastModified = Const.Dates.Format2.parse(h(Headers.Standard.Last_Modified)),
-          xObjectHash = h(Headers.Pithos.X_Object_Hash),
-          xObjectModifiedBy = h(Headers.Pithos.X_Object_Modified_By),
-          xObjectVersionTimestamp = Const.Dates.Format2.parse(h(Headers.Pithos.X_Object_Version_Timestamp)),
-          xObjectUUID = h(Headers.Pithos.X_Object_UUID),
-          xObjectVersion = h(Headers.Pithos.X_Object_Version),
-          eTag = Some(h(Headers.Standard.ETag))
-        )
+    val parsedResultData = KeyMap(responseHeaders)
 
-        Some(resultData)
+    if(successCodes(statusCode)) {
+      parsedResultData.set(ResultKeys.Commands.Container, container)
+      parsedResultData.set(ResultKeys.Commands.Path, path)
     }
 
-    GetObjectInfoResult(
-      this,
-      responseHeaders,
+    Result(
+      descriptor,
       statusCode,
       statusText,
-      completionMillis,
-      resultDataOpt
+      startMillis,
+      stopMillis,
+      parsedResultData
     )
   }
 }

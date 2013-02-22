@@ -35,28 +35,29 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.Const
-import gr.grnet.pithosj.core.command.result.{ContainerResultData, ListContainersResultData, ListContainersResult}
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
+import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.command.result.{ContainerResultData, Result}
+import gr.grnet.pithosj.core.date.DateParsers
+import gr.grnet.pithosj.core.http.{ResponseFormats, Method}
+import gr.grnet.pithosj.core.keymap.{ResultKeys, RequestParamKeys, KeyMap}
 import scala.xml.XML
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleton[ListContainersResult] {
+case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = HTTPMethod.GET
+  def httpMethod = Method.GET
 
   /**
    * The HTTP query parameters that are set by this command.
    */
   override val queryParameters = {
     newQueryParameters.
-      setOne(Const.RequestParams.Format.requestParam(), Const.ResponseFormats.XML.responseFormat())
+      set(RequestParamKeys.Format, ResponseFormats.XML.responseFormat())
   }
 
   /**
@@ -70,75 +71,90 @@ case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleto
    */
   def serverURLPathElements = Seq(connectionInfo.userID)
 
-  def buildResult(
-      responseHeaders: MetaData,
+  /**
+   * The keys for extra result data pertaining to this command.
+   * Normally, the data that the keys refer to will be parsed
+   * from the `HTTP` response body (`XML` or `JSON`).
+   */
+  override val resultDataKeys = Seq(
+    ResultKeys.ListContainers
+  )
+
+  override def buildResult(
+      responseHeaders: KeyMap,
       statusCode: Int,
       statusText: String,
-      completionMillis: Long,
+      startMillis: Long,
+      stopMillis: Long,
       getResponseBody: () ⇒ String
   ) = {
-    val resultDataOpt = successCodes(statusCode) match {
-      case false ⇒
-        None
-      case true ⇒
-        val body = getResponseBody()
-        val xml = XML.loadString(body)
 
-        val containerResults = for {
-          container <- xml \ "container"
-          count <- container \ "count"
-          last_modified <- container \ "last_modified"
-          bytes <- container \ "bytes"
-          name <- container \ "name"
-          x_container_policy <- container \ "x_container_policy"
+    val resultData = KeyMap(responseHeaders)
+
+    if(successCodes(statusCode)) {
+      val body = getResponseBody()
+      val xml = XML.loadString(body)
+
+      val containerResults = for {
+        container <- xml \ "container"
+        count <- container \ "count"
+        last_modified <- container \ "last_modified"
+        bytes <- container \ "bytes"
+        name <- container \ "name"
+        x_container_policy <- container \ "x_container_policy"
+      } yield {
+        // parse:
+        //  <x_container_policy>
+        //    <key>quota</key>
+        //    <value>53687091200</value>
+        //    <key>versioning</key>
+        //
+        //    <value>auto</value>
+        //  </x_container_policy>
+        val kvPairs = for {
+          child <- x_container_policy.nonEmptyChildren if Set("key", "value").contains(child.label.toLowerCase)
         } yield {
-          // parse:
-          //  <x_container_policy>
-          //    <key>quota</key>
-          //    <value>53687091200</value>
-          //    <key>versioning</key>
-          //
-          //    <value>auto</value>
-          //  </x_container_policy>
-          val kvPairs = for {
-            child <- x_container_policy.nonEmptyChildren if Set("key", "value").contains(child.label.toLowerCase())
-          } yield {
-            child.text
-          }
-
-          // A key is at an even index, a value is at an odd index
-          val (keys_i, values_i) = kvPairs.zipWithIndex.partition {
-            case (s, index) => index % 2 == 0
-          }
-          val keys = keys_i.map(_._1) // throw away the index
-          val values = values_i.map(_._1)
-
-          val policy = new MetaData
-          for((k, v) <- keys.zip(values)) {
-            policy.setOne(k, v)
-          }
-
-          val containerResultData = ContainerResultData(
-            name.text,
-            count.text.toInt,
-            Const.Dates.Format1.parse(last_modified.text),
-            bytes.text.toLong,
-            policy
-          )
-
-          containerResultData
+          child.text
         }
 
-        Some(ListContainersResultData(containerResults.toList))
+        // A key is at an even index, a value is at an odd index
+        val (keys_i, values_i) = kvPairs.zipWithIndex.partition {
+          case (s, index) => index % 2 == 0
+        }
+        val keys = keys_i.map(_._1) // throw away the index
+        val values = values_i.map(_._1)
+
+        val policy = KeyMap()
+        for((k, v) <- keys.zip(values)) {
+          k.toLowerCase match {
+            case ResultKeys.ContainerQuota.name ⇒
+              policy.set(ResultKeys.ContainerQuota, v.toLong)
+            case k ⇒
+              policy.setString(k, v)
+          }
+        }
+
+        val containerResultData = ContainerResultData(
+          name.text,
+          count.text.toInt,
+          DateParsers.parse(last_modified.text, DateParsers.Format1Parser),
+          bytes.text.toLong,
+          policy
+        )
+
+        containerResultData
+      }
+
+      resultData.set(ResultKeys.ListContainers, containerResults.toList)
     }
 
-    ListContainersResult(
-      this,
-      responseHeaders,
+    Result(
+      descriptor,
       statusCode,
       statusText,
-      completionMillis,
-      resultDataOpt
+      startMillis,
+      stopMillis,
+      resultData
     )
   }
 }

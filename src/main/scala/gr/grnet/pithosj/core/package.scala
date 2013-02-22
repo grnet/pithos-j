@@ -39,9 +39,29 @@ import scala.collection.mutable
 import scala.collection.{JavaConversions => JC}
 
 package object core {
-  @inline final def ??? = throw new PithosNotImplementedException
+  @inline
+  final def ??? = throw new PithosNotImplementedException
 
-  @inline final def asScala[K, V](jmap: java.util.Map[K, V]): mutable.Map[K, V] = {
-    JC.mapAsScalaMap(jmap)
+  @inline
+  final def asScala[K, V](jmap: java.util.Map[K, V]): mutable.Map[K, V] = {
+    jmap match {
+      case null ⇒ mutable.Map[K, V]()
+      case jmap ⇒ JC.mapAsScalaMap(jmap)
+    }
+  }
+
+  @inline
+  final def asScala[T](jlist: java.util.List[T]): List[T] = {
+    jlist match {
+      case null ⇒ Nil
+      case jlist ⇒ JC.asScalaBuffer(jlist).toList
+    }
+  }
+
+  @inline
+  final def asFullScala[A, B](jlmap: java.util.Map[A, java.util.List[B]]): mutable.Map[A, List[B]] = {
+    asScala(jlmap).map { case (k, v) ⇒
+      (k, asScala(v))
+    }
   }
 }

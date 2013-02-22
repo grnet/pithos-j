@@ -33,22 +33,11 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
-
-import gr.grnet.pithosj.core.MetaData
-import java.util.Date
+package gr.grnet.pithosj.core.http;
 
 /**
- *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-
-case class ContainerResultData(
-    name: String,
-    count: Int,
-    lastModified: Date,
-    bytes: Long,
-    policy: MetaData
-)
-
-case class ListContainersResultData(containers: List[ContainerResultData])
+public interface IRequestParam {
+  public String requestParam();
+}

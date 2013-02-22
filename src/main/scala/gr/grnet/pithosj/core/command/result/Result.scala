@@ -36,58 +36,19 @@
 package gr.grnet.pithosj.core.command
 package result
 
-import gr.grnet.pithosj.core.Const.IHeader
-import gr.grnet.pithosj.core.MetaData
-import java.util.{List ⇒ JList}
+import gr.grnet.pithosj.core.keymap.KeyMap
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait Result {
-  def responseHeaders: MetaData
-
-  def statusCode: Int
-
-  def statusText: String
-
-  def completionMillis: Long
-
-  def isSuccess: Boolean
-
-  final def isStatusCode(statusCode: Int): Boolean = this.statusCode == statusCode
-
-  final def is200 = isStatusCode(200)
-  final def is201 = isStatusCode(201)
-  final def is204 = isStatusCode(204)
-  final def is400 = isStatusCode(400)
-  final def is401 = isStatusCode(401)
-  final def is403 = isStatusCode(403)
-  final def is404 = isStatusCode(404)
-  final def is503 = isStatusCode(503)
-
-  final def getHeader(name: String): String = responseHeaders.getOne(name)
-  final def getIntHeader(name: String): Int = getHeader(name).toInt
-  final def getLongHeader(name: String): Long = getHeader(name).toLong
-  final def getHeadersJList(name: String): JList[String] = responseHeaders.getJList(name)
-  final def getHeader(name: IHeader): String = responseHeaders.getOne(name)
-  final def getIntHeader(name: IHeader): Int = getHeader(name).toInt
-  final def getLongHeader(name: IHeader): Long = getHeader(name).toLong
-  final def getHeadersJList(name: IHeader): JList[String] = responseHeaders.getJList(name)
-}
-
-abstract class ResultSkeleton(
-  val responseHeaders: MetaData,
-  val statusCode: Int,
-  val statusText: String,
-  val completionMillis: Long
-) extends Result
-
-case class SimpleResult(
-    command: Command[SimpleResult],
-    responseHeaders: MetaData,
+case class Result(
+    originator: CommandDescriptor,
     statusCode: Int,
     statusText: String,
-    completionMillis: Long,
-    isSuccess: Boolean
-) extends Result
+    startMillis: Long,
+    stopMillis: Long,
+    resultData: KeyMap // response headers and other command-specific result data
+) {
+  def isSuccess: Boolean = originator.successCodes(statusCode)
+}

@@ -35,20 +35,19 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.Const.{Headers, IHeader}
-import gr.grnet.pithosj.core.command.result.{GetAccountInfoResultData, GetAccountInfoResult}
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
+import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.http.Method
+import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetAccountInfo(connectionInfo: ConnectionInfo) extends CommandSkeleton[GetAccountInfoResult] {
+case class GetAccountInfo(connectionInfo: ConnectionInfo) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = HTTPMethod.HEAD
+  def httpMethod = Method.HEAD
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -61,34 +60,49 @@ case class GetAccountInfo(connectionInfo: ConnectionInfo) extends CommandSkeleto
    */
   def serverURLPathElements = Seq(connectionInfo.userID)
 
-  def buildResult(
-      responseHeaders: MetaData,
-      statusCode: Int,
-      statusText: String,
-      completionMillis: Long,
-      getResponseBody: () ⇒ String
+  /**
+   * Type-safe keys for `HTTP` response headers that are specific to this command.
+   * These usually correspond to Pithos-specific headers, not general-purpose
+   * `HTTP` response headers but there may be exceptions.
+   *
+   * Each command must document which keys it supports.
+   */
+  override val responseHeaderKeys = Seq(
+    HeaderKeys.Pithos.X_Account_Bytes_Used,
+    HeaderKeys.Pithos.X_Account_Container_Count,
+    HeaderKeys.Pithos.X_Account_Policy_Quota,
+    HeaderKeys.Pithos.X_Account_Policy_Versioning
+  )
+
+
+  /**
+   * Parse a response header that is specific to this command and whose value must be of non-String type.
+   *
+   * Returns `true` iff the header is parsed.
+   *
+   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `keyMap`.
+   */
+  override protected def tryParseNonStringResponseHeader(
+      keyMap: KeyMap,
+      name: String,
+      value: String
   ) = {
-    def h(header: IHeader) = responseHeaders.getOne(header)
+    name match {
+      case HeaderKeys.Pithos.X_Account_Bytes_Used.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Account_Bytes_Used, value.toLong)
+        true
 
-    val resultDataOpt = successCodes(statusCode) match {
-      case false ⇒
-        None
-      case true ⇒
-        Some(GetAccountInfoResultData(
-          h(Headers.Pithos.X_Account_Bytes_Used).toLong,
-          h(Headers.Pithos.X_Account_Container_Count).toInt,
-          h(Headers.Pithos.X_Account_Policy_Quota).toLong,
-          h(Headers.Pithos.X_Account_Policy_Versioning)
-        ))
+      case HeaderKeys.Pithos.X_Account_Container_Count.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Account_Container_Count, value.toInt)
+        true
+
+      case HeaderKeys.Pithos.X_Account_Policy_Quota.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Account_Policy_Quota, value.toLong)
+        true
+
+      case _ ⇒
+        false
     }
-
-    GetAccountInfoResult(
-      this,
-      responseHeaders,
-      statusCode,
-      statusText,
-      completionMillis,
-      resultDataOpt
-    )
   }
 }

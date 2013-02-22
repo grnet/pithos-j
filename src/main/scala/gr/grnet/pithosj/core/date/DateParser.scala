@@ -33,22 +33,27 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.date
 
-import gr.grnet.pithosj.core.MetaData
-import gr.grnet.pithosj.core.command.{GetObject}
+import java.util.Date
 
 /**
+ * A [[java.util.Date]] parser.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetObjectResult(
-    command: GetObject,
-    override val responseHeaders: MetaData,
-    override val statusCode: Int,
-    override val statusText: String,
-    override val completionMillis: Long,
-    resultDataOpt: Option[GetObjectResultData]
-) extends ResultSkeleton(responseHeaders, statusCode, statusText, completionMillis) {
-  def isSuccess: Boolean = command.successCodes(statusCode)
+trait DateParser {
+  /**
+   * The description of this parser. This can be either a free text description or,
+   * in case of a [[java.text.DateFormat]]-based implementation, the format string.
+   */
+  def description: String
+
+  /**
+   * Tries to parse the given date.
+   * The implementation must not throw an [[java.lang.Exception]]. In particular,
+   * it must not throw a [[java.text.ParseException]], which is common in the case of a
+   * [[java.text.SimpleDateFormat]].
+   */
+  def parse(source: String): Option[Date]
 }

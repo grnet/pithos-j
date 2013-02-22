@@ -33,14 +33,15 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.asynchttp
+package gr.grnet.pithosj.core
+package asynchttp
 
-import com.ning.http.client.{HttpResponseHeaders, AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
+import com.ning.http.client.{AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
 import gr.grnet.pithosj.core.Helpers.RequestBuilder
+import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
-import gr.grnet.pithosj.core.http.HTTPMethod.{OPTIONS, DELETE, POST, PUT, GET, HEAD}
-import gr.grnet.pithosj.core.http.{InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
-import gr.grnet.pithosj.core.{Helpers, MetaData, PithosException}
+import gr.grnet.pithosj.core.http.Method.{OPTIONS, DELETE, POST, PUT, GET, HEAD, COPY}
+import gr.grnet.pithosj.core.http.{Method, InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
 import org.slf4j.LoggerFactory
 
 /**
@@ -53,7 +54,7 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
   /**
    * Creates a request builder for this command.
    */
-  private def createRequestBuilder[R](command: Command[R]): RequestBuilder = {
+  private def createRequestBuilder(command: Command): RequestBuilder = {
     val url = command.serverURLExcludingParameters
 
     val requestBuilder = command.httpMethod match {
@@ -63,15 +64,22 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
       case POST ⇒ http.preparePost(url)
       case DELETE ⇒ http.prepareDelete(url)
       case OPTIONS ⇒ http.prepareOptions(url)
-      case method ⇒ throw new PithosException("Unsupported HTTP method %s", method)
+      case COPY ⇒ http.preparePut(url).setMethod(Method.COPY.name())
+      case method ⇒ throw new PithosException(
+        "Unsupported HTTP method %s. All known methods are ",
+        method,
+        Method.values().mkString(", ")
+      )
     }
 
-    val headers = command.requestHeaders
-    requestBuilder.setHeaders(headers.toJMap)
+    val headers = command.requestHeaders.toMap
+    for((name, value) ← headers) {
+      requestBuilder.setHeader(name, String.valueOf(value))
+    }
 
-    command.queryParameters.foreach {
-      case (paramName, paramValues) ⇒
-        requestBuilder.addQueryParameter(paramName, paramValues.get(0))
+    val queryParams = command.queryParameters.toMap
+    for((name, value) ← queryParams) {
+      requestBuilder.addQueryParameter(name, String.valueOf(value))
     }
 
     for(requestBody ← command.requestBodyOpt) {
@@ -98,9 +106,9 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
    * Executes the given command and returns a [[java.util.concurrent.Future]]
    * with the command-specific result.
    */
-  def execute[R](command: Command[R]) = {
+  def execute(command: Command) = {
     logger.debug("Call   : %s".format(command))
-    logger.debug("URL    : %s".format(command.serverURLExcludingParameters))
+    logger.debug("HTTP   : %s %s".format(command.httpMethod, command.serverURLExcludingParameters))
     logger.debug("Headers: %s".format(command.requestHeaders))
     logger.debug("Params : %s".format(command.queryParameters))
 
@@ -109,24 +117,27 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
     val startMillis = System.currentTimeMillis()
     val onBodyPartReceivedOpt = command.onBodyPartReceivedOpt
 
-    val handler = new AsyncCompletionHandler[R] {
+    val handler = new AsyncCompletionHandler[Result] {
       override def onBodyPartReceived(content: HttpResponseBodyPart) = {
-        command.onBodyPartReceivedOpt match {
+        onBodyPartReceivedOpt match {
           case Some(onBodyPartReceived) ⇒
-            onBodyPartReceived(content)
+            onBodyPartReceived.apply(content)
           case None ⇒
             super.onBodyPartReceived(content)
         }
       }
 
       def onCompleted(response: Response) = {
-        val responseHeaders = new MetaData
-        Helpers.copyAllResponseHeaders(response, responseHeaders)
+        val stopMillis = System.currentTimeMillis()
+        val rawHeaders = asFullScala(response.getHeaders)
+        val responseHeaders = command.parseAllResponseHeaders(rawHeaders)
+
         command.buildResult(
           responseHeaders,
           response.getStatusCode,
           response.getStatusText,
-          System.currentTimeMillis() - startMillis,
+          startMillis,
+          stopMillis,
           () ⇒ response.getResponseBody
         )
       }

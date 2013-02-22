@@ -35,16 +35,15 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.command.result.SimpleResult
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
+import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.http.Method
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class Ping(connectionInfo: ConnectionInfo) extends CommandSkeleton[SimpleResult] {
-  val httpMethod: HTTPMethod = HTTPMethod.HEAD
+case class Ping(connectionInfo: ConnectionInfo) extends CommandSkeleton {
+  val httpMethod: Method = Method.HEAD
 
   val successCodes: Set[Int] = Set(204)
 
@@ -53,21 +52,4 @@ case class Ping(connectionInfo: ConnectionInfo) extends CommandSkeleton[SimpleRe
    * in the HTTP call.
    */
   val serverURLPathElements = Seq(connectionInfo.userID)
-
-  def buildResult(
-      responseHeaders: MetaData,
-      statusCode: Int,
-      statusText: String,
-      completionMillis: Long,
-      getResponseBody: () ⇒ String
-  ) = {
-    SimpleResult(
-      this,
-      responseHeaders,
-      statusCode,
-      statusText,
-      completionMillis,
-      successCodes(statusCode)
-    )
-  }
 }

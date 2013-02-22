@@ -35,7 +35,8 @@
 
 package gr.grnet.pithosj.core
 
-import gr.grnet.pithosj.core.command.result.{ListObjectsInPathResult, SimpleResult, ListContainersResult, GetObjectResult, GetObjectInfoResult, GetAccountInfoResult}
+import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.pithosj.core.keymap.KeyMap
 import java.io.{File, OutputStream}
 import java.util.concurrent.Future
 
@@ -45,41 +46,41 @@ import java.util.concurrent.Future
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait Pithos {
-  def ping(connInfo: ConnectionInfo): Future[SimpleResult]
+  def ping(connInfo: ConnectionInfo): Future[Result]
 
-  def getAccountInfo(connInfo: ConnectionInfo): Future[GetAccountInfoResult]
+  def getAccountInfo(connInfo: ConnectionInfo): Future[Result]
 
-  def replaceAccountMeta(connInfo: ConnectionInfo, meta: MetaData): Future[SimpleResult]
+  def replaceAccountMeta(connInfo: ConnectionInfo, meta: KeyMap): Future[Result]
 
-  def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String): Future[SimpleResult]
+  def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String): Future[Result]
 
-  def listContainers(connInfo: ConnectionInfo): Future[ListContainersResult]
+  def listContainers(connInfo: ConnectionInfo): Future[Result]
 
-  def createContainer(connInfo: ConnectionInfo, container: String): Future[SimpleResult]
+  def createContainer(connInfo: ConnectionInfo, container: String): Future[Result]
 
-  def getContainerInfo(connInfo: ConnectionInfo, container: String): Future[SimpleResult]
+  def getContainerInfo(connInfo: ConnectionInfo, container: String): Future[Result]
 
-  def deleteContainer(connInfo: ConnectionInfo, container: String): Future[SimpleResult]
+  def deleteContainer(connInfo: ConnectionInfo, container: String): Future[Result]
 
   def createDirectory(
       connInfo: ConnectionInfo,
       container: String,
       path: String
-  ): Future[SimpleResult]
+  ): Future[Result]
 
-  def getObjectMeta(connInfo: ConnectionInfo, path: String): Future[SimpleResult]
+  def getObjectMeta(connInfo: ConnectionInfo, path: String): Future[Result]
 
   def deleteObjectMeta(
       connInfo: ConnectionInfo,
       path: String,
       metaKey: String
-  ): Future[SimpleResult]
+  ): Future[Result]
 
   def replaceObjectMeta(
       connInfo: ConnectionInfo,
       path: String,
-      meta: MetaData
-  ): Future[SimpleResult]
+      meta: KeyMap
+  ): Future[Result]
 
   def getObject(
       connInfo: ConnectionInfo,
@@ -87,13 +88,13 @@ trait Pithos {
       path: String,
       version: String,
       out: OutputStream
-  ): Future[GetObjectResult]
+  ): Future[Result]
 
   def getObjectInfo(
       connInfo: ConnectionInfo,
       container: String,
       path: String
-  ): Future[GetObjectInfoResult]
+  ): Future[Result]
 
   def putObject(
       connInfo: ConnectionInfo,
@@ -101,7 +102,7 @@ trait Pithos {
       path: String,
       in: File,
       contentType: String
-  ): Future[SimpleResult]
+  ): Future[Result]
 
   /**
    * Delete a file or folder.
@@ -110,30 +111,32 @@ trait Pithos {
       connInfo: ConnectionInfo,
       container: String,
       path: String
-  ): Future[SimpleResult]
+  ): Future[Result]
 
   def copyObject(
       connInfo: ConnectionInfo,
       fromContainer: String,
       fromPath: String,
       toContainer: String,
-      toPath: String): Future[SimpleResult]
+      toPath: String
+  ): Future[Result]
 
   def moveObject(
       connInfo: ConnectionInfo,
       fromContainer: String,
       fromPath: String,
       toContainer: String,
-      toPath: String): Future[SimpleResult]
+      toPath: String
+  ): Future[Result]
 
   def listObjectsInContainer(
       connInfo: ConnectionInfo,
       container: String
-  ): Future[ListObjectsInPathResult]
+  ): Future[Result]
 
   def listObjectsInPath(
       connInfo: ConnectionInfo,
       container: String,
       path: String
-  ): Future[ListObjectsInPathResult]
+  ): Future[Result]
 }

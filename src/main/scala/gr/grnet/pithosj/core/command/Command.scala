@@ -37,19 +37,20 @@ package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.pithosj.core.http.{RequestBody, HTTPMethod}
-import gr.grnet.pithosj.core.{MetaData, Paths, ConnectionInfo}
-import org.slf4j.LoggerFactory
+import gr.grnet.pithosj.core.http.{RequestBody, Method}
+import gr.grnet.pithosj.core.keymap.{ResultKey, PithosKey, HeaderKey, KeyMap}
+import gr.grnet.pithosj.core.{Paths, ConnectionInfo}
+import gr.grnet.pithosj.core.command.result.Result
 
 /**
  * A command to be executed via the Pithos+ REST API.
- *  Each command specifies its own input data, which will be used
- *  to build up an HTTP request. Also, a command has a specific type (`R`)
- *  of results to be returned from the Pithos+ REST API call.
+ * Each command specifies its own input data, which will be used
+ * to build up an HTTP request. Also, a command has a specific type (`R`)
+ * of results to be returned from the Pithos+ REST API call.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait Command[+R] {
+trait Command {
   /**
    * Specifies the target against which the command will be executed.
    * This includes the Pithos+ server and the Pithos+ user id and token.
@@ -57,19 +58,43 @@ trait Command[+R] {
   def connectionInfo: ConnectionInfo
 
   /**
+   * The account ID for this command. This is the same as `connectionInfo.userID` and
+   * is provided for convenience.
+   */
+  def account: String = connectionInfo.userID
+
+  /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod: HTTPMethod
+  def httpMethod: Method
 
   /**
    * The HTTP request headers that are set by this command.
    */
-  def requestHeaders: MetaData
+  def requestHeaders: KeyMap
 
   /**
    * The HTTP query parameters that are set by this command.
    */
-  def queryParameters: MetaData
+  def queryParameters: KeyMap
+
+  /**
+   * Type-safe keys for `HTTP` response headers that are specific to this command.
+   * These usually correspond to Pithos-specific headers, not general-purpose
+   * `HTTP` response headers but there may be exceptions.
+   *
+   * Each command must document which keys it supports.
+   */
+  def responseHeaderKeys: Seq[HeaderKey[_]]
+
+  /**
+   * The keys for extra result data pertaining to this command.
+   * Normally, the data that the keys refer to will be parsed
+   * from the `HTTP` response body (`XML` or `JSON`).
+   *
+   * Each command must document which keys it supports.
+   */
+  def resultDataKeys: Seq[ResultKey[_]]
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -85,9 +110,7 @@ trait Command[+R] {
    * Computes the URL that will be used in the HTTP call.
    * The URL does not contain any needed parameters.
    */
-  def serverURLExcludingParameters: String = {
-    Paths.buildWithFirst(connectionInfo.serverURL, serverURLPathElements: _*)
-  }
+  def serverURLExcludingParameters: String
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -102,11 +125,19 @@ trait Command[+R] {
    */
   def requestBodyOpt: Option[RequestBody]
 
+  def parseAllResponseHeaders(responseHeaders: scala.collection.Map[String, List[String]]): KeyMap
+
+  /**
+   * Generates a new command descriptor for this command.
+   */
+  def descriptor: CommandDescriptor
+
   def buildResult(
-      responseHeaders: MetaData,
+      responseHeaders: KeyMap,
       statusCode: Int,
       statusText: String,
-      completionMillis: Long,
+      startMillis: Long,
+      stopMillis: Long,
       getResponseBody: () ⇒ String
-  ): R
+  ): Result
 }

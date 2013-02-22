@@ -33,26 +33,25 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.keymap
 
-import java.util.Date
+import gr.grnet.pithosj.core.http.IHeader
 
 /**
+ * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for HTTP headers.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ObjectInPathResultData(
-    container: String,
-    path: String,
-    contentType: String,
-    contentLength: Long,
-    lastModified: Date,
-    xObjectHash: String,
-    xObjectModifiedBy: String,
-    xObjectVersionTimestamp: Date,
-    xObjectUUID: String,
-    xObjectVersion: String,
-    eTag: Option[String] = None
-)
+final class HeaderKey[T: Manifest] private[keymap](
+    override val name: String
+) extends PithosKey[T](name)
 
-case class ListObjectsInPathResultData(objects: List[ObjectInPathResultData])
+object HeaderKey {
+  def apply[T: Manifest](name: String): HeaderKey[T] = {
+    new HeaderKey[T](name)
+  }
+
+  def apply[T: Manifest](header: IHeader): HeaderKey[T] = {
+    new HeaderKey[T](header.headerName())
+  }
+}

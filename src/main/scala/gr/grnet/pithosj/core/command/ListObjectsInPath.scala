@@ -35,10 +35,11 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.command.result.{ObjectInPathResultData, ListObjectsInPathResultData, ListObjectsInPathResult}
-import gr.grnet.pithosj.core.http.HTTPMethod
-import gr.grnet.pithosj.core.{Const, MetaData, ConnectionInfo}
-import java.util.Date
+import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.command.result.{Result, ObjectInPathResultData}
+import gr.grnet.pithosj.core.date.DateParsers
+import gr.grnet.pithosj.core.http.{ResponseFormats, Method}
+import gr.grnet.pithosj.core.keymap.{HeaderKeys, ResultKeys, RequestParamKeys, KeyMap}
 import scala.xml.XML
 
 /**
@@ -49,11 +50,11 @@ case class ListObjectsInPath(
     connectionInfo: ConnectionInfo,
     container: String,
     path: String
-) extends CommandSkeleton[ListObjectsInPathResult] {
+) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = HTTPMethod.GET
+  def httpMethod = Method.GET
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -69,65 +70,114 @@ case class ListObjectsInPath(
 
   override val queryParameters = {
     newQueryParameters.
-      setOne(Const.RequestParams.Format.requestParam(), Const.ResponseFormats.XML.responseFormat()).
-      setOne(Const.RequestParams.Path.requestParam(), path)
+      set(RequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
+      set(RequestParamKeys.Path, path)
   }
 
-  def buildResult(
-      responseHeaders: MetaData,
+  override val responseHeaderKeys = Seq(
+    HeaderKeys.Pithos.X_Container_Block_Hash,
+    HeaderKeys.Pithos.X_Container_Block_Size,
+    HeaderKeys.Pithos.X_Container_Object_Meta,
+    HeaderKeys.Pithos.X_Container_Object_Count,
+    HeaderKeys.Pithos.X_Container_Bytes_Used
+  )
+
+  override val resultDataKeys = Seq(
+    ResultKeys.ListObjectsInPath
+  )
+
+  /**
+   * Parse a response header that is specific to this command and whose value must be of non-String type.
+   *
+   * Returns `true` iff the header is parsed.
+   *
+   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `keyMap`.
+   */
+  override protected def tryParseNonStringResponseHeader(
+      keyMap: KeyMap,
+      name: String,
+      value: String
+  ) = {
+    name match {
+      case HeaderKeys.Pithos.X_Container_Block_Hash.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Container_Block_Hash, value)
+        true
+
+      case HeaderKeys.Pithos.X_Container_Block_Size.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Container_Block_Size, value.toLong)
+        true
+
+      case HeaderKeys.Pithos.X_Container_Object_Meta.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Container_Object_Meta, value)
+        true
+
+      case HeaderKeys.Pithos.X_Container_Object_Count.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Container_Object_Count, value.toInt)
+        true
+
+      case HeaderKeys.Pithos.X_Container_Bytes_Used.name ⇒
+        keyMap.set(HeaderKeys.Pithos.X_Container_Bytes_Used, value.toLong)
+        true
+
+      case _ ⇒
+        false
+    }
+  }
+
+  override def buildResult(
+      responseHeaders: KeyMap,
       statusCode: Int,
       statusText: String,
-      completionMillis: Long,
+      startMillis: Long,
+      stopMillis: Long,
       getResponseBody: () => String
   ) = {
-    val resultDataOpt = successCodes(statusCode) match {
-      case false ⇒
-        None
-      case true ⇒
-        val body = getResponseBody()
-        val xml = XML.loadString(body)
 
-        val objectsInPath = for {
-          obj   <- xml \ "object"
-          hash  <- obj \ "hash"
-          name  <- obj \ "name"
-          bytes <- obj \ "bytes"
-          x_object_version_timestamp <- obj \ "x_object_version_timestamp"
-          x_object_uuid <- obj \ "x_object_uuid"
-          last_modified <- obj \ "last_modified"
-          content_type  <- obj \ "content_type"
-          x_object_hash <- obj \ "x_object_hash"
-          x_object_version     <- obj \ "x_object_version"
-          x_object_modified_by <- obj \ "x_object_modified_by"
-        } yield {
-          ObjectInPathResultData(
-            container = container,
-            path = name.text,
-            contentType = content_type.text,
-            contentLength = bytes.text.toLong,
-            lastModified = Const.Dates.Format1.parse(last_modified.text),
-            xObjectHash = x_object_hash.text,
-            xObjectModifiedBy = x_object_modified_by.text,
-            xObjectVersionTimestamp = new Date(x_object_version_timestamp.text.toDouble * 1000 toLong),
-            xObjectUUID = x_object_uuid.text,
-            xObjectVersion = x_object_version.text,
-            eTag = None
-          )
-        }
+    val resultData = KeyMap(responseHeaders)
 
-        Some(ListObjectsInPathResultData(objectsInPath.toList))
+    if(successCodes(statusCode)) {
+      val body = getResponseBody()
+      val xml = XML.loadString(body)
+
+      val objectsInPath = for {
+        obj   <- xml \ "object"
+        hash  <- obj \ "hash"
+        name  <- obj \ "name"
+        bytes <- obj \ "bytes"
+        x_object_version_timestamp <- obj \ "x_object_version_timestamp"
+        x_object_uuid <- obj \ "x_object_uuid"
+        last_modified <- obj \ "last_modified"
+        content_type  <- obj \ "content_type"
+        x_object_hash <- obj \ "x_object_hash"
+        x_object_version     <- obj \ "x_object_version"
+        x_object_modified_by <- obj \ "x_object_modified_by"
+      } yield {
+        ObjectInPathResultData(
+          container = container,
+          path = name.text,
+          contentType = content_type.text,
+          contentLength = bytes.text.toLong,
+          lastModified = DateParsers.parse(last_modified.text, DateParsers.Format1Parser),
+          xObjectHash = x_object_hash.text,
+          xObjectModifiedBy = x_object_modified_by.text,
+          xObjectVersionTimestamp = DateParsers.parse(x_object_version_timestamp.text, DateParsers.Format3Parser),
+          xObjectUUID = x_object_uuid.text,
+          xObjectVersion = x_object_version.text,
+          eTag = None
+        )
+      }
+
+      resultData.set(ResultKeys.ListObjectsInPath, objectsInPath.toList)
     }
 
-    val result = ListObjectsInPathResult(
-      this,
-      responseHeaders,
+    Result(
+      descriptor,
       statusCode,
       statusText,
-      completionMillis,
-      resultDataOpt
+      startMillis,
+      stopMillis,
+      resultData
     )
-
-    logger.debug(result.toString)
-    result
   }
 }

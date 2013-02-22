@@ -35,9 +35,10 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.command.result.SimpleResult
-import gr.grnet.pithosj.core.{MetaData, ConnectionInfo}
-import gr.grnet.pithosj.core.http.HTTPMethod
+import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.pithosj.core.http.Method
+import gr.grnet.pithosj.core.keymap.KeyMap
 
 /**
  *
@@ -47,11 +48,11 @@ case class DeleteObject(
     connectionInfo: ConnectionInfo,
     container: String,
     path: String
-) extends CommandSkeleton[SimpleResult] {
+) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = HTTPMethod.DELETE
+  def httpMethod = Method.DELETE
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -63,14 +64,4 @@ case class DeleteObject(
    * in the HTTP call.
    */
   def serverURLPathElements = Seq(connectionInfo.userID, container, path)
-
-  def buildResult(
-      responseHeaders: MetaData,
-      statusCode: Int,
-      statusText: String,
-      completionMillis: Long,
-      getResponseBody: () => String
-  ) = {
-    SimpleResult(this, responseHeaders, statusCode, statusText, completionMillis, successCodes(statusCode))
-  }
 }
