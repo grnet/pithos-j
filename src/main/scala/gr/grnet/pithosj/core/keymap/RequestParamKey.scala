@@ -62,7 +62,7 @@ object RequestParamKey {
 
   /**
    * Factory method for a [[gr.grnet.pithosj.core.keymap.RequestParamKey]], given
-   * a [[IRequestParam]].
+   * a [[gr.grnet.pithosj.core.http.IRequestParam]].
    */
   def apply(param: IRequestParam): RequestParamKey = {
     new RequestParamKey(param.requestParam())
