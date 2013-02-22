@@ -132,7 +132,7 @@ trait Command {
   def descriptor: CommandDescriptor
 
   def buildResult(
-      responseHeaders: KeyMap,
+      initialMap: KeyMap,
       statusCode: Int,
       statusText: String,
       startMillis: Long,

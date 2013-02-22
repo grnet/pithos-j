@@ -41,7 +41,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>gr.grnet</groupId>
   <artifactId>pithosj</artifactId>
-  <version>0.1.1</version>
+  <version>0.2.0</version>
 
   <!-- Project details-->
   <name>PithosJ</name>

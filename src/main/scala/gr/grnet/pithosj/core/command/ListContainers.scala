@@ -81,7 +81,7 @@ case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleto
   )
 
   override def buildResult(
-      responseHeaders: KeyMap,
+      initialMap: KeyMap,
       statusCode: Int,
       statusText: String,
       startMillis: Long,
@@ -89,7 +89,7 @@ case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleto
       getResponseBody: () ⇒ String
   ) = {
 
-    val resultData = KeyMap(responseHeaders)
+    val resultData = KeyMap(initialMap)
 
     if(successCodes(statusCode)) {
       val body = getResponseBody()
@@ -148,13 +148,13 @@ case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleto
       resultData.set(ResultKeys.ListContainers, containerResults.toList)
     }
 
-    Result(
-      descriptor,
+    super.buildResult(
+      resultData,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      resultData
+      getResponseBody
     )
   }
 }

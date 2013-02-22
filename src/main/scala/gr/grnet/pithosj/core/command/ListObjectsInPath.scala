@@ -126,7 +126,7 @@ case class ListObjectsInPath(
   }
 
   override def buildResult(
-      responseHeaders: KeyMap,
+      initialMap: KeyMap,
       statusCode: Int,
       statusText: String,
       startMillis: Long,
@@ -134,7 +134,7 @@ case class ListObjectsInPath(
       getResponseBody: () => String
   ) = {
 
-    val resultData = KeyMap(responseHeaders)
+    val resultData = KeyMap(initialMap)
 
     if(successCodes(statusCode)) {
       val body = getResponseBody()
@@ -171,13 +171,13 @@ case class ListObjectsInPath(
       resultData.set(ResultKeys.ListObjectsInPath, objectsInPath.toList)
     }
 
-    Result(
-      descriptor,
+    super.buildResult(
+      resultData,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      resultData
+      getResponseBody
     )
   }
 }

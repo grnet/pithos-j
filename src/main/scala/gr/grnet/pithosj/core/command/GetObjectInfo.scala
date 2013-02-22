@@ -127,7 +127,7 @@ case class GetObjectInfo(
   }
 
   override def buildResult(
-      responseHeaders: KeyMap,
+      initialMap: KeyMap,
       statusCode: Int,
       statusText: String,
       startMillis: Long,
@@ -135,20 +135,20 @@ case class GetObjectInfo(
       getResponseBody: () ⇒ String
   ) = {
 
-    val parsedResultData = KeyMap(responseHeaders)
+    val resultData = KeyMap(initialMap)
 
     if(successCodes(statusCode)) {
-      parsedResultData.set(ResultKeys.Commands.Container, container)
-      parsedResultData.set(ResultKeys.Commands.Path, path)
+      resultData.set(ResultKeys.Commands.Container, container)
+      resultData.set(ResultKeys.Commands.Path, path)
     }
 
-    Result(
-      descriptor,
+    super.buildResult(
+      resultData,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      parsedResultData
+      getResponseBody
     )
   }
 }

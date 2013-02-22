@@ -168,30 +168,31 @@ trait CommandSkeleton extends Command {
     keyMap
   }
 
-  def buildResultData(
-      responseHeaders: KeyMap,
+  private def addResponseBody(
+      initialMap: KeyMap,
       getResponseBody: () => String
   ): KeyMap = {
-    val resultData = KeyMap(responseHeaders)
+    val resultData = KeyMap(initialMap)
     resultData.set(ResultKeys.ResponseBody, getResponseBody())
     resultData
   }
 
   def buildResult(
-      responseHeaders: KeyMap,
+      initialMap: KeyMap,
       statusCode: Int,
       statusText: String,
       startMillis: Long,
       stopMillis: Long,
       getResponseBody: () => String
   ) = {
+
     Result(
       descriptor,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      buildResultData(responseHeaders, getResponseBody)
+      addResponseBody(initialMap, getResponseBody)
     )
   }
 }

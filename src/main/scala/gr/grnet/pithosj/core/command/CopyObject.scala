@@ -55,7 +55,7 @@ case class CopyObject(
   /**
    * The HTTP method by which the command is implemented.
    */
-  val httpMethod = Method.PUT
+  val httpMethod = Method.COPY
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -67,19 +67,8 @@ case class CopyObject(
    */
   override val requestHeaders = {
     newDefaultRequestHeaders.
-      set(HeaderKeys.Pithos.X_Copy_From, Paths.build(fromContainer, fromPath)).
-      set(HeaderKeys.Pithos.Destination, Paths.build(toContainer, toPath)).
-      set(HeaderKeys.Standard.Content_Length, 0L)
+      set(HeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath))
   }
 
-  def serverURLPathElements = Seq(account, toContainer, toPath)
-
-  override def buildResult(
-      responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long,
-      stopMillis: Long, getResponseBody: () => String
-  ) = {
-    val responseBody = getResponseBody()
-    println("responseBody = %s".format(responseBody))
-    super.buildResult(responseHeaders, statusCode, statusText, startMillis, stopMillis, getResponseBody)
-  }
+  def serverURLPathElements = Seq(account, fromContainer, fromPath)
 }
