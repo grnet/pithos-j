@@ -41,7 +41,6 @@ import gr.grnet.pithosj.core.keymap.KeyMap
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 import java.util.concurrent.Future
-import org.slf4j.LoggerFactory
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.core.Pithos]].
@@ -51,7 +50,6 @@ import org.slf4j.LoggerFactory
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait PithosSkeleton extends Pithos {
-  protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val executor: CommandExecutor
 
   protected def call(command: Command): Future[Result] = {

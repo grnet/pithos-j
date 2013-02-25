@@ -36,7 +36,7 @@
 package gr.grnet.pithosj.core.command
 
 import gr.grnet.pithosj.core.http.Method
-import gr.grnet.pithosj.core.keymap.{KeyMap, HeaderKeys}
+import gr.grnet.pithosj.core.keymap.HeaderKeys
 import gr.grnet.pithosj.core.{ConnectionInfo, Paths}
 
 /**
