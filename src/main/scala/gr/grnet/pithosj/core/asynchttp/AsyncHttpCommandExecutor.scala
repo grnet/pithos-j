@@ -42,15 +42,12 @@ import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
 import gr.grnet.pithosj.core.http.Method.{OPTIONS, DELETE, POST, PUT, GET, HEAD, COPY}
 import gr.grnet.pithosj.core.http.{Method, InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
-import org.slf4j.LoggerFactory
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-
   /**
    * Creates a request builder for this command.
    */
@@ -107,11 +104,6 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
    * with the command-specific result.
    */
   def execute(command: Command) = {
-    logger.debug("Call   : %s".format(command))
-    logger.debug("HTTP   : %s %s".format(command.httpMethod, command.serverURLExcludingParameters))
-    logger.debug("Headers: %s".format(command.requestHeaders))
-    logger.debug("Params : %s".format(command.queryParameters))
-
     val requestBuilder = createRequestBuilder(command)
 
     val startMillis = System.currentTimeMillis()

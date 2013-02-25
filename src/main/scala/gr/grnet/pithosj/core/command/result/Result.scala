@@ -51,4 +51,8 @@ case class Result(
     resultData: KeyMap // response headers and other command-specific result data
 ) {
   def isSuccess: Boolean = originator.successCodes(statusCode)
+
+  def is200 = statusCode == 200
+  def is201 = statusCode == 201
+  def is204 = statusCode == 204
 }
