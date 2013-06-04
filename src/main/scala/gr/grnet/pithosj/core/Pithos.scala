@@ -38,7 +38,7 @@ package gr.grnet.pithosj.core
 import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.keymap.KeyMap
 import java.io.{File, OutputStream}
-import java.util.concurrent.Future
+import scala.concurrent.Future
 
 /**
  * Provides the Pithos API.

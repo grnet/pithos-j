@@ -40,7 +40,7 @@ import gr.grnet.pithosj.core.command.{Command, CommandExecutor, ListObjectsInPat
 import gr.grnet.pithosj.core.keymap.KeyMap
 import java.io.{File, OutputStream}
 import java.net.URLConnection
-import java.util.concurrent.Future
+import scala.concurrent.Future
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.core.Pithos]].
@@ -56,7 +56,7 @@ trait PithosSkeleton extends Pithos {
     try {
       command.validate match {
         case Some(error) ⇒
-          Helpers.knownBadFuture(error)
+          Future.failed(new RuntimeException("Could not validate %s".format(command)))
 
         case None ⇒
           executor.execute(command)
@@ -64,7 +64,7 @@ trait PithosSkeleton extends Pithos {
     }
     catch {
       case e: Throwable ⇒
-        Helpers.knownBadFuture(e, "Internal error")
+        Future.failed(e)
     }
   }
 

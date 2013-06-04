@@ -65,7 +65,7 @@
 
   <!--Common project settings-->
   <properties>
-    <scala.version>2.9.2</scala.version>
+    <scala.version>2.10.1</scala.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
   </properties>
@@ -80,7 +80,7 @@
     <dependency>
       <groupId>com.ning</groupId>
       <artifactId>async-http-client</artifactId>
-      <version>1.7.8</version>
+      <version>1.7.17</version>
     </dependency>
 
     <dependency>

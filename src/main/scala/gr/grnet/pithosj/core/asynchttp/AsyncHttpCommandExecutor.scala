@@ -42,6 +42,7 @@ import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
 import gr.grnet.pithosj.core.http.Method.{OPTIONS, DELETE, POST, PUT, GET, HEAD, COPY}
 import gr.grnet.pithosj.core.http.{Method, InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
+import scala.concurrent.Promise
 
 /**
  *
@@ -104,6 +105,7 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
    * with the command-specific result.
    */
   def execute(command: Command) = {
+    val promise = Promise[Result]()
     val requestBuilder = createRequestBuilder(command)
 
     val startMillis = System.currentTimeMillis()
@@ -124,7 +126,7 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
         val rawHeaders = asFullScala(response.getHeaders)
         val responseHeaders = command.parseAllResponseHeaders(rawHeaders)
 
-        command.buildResult(
+        val result = command.buildResult(
           responseHeaders,
           response.getStatusCode,
           response.getStatusText,
@@ -132,9 +134,17 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
           stopMillis,
           () ⇒ response.getResponseBody
         )
+
+        promise.success(result)
+        result
+      }
+
+      override def onThrowable(t: Throwable) {
+        promise.failure(t)
       }
     }
 
     requestBuilder.execute(handler)
+    promise.future
   }
 }

@@ -35,13 +35,12 @@
 
 package gr.grnet.pithosj.core
 
-import com.ning.http.client.{AsyncHttpClient, Response}
-import java.util
-import java.util.concurrent.{ExecutionException, TimeUnit, Future}
-import org.slf4j.LoggerFactory
-import gr.grnet.pithosj.core.keymap.{HeaderKey, HeaderKeys, KeyMap}
+import com.ning.http.client.AsyncHttpClient
 import gr.grnet.pithosj.core.date.DateParsers
-import gr.grnet.pithosj.core.http.Headers
+import gr.grnet.pithosj.core.keymap.{HeaderKey, HeaderKeys, KeyMap}
+import java.util
+import java.util.concurrent.{TimeUnit, Future}
+import org.slf4j.LoggerFactory
 
 /**
  *
@@ -49,7 +48,6 @@ import gr.grnet.pithosj.core.http.Headers
  */
 sealed class Helpers {
 
-  import Helpers.RequestBuilder
 
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -75,24 +73,6 @@ sealed class Helpers {
 
       def isDone = true
     }
-  }
-
-  final def knownBadFuture[T](cause: Throwable, message: String): Future[T] = {
-    new Future[T] {
-      def isCancelled = false
-
-      def get(timeout: Long, unit: TimeUnit) = throw new ExecutionException(message, cause)
-
-      def get() = throw new ExecutionException(message, cause)
-
-      def cancel(mayInterruptIfRunning: Boolean) = false
-
-      def isDone = true
-    }
-  }
-
-  final def knownBadFuture[T](message: String): Future[T] = {
-    knownBadFuture(null, message)
   }
 
   final def parseGenericResponseHeader(
