@@ -33,12 +33,12 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.api
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+trait CdmiCapabilityApi {
 
 }

@@ -33,43 +33,42 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
+package gr.grnet.common.keymap
 
 import com.ckkloverdos.env.MutableEnv
-import gr.grnet.pithosj.core.http.IHeader
+import com.ckkloverdos.key.{TKeyOnly, TKey}
+import gr.grnet.common.http.IHeader
 
 /**
  * A generic dictionary that can be accessed with type-safe keys.
- *
- * @see [[gr.grnet.pithosj.core.keymap.PithosKey]]
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final class KeyMap private[keymap](private val env: MutableEnv) {
   require(env ne null)
 
-  def set[T: Manifest](key: PithosKey[T], value: T): this.type = {
-    env + (key, value)
+  def set[T: Manifest](key: TKey[T], value: T): this.type = {
+    env +(key, value)
     this
   }
 
   def setString(keyName: String, value: String): this.type = {
-    set(new PithosKey[String](keyName), value)
+    set(new TKeyOnly[String](keyName), value)
   }
 
-  def get[T: Manifest](key: PithosKey[T]): Option[T] = {
+  def get[T: Manifest](key: TKey[T]): Option[T] = {
     env.get(key)
   }
 
-  def getEx[T: Manifest](key: PithosKey[T]): T = {
+  def getEx[T: Manifest](key: TKey[T]): T = {
     env.getEx[T](key)
   }
 
-  def get[T: Manifest](key: PithosKey[T], value: T): T = {
+  def get[T: Manifest](key: TKey[T], value: T): T = {
     env.getOrElse(key, value)
   }
 
-  def contains[T: Manifest](key: PithosKey[T]): Boolean = {
+  def contains[T: Manifest](key: TKey[T]): Boolean = {
     env.contains(key)
   }
 
@@ -77,8 +76,9 @@ final class KeyMap private[keymap](private val env: MutableEnv) {
    * Returns all the values with keys of the given name.
    */
   def getForName(keyName: String): Seq[Any] = {
-    env.toMap.filter { case (key, value) ⇒
-      key == keyName
+    env.toMap.filter {
+      case (key, value) ⇒
+        key == keyName
     }.values.toSeq
   }
 
@@ -108,12 +108,13 @@ final class KeyMap private[keymap](private val env: MutableEnv) {
 
   override def toString = {
     "KeyMap(%s)".format(
-      env.toMap.map { case (k, v) ⇒
-        val vt = v match {
-          case null ⇒ ""
-          case anyRef: AnyRef ⇒ " [:%s]".format(anyRef.getClass.getSimpleName)
-        }
-        (k, "%s%s".format(v, vt))
+      env.toMap.map {
+        case (k, v) ⇒
+          val vt = v match {
+            case null ⇒ ""
+            case anyRef: AnyRef ⇒ " [:%s]".format(anyRef.getClass.getSimpleName)
+          }
+          (k, "%s%s".format(v, vt))
       }.mkString(", ")
     )
   }
@@ -121,5 +122,6 @@ final class KeyMap private[keymap](private val env: MutableEnv) {
 
 object KeyMap {
   def apply(): KeyMap = new KeyMap(MutableEnv())
+
   def apply(other: KeyMap): KeyMap = new KeyMap(MutableEnv() ++ other.env)
 }

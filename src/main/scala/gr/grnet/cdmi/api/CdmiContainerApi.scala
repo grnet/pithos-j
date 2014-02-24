@@ -33,13 +33,16 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.api
+
+import gr.grnet.cdmi.model.CdmiContainer
+import scala.concurrent.Future
 
 /**
- * Marker interface for an <code>HTTP</code> header.
+ * API for container objects.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public interface IHeader {
-  public String headerName();
+trait CdmiContainerApi {
+  def getRootContainers(): Future[List[String]]
 }

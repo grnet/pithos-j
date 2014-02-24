@@ -33,15 +33,22 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.date
+package gr.grnet.common.date
 
 /**
- * Provides [[gr.grnet.pithosj.core.date.DateParser]]]s for dates returned from
+ * Provides [[gr.grnet.common.date.DateParser]]s for dates returned from
  * Pithos+ REST API calls.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 object DateParsers {
+  /**
+   * Parses a date according to ISO 8601:2004 extended representation.
+   * This is used for all dates in the CDMI protocol.
+   *
+   */
+  final val CdmiDateParser = new SimpleDateFormatParser("yyyy-mm-dd'T'hh:mm:ss.ssssssZ")
+
   /**
    * Parses a date according to the `"yyyy-MM-dd'T'HH:mm:ss.SSSSSSX"` format.
    * Note that we need at least `JDK 1.7` for the `X` in the end.
@@ -78,8 +85,8 @@ object DateParsers {
   }
 
   /**
-   * Tries to parse the given (in string format) date via the provided [[gr.grnet.pithosj.core.date.DateParser]]s.
-   * Returns the [[gr.grnet.pithosj.core.date.ParsedDate]] for the first parser that succeeded.
+   * Tries to parse the given (in string format) date via the provided [[gr.grnet.common.date.DateParser]]s.
+   * Returns the [[gr.grnet.common.date.ParsedDate]] for the first parser that succeeded.
    */
   def parse(source: String, parser0: DateParser, parsers: DateParser*): ParsedDate = {
     parser0.parse(source) match {

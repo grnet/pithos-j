@@ -33,12 +33,25 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.api
+
+import java.net.URI
 
 /**
+ * The CDMI API.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+trait Cdmi
+  extends CdmiCapabilityApi
+  with    CdmiContainerApi
+  with    CdmiDataApi
+  with    CdmiDomainApi
+  with    CdmiQueueApi {
 
+  /**
+   *
+   * @return the URI of the CDMI cloud
+   */
+  def rootURI: URI
 }

@@ -33,12 +33,31 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.common.http
+
+import gr.grnet.common.keymap.KeyMap
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+case class Result(
+  originator: CommandDescriptor,
+  statusCode: Int,
+  statusText: String,
+  startMillis: Long,
+  stopMillis: Long,
+  resultData: KeyMap // response headers and other command-specific result data
+) {
+  def completionMillis = stopMillis - startMillis
 
+  def isSuccess: Boolean = originator.successCodes(statusCode)
+
+  def is200 = statusCode == 200
+
+  def is201 = statusCode == 201
+
+  def is204 = statusCode == 204
+
+  def is(code: Int) = this.statusCode == code
 }

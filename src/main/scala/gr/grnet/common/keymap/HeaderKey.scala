@@ -33,12 +33,26 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.common.keymap
+
+import com.ckkloverdos.key.TKeyOnly
+import gr.grnet.common.http.IHeader
 
 /**
+ * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for HTTP headers.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+final class HeaderKey[T: Manifest] private[keymap](
+  override val name: String
+) extends TKeyOnly[T](name)
 
+object HeaderKey {
+  def apply[T: Manifest](name: String): HeaderKey[T] = {
+    new HeaderKey[T](name)
+  }
+
+  def apply[T: Manifest](header: IHeader): HeaderKey[T] = {
+    new HeaderKey[T](header.headerName())
+  }
 }

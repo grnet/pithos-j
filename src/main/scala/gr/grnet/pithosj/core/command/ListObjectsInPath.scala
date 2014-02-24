@@ -35,11 +35,13 @@
 
 package gr.grnet.pithosj.core.command
 
+import gr.grnet.common.date.DateParsers
+import gr.grnet.common.http.Method
+import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.result.{Result, ObjectInPathResultData}
-import gr.grnet.pithosj.core.date.DateParsers
-import gr.grnet.pithosj.core.http.{ResponseFormats, Method}
-import gr.grnet.pithosj.core.keymap.{HeaderKeys, ResultKeys, RequestParamKeys, KeyMap}
+import gr.grnet.pithosj.core.command.result.ObjectInPathResultData
+import gr.grnet.pithosj.core.http.ResponseFormats
+import gr.grnet.pithosj.core.keymap.{HeaderKeys, ResultKeys, RequestParamKeys}
 import scala.xml.XML
 
 /**
@@ -91,7 +93,7 @@ case class ListObjectsInPath(
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
    * and its associated non-String value are recorded in the provided `keyMap`.
    */
   override protected def tryParseNonStringResponseHeader(

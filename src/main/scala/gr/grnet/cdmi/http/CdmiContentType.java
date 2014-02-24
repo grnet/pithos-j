@@ -33,12 +33,29 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.http;
+
+import gr.grnet.common.http.IContentType;
 
 /**
+ * CDMI-specific content types.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+public enum CdmiContentType implements IContentType {
+    Application_Directory("application/directory"),
+    Application_CdmiCapability("application/cdmi-capability"),
+    Application_CdmiDomain("application/vnd.org.snia.cdmi-object"),
+    Application_CdmiContainer("application/cdmi-container"),
+    Application_CdmiData("application/cdmi-object");
 
+    private final String contentType;
+
+    CdmiContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String contentType() {
+        return this.contentType;
+    }
 }

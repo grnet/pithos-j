@@ -33,21 +33,16 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
+package gr.grnet.common.date
 
-import gr.grnet.pithosj.core.http.Method
-import gr.grnet.pithosj.core.keymap.KeyMap
+import java.util.Date
 
 /**
- * A high-level view of a Pithos+ HTTP request details.
+ * Represents an attempt to parse a [[java.util.Date]].
+ * An attempt is successful iff `date` is [[scala.Some]] value.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CommandDescriptor(
-    userID: String,
-    requestURL: String,
-    httpMethod: Method,
-    requestHeaders: KeyMap,
-    queryParameters: KeyMap,
-    successCodes: Set[Int]
-)
+case class ParsedDate(date: Option[Date], originalValue: String, parser: DateParser) {
+  def isParsed: Boolean = date.isDefined
+}

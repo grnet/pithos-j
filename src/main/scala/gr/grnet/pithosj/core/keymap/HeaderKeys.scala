@@ -35,8 +35,11 @@
 
 package gr.grnet.pithosj.core.keymap
 
-import gr.grnet.pithosj.core.date.ParsedDate
-import gr.grnet.pithosj.core.http.Headers
+import gr.grnet.common.date.ParsedDate
+import gr.grnet.common.http.StdHeader
+import gr.grnet.common.keymap.{HeaderKey, KeyMap}
+import gr.grnet.pithosj.core.http
+import gr.grnet.pithosj.core.http.PithosHeader
 
 /**
  *
@@ -57,15 +60,15 @@ object HeaderKeys {
   final val AllKeys = Standard.AllKeys ++ Pithos.AllKeys
 
   object Standard {
-    final val Content_Type = HeaderKey[String](Headers.Standard.Content_Type)
-    final val Content_Length = HeaderKey[Long](Headers.Standard.Content_Length)
-    final val Content_Encoding = HeaderKey[String](Headers.Standard.Content_Encoding)
-    final val Content_Disposition = HeaderKey[String](Headers.Standard.Content_Disposition)
-    final val Content_Language = HeaderKey[String](Headers.Standard.Content_Language)
-    final val Date = HeaderKey[ParsedDate](Headers.Standard.Date)
-    final val Last_Modified = HeaderKey[ParsedDate](Headers.Standard.Last_Modified)
-    final val ETag = HeaderKey[String](Headers.Standard.ETag)
-    final val Server = HeaderKey[String](Headers.Standard.Server)
+    final val Content_Type = HeaderKey[String](StdHeader.Content_Type)
+    final val Content_Length = HeaderKey[Long](StdHeader.Content_Length)
+    final val Content_Encoding = HeaderKey[String](StdHeader.Content_Encoding)
+    final val Content_Disposition = HeaderKey[String](StdHeader.Content_Disposition)
+    final val Content_Language = HeaderKey[String](StdHeader.Content_Language)
+    final val Date = HeaderKey[ParsedDate](StdHeader.Date)
+    final val Last_Modified = HeaderKey[ParsedDate](StdHeader.Last_Modified)
+    final val ETag = HeaderKey[String](StdHeader.ETag)
+    final val Server = HeaderKey[String](StdHeader.Server)
 
     final val AllKeys = Set[HeaderKey[_]](
       Content_Type,
@@ -80,35 +83,35 @@ object HeaderKeys {
   }
 
   object Pithos {
-    final val Destination = HeaderKey[String](Headers.Pithos.Destination)
+    final val Destination = HeaderKey[String](PithosHeader.Destination)
 
-    final val X_Auth_Token = HeaderKey[String](Headers.Pithos.X_Auth_Token)
+    final val X_Auth_Token = HeaderKey[String](http.PithosHeader.X_Auth_Token)
 
-    final val X_Copy_From = HeaderKey[String](Headers.Pithos.X_Copy_From)
+    final val X_Copy_From = HeaderKey[String](http.PithosHeader.X_Copy_From)
 
-    final val X_Container_Block_Hash = HeaderKey[String](Headers.Pithos.X_Container_Block_Hash)
-    final val X_Container_Block_Size = HeaderKey[Long](Headers.Pithos.X_Container_Block_Size)
-    final val X_Container_Object_Meta = HeaderKey[String](Headers.Pithos.X_Container_Object_Meta)
-    final val X_Container_Object_Count = HeaderKey[Int](Headers.Pithos.X_Container_Object_Count)
-    final val X_Container_Bytes_Used = HeaderKey[Long](Headers.Pithos.X_Container_Bytes_Used)
+    final val X_Container_Block_Hash = HeaderKey[String](http.PithosHeader.X_Container_Block_Hash)
+    final val X_Container_Block_Size = HeaderKey[Long](http.PithosHeader.X_Container_Block_Size)
+    final val X_Container_Object_Meta = HeaderKey[String](http.PithosHeader.X_Container_Object_Meta)
+    final val X_Container_Object_Count = HeaderKey[Int](http.PithosHeader.X_Container_Object_Count)
+    final val X_Container_Bytes_Used = HeaderKey[Long](http.PithosHeader.X_Container_Bytes_Used)
 
-    final val X_Account_Bytes_Used = HeaderKey[Long](Headers.Pithos.X_Account_Bytes_Used)
-    final val X_Account_Container_Count = HeaderKey[Int](Headers.Pithos.X_Account_Container_Count)
-    final val X_Account_Policy_Quota = HeaderKey[Long](Headers.Pithos.X_Account_Policy_Quota)
-    final val X_Account_Policy_Versioning = HeaderKey[String](Headers.Pithos.X_Account_Policy_Versioning)
+    final val X_Account_Bytes_Used = HeaderKey[Long](http.PithosHeader.X_Account_Bytes_Used)
+    final val X_Account_Container_Count = HeaderKey[Int](http.PithosHeader.X_Account_Container_Count)
+    final val X_Account_Policy_Quota = HeaderKey[Long](http.PithosHeader.X_Account_Policy_Quota)
+    final val X_Account_Policy_Versioning = HeaderKey[String](http.PithosHeader.X_Account_Policy_Versioning)
 
-    final val X_Object_Hash = HeaderKey[String](Headers.Pithos.X_Object_Hash)
-    final val X_Object_UUID = HeaderKey[String](Headers.Pithos.X_Object_UUID)
-    final val X_Object_Version = HeaderKey[String](Headers.Pithos.X_Object_Version)
-    final val X_Object_Version_Timestamp = HeaderKey[ParsedDate](Headers.Pithos.X_Object_Version_Timestamp)
-    final val X_Object_Modified_By = HeaderKey[String](Headers.Pithos.X_Object_Modified_By)
-    final val X_Object_Manifest = HeaderKey[String](Headers.Pithos.X_Object_Manifest)
-    final val X_Object_Sharing = HeaderKey[String](Headers.Pithos.X_Object_Sharing)
-    final val X_Object_Shared_By = HeaderKey[String](Headers.Pithos.X_Object_Shared_By)
-    final val X_Object_Allowed_To = HeaderKey[String](Headers.Pithos.X_Object_Allowed_To)
-    final val X_Object_Public = HeaderKey[String](Headers.Pithos.X_Object_Public)
-    final val X_Object_Meta_Star = HeaderKey[String](Headers.Pithos.X_Object_Meta_Star)
-    final val X_Source_Account = HeaderKey[String](Headers.Pithos.X_Source_Account)
+    final val X_Object_Hash = HeaderKey[String](http.PithosHeader.X_Object_Hash)
+    final val X_Object_UUID = HeaderKey[String](http.PithosHeader.X_Object_UUID)
+    final val X_Object_Version = HeaderKey[String](http.PithosHeader.X_Object_Version)
+    final val X_Object_Version_Timestamp = HeaderKey[ParsedDate](http.PithosHeader.X_Object_Version_Timestamp)
+    final val X_Object_Modified_By = HeaderKey[String](http.PithosHeader.X_Object_Modified_By)
+    final val X_Object_Manifest = HeaderKey[String](http.PithosHeader.X_Object_Manifest)
+    final val X_Object_Sharing = HeaderKey[String](http.PithosHeader.X_Object_Sharing)
+    final val X_Object_Shared_By = HeaderKey[String](http.PithosHeader.X_Object_Shared_By)
+    final val X_Object_Allowed_To = HeaderKey[String](http.PithosHeader.X_Object_Allowed_To)
+    final val X_Object_Public = HeaderKey[String](http.PithosHeader.X_Object_Public)
+    final val X_Object_Meta_Star = HeaderKey[String](http.PithosHeader.X_Object_Meta_Star)
+    final val X_Source_Account = HeaderKey[String](http.PithosHeader.X_Source_Account)
 
     final val AllKeys = Set[HeaderKey[_]](
       Destination,

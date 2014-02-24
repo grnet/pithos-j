@@ -35,10 +35,9 @@
 
 package gr.grnet.pithosj.core.command
 
+import gr.grnet.common.http.{ContentTypes, Method}
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.http.{ContentTypes, Method}
-import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
-import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.pithosj.core.keymap.HeaderKeys
 
 /**
  *

@@ -36,11 +36,12 @@
 package gr.grnet.pithosj.core
 
 import com.ning.http.client.AsyncHttpClient
-import gr.grnet.pithosj.core.date.DateParsers
-import gr.grnet.pithosj.core.keymap.{HeaderKey, HeaderKeys, KeyMap}
+import gr.grnet.common.date.DateParsers
+import gr.grnet.pithosj.core.keymap.HeaderKeys
 import java.util
 import java.util.concurrent.{TimeUnit, Future}
 import org.slf4j.LoggerFactory
+import gr.grnet.common.keymap.{HeaderKey, KeyMap}
 
 /**
  *

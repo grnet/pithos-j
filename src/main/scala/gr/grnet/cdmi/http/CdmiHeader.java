@@ -33,13 +33,26 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.http;
+
+import gr.grnet.common.http.IHeader;
 
 /**
- * Enumeration for HTTP methods.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
-public enum Method {
-  HEAD, GET, POST, PUT, DELETE, OPTIONS, COPY
+* @author Christos KK Loverdos <loverdos@gmail.com>
+*/
+public enum CdmiHeader implements IHeader {
+    X_CDMI_Specification_Version("X-CDMI-Specification-Version"), // 8.2.4
+    X_CDMI_Partial("X-CDMI-Partial"); // 8.2.4
+
+    private final String headerName;
+
+    CdmiHeader(String headerName) {
+        this.headerName = headerName;
+    }
+
+
+    @Override
+    public String headerName() {
+        return this.headerName;
+    }
 }

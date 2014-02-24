@@ -33,12 +33,29 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.common.http;
 
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+public enum StdHeader implements IHeader {
+    Content_Type("Content-Type"),
+    Content_Length("Content-Length"),
+    Content_Encoding("Content-Encoding"),
+    Content_Disposition("Content-Disposition"),
+    Content_Language("Content-Language"),
+    Date("Date"),
+    Last_Modified("Last-Modified"),
+    ETag("ETag"),
+    Server("Server");
 
+    private final String headerName;
+
+    StdHeader(String headerName) {
+        this.headerName = headerName;
+    }
+
+    public String headerName() {
+        return headerName;
+    }
 }

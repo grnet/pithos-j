@@ -35,8 +35,8 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.command.result.Result
 import scala.concurrent.Future
+import gr.grnet.common.http.Result
 
 /**
  * A [[gr.grnet.pithosj.core.command.CommandExecutor]] is responsible to synchronously execute

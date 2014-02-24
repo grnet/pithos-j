@@ -36,11 +36,11 @@
 package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
+import gr.grnet.common.date.DateParsers
+import gr.grnet.common.http.Method
+import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.result.Result
-import gr.grnet.pithosj.core.date.DateParsers
-import gr.grnet.pithosj.core.http.Method
-import gr.grnet.pithosj.core.keymap.{RequestParamKeys, HeaderKeys, ResultKeys, KeyMap}
+import gr.grnet.pithosj.core.keymap.{RequestParamKeys, HeaderKeys, ResultKeys}
 import java.io.OutputStream
 
 /**
@@ -121,7 +121,7 @@ case class GetObject(
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
    * and its associated non-String value are recorded in the provided `keyMap`.
    */
   override protected def tryParseNonStringResponseHeader(

@@ -35,10 +35,10 @@
 
 package gr.grnet.pithosj.core.command
 
+import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.result.Result
-import gr.grnet.pithosj.core.http.{FileRequestBody, Method}
-import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
+import gr.grnet.pithosj.core.http.FileRequestBody
+import gr.grnet.pithosj.core.keymap.HeaderKeys
 import java.io.File
 
 /**

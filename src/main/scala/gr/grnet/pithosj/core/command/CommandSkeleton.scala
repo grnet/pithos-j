@@ -39,9 +39,10 @@ import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
 import gr.grnet.pithosj.core.{Helpers, Paths}
 import gr.grnet.pithosj.core.http.{RequestBody}
-import gr.grnet.pithosj.core.keymap.{ResultKeys, ResultKey, HeaderKey, HeaderKeys, KeyMap}
+import gr.grnet.pithosj.core.keymap.{ResultKeys, ResultKey, HeaderKeys}
 import org.slf4j.LoggerFactory
-import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.common.http.{Result, CommandDescriptor}
+import gr.grnet.common.keymap.{HeaderKey, KeyMap}
 
 /**
  *
@@ -84,7 +85,7 @@ trait CommandSkeleton extends Command {
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * The parsed [[HeaderKey]]
    * and its associated non-String value are recorded in the provided `keyMap`.
    */
   protected def tryParseNonStringResponseHeader(
@@ -105,7 +106,7 @@ trait CommandSkeleton extends Command {
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.pithosj.core.keymap.HeaderKey]]
+   * The parsed [[HeaderKey]]
    * and its associated non-String value are recorded in the provided `keyMap`.
    */
   protected def tryParseNonStringResponseHeader(

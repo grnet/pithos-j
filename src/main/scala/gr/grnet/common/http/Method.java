@@ -33,27 +33,13 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.date
-
-import java.util.Date
+package gr.grnet.common.http;
 
 /**
- * A [[java.util.Date]] parser.
+ * Enumeration for HTTP methods.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait DateParser {
-  /**
-   * The description of this parser. This can be either a free text description or,
-   * in case of a [[java.text.DateFormat]]-based implementation, the format string.
-   */
-  def description: String
-
-  /**
-   * Tries to parse the given date.
-   * The implementation must not throw an [[java.lang.Exception]]. In particular,
-   * it must not throw a [[java.text.ParseException]], which is common in the case of a
-   * [[java.text.SimpleDateFormat]].
-   */
-  def parse(source: String): Option[Date]
+public enum Method {
+    HEAD, GET, POST, PUT, DELETE, OPTIONS, COPY
 }

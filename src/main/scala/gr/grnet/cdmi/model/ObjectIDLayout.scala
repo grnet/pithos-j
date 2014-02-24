@@ -33,28 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
-package result
-
-import gr.grnet.pithosj.core.keymap.KeyMap
+package gr.grnet.cdmi.model
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class Result(
-    originator: CommandDescriptor,
-    statusCode: Int,
-    statusText: String,
-    startMillis: Long,
-    stopMillis: Long,
-    resultData: KeyMap // response headers and other command-specific result data
-) {
-  def completionMillis = stopMillis - startMillis
-
-  def isSuccess: Boolean = originator.successCodes(statusCode)
-
-  def is200 = statusCode == 200
-  def is201 = statusCode == 201
-  def is204 = statusCode == 204
+trait ObjectIDLayout {
+  def reserved0: Byte
+  def enterpriseNumber: Int // high byte is always 0
+  def reserved4: Byte
+  def length: Byte
+  def crc: Int              // Highest 2 bytes are always zero
+  def data: Array[Byte]     // 32 bytes long
 }

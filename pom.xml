@@ -90,6 +90,18 @@
     </dependency>
 
     <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-core_2.10</artifactId>
+      <version>6.12.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>twitter-server_2.10</artifactId>
+      <version>1.5.1</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>

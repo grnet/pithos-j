@@ -33,25 +33,13 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
-
-import gr.grnet.pithosj.core.http.IHeader
+package gr.grnet.cdmi.api
 
 /**
- * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for HTTP headers.
+ * API for domain objects (used for administration: user auth and accounting).
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final class HeaderKey[T: Manifest] private[keymap](
-    override val name: String
-) extends PithosKey[T](name)
+trait CdmiDomainApi {
 
-object HeaderKey {
-  def apply[T: Manifest](name: String): HeaderKey[T] = {
-    new HeaderKey[T](name)
-  }
-
-  def apply[T: Manifest](header: IHeader): HeaderKey[T] = {
-    new HeaderKey[T](header.headerName())
-  }
 }

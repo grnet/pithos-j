@@ -35,11 +35,13 @@
 
 package gr.grnet.pithosj.core.command
 
+import gr.grnet.common.date.DateParsers
+import gr.grnet.common.http.Method
+import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.result.{ContainerResultData, Result}
-import gr.grnet.pithosj.core.date.DateParsers
-import gr.grnet.pithosj.core.http.{ResponseFormats, Method}
-import gr.grnet.pithosj.core.keymap.{ResultKeys, RequestParamKeys, KeyMap}
+import gr.grnet.pithosj.core.command.result.ContainerResultData
+import gr.grnet.pithosj.core.http.ResponseFormats
+import gr.grnet.pithosj.core.keymap.{ResultKeys, RequestParamKeys}
 import scala.xml.XML
 
 /**

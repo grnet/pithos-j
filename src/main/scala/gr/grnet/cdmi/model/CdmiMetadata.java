@@ -33,12 +33,18 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.model;
 
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
-
+public enum CdmiMetadata {
+    cdmi_ctime,
+    cdmi_mtime,
+    cdmi_atime,
+    cdmi_mcount,
+    cdmi_acount,
+    mimetype,
+    filename,
+    metadataFilename,
 }

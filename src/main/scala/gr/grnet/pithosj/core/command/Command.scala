@@ -37,10 +37,12 @@ package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.pithosj.core.http.{RequestBody, Method}
-import gr.grnet.pithosj.core.keymap.{ResultKey, PithosKey, HeaderKey, KeyMap}
-import gr.grnet.pithosj.core.{Paths, ServiceInfo}
-import gr.grnet.pithosj.core.command.result.Result
+import gr.grnet.common.http.Method
+import gr.grnet.common.http.{Result, CommandDescriptor}
+import gr.grnet.common.keymap.{HeaderKey, KeyMap}
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.http.RequestBody
+import gr.grnet.pithosj.core.keymap.ResultKey
 
 /**
  * A command to be executed via the Pithos+ REST API.

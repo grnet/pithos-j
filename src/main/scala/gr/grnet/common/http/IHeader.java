@@ -33,12 +33,13 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.common.http;
 
 /**
+ * Marker interface for an <code>HTTP</code> header.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
-
+public interface IHeader {
+    public String headerName();
 }

@@ -35,10 +35,10 @@
 
 package gr.grnet.pithosj.core
 
-import gr.grnet.pithosj.core.command.result.Result
-import gr.grnet.pithosj.core.keymap.KeyMap
 import java.io.{File, OutputStream}
 import scala.concurrent.Future
+import gr.grnet.common.keymap.KeyMap
+import gr.grnet.common.http.Result
 
 /**
  * Provides the Pithos API.

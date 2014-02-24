@@ -33,12 +33,16 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.api
+
+import java.io.OutputStream
+import scala.concurrent.Future
 
 /**
+ * Extended (GRNET supported) data API.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
-
+trait CdmiDataApiEx {
+  def getObjectByPath(path: String, out: OutputStream): Future[Unit]
 }

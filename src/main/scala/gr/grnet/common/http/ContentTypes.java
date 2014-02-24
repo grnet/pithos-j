@@ -33,12 +33,27 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.common.http;
 
 /**
+ * Provides <code>HTTP</code> content types used by the library.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+public enum ContentTypes {
+    Application_Directory("application/directory"),
+    Application_CdmiCapability("application/cdmi-capability"),
+    Application_CdmiDomain("application/vnd.org.snia.cdmi-object"),
+    Application_CdmiContainer("application/cdmi-container"),
+    Application_CdmiData("application/cdmi-object");
 
+    private final String contentType;
+
+    ContentTypes(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String contentType() {
+        return contentType;
+    }
 }

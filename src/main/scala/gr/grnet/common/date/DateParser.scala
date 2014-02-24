@@ -33,12 +33,27 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.common.date
+
+import java.util.Date
 
 /**
+ * A [[java.util.Date]] parser.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+trait DateParser {
+  /**
+   * The description of this parser. This can be either a free text description or,
+   * in case of a [[java.text.DateFormat]]-based implementation, the format string.
+   */
+  def description: String
 
+  /**
+   * Tries to parse the given date.
+   * The implementation must not throw an [[java.lang.Exception]]. In particular,
+   * it must not throw a [[java.text.ParseException]], which is common in the case of a
+   * [[java.text.SimpleDateFormat]].
+   */
+  def parse(source: String): Option[Date]
 }

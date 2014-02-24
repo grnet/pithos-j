@@ -38,11 +38,12 @@ package asynchttp
 
 import com.ning.http.client.{AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
 import gr.grnet.pithosj.core.Helpers.RequestBuilder
-import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
-import gr.grnet.pithosj.core.http.Method.{OPTIONS, DELETE, POST, PUT, GET, HEAD, COPY}
-import gr.grnet.pithosj.core.http.{Method, InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
+import gr.grnet.common.http.Method
+import Method.{OPTIONS, DELETE, POST, PUT, GET, HEAD, COPY}
+import gr.grnet.pithosj.core.http.{InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
 import scala.concurrent.Promise
+import gr.grnet.common.http.Result
 
 /**
  *

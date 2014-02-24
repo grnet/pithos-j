@@ -33,16 +33,13 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.date
+package gr.grnet.cdmi.api
 
-import java.util.Date
 
 /**
- * Represents an attempt to parse a [[java.util.Date]].
- * An attempt is successful iff `date` is [[scala.Some]] value.
+ * API for data objects.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ParsedDate(date: Option[Date], originalValue: String, parser: DateParser) {
-  def isParsed: Boolean = date.isDefined
+trait CdmiDataApi {
 }

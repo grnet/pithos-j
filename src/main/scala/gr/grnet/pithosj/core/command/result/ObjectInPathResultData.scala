@@ -35,7 +35,7 @@
 
 package gr.grnet.pithosj.core.command.result
 
-import gr.grnet.pithosj.core.date.ParsedDate
+import gr.grnet.common.date.ParsedDate
 
 /**
  * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListObjectsInPath]] command.

@@ -35,9 +35,11 @@
 
 package gr.grnet.pithosj.core.keymap
 
+import gr.grnet.common.http.Result
+
 
 /**
- * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for the [[gr.grnet.pithosj.core.command.result.Result]]s
+ * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for the [[Result]]s
  * of [[gr.grnet.pithosj.core.command.Command]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>

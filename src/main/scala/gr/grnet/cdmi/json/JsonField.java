@@ -33,12 +33,40 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.json;
 
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
+public enum JsonField {
+    mimetype("mimetype"),   // 8.2.5/Table 8
+    metadata("metadata"),   // 8.2.5/Table 8
+    domainURI("domainURI"), // 8.2.5/Table 8
+    deserialize("deserialize"), // 8.2.5/Table 8
+    serialize("serialize"), // 8.2.5/Table 8
+    copy("copy"), // 8.2.5/Table 8
+    move("move"), // 8.2.5/Table 8
+    reference("reference"), // 8.2.5/Table 8
+    deserializevalue("deserializevalue"), // 8.2.5/Table 8
+    valuetransferencoding("valuetransferencoding"), // 8.2.5/Table 8
+    value("value"), // 8.2.5/Table 8
 
+    objectType("objectType"), // 8.2.7/Table 10
+    objectID("objectID"), // 8.2.7/Table 10
+    objectName("objectName"), // 8.2.7/Table 10
+    parentURI("parentURI"), // 8.2.7/Table 10
+    parentID("parentID"), // 8.2.7/Table 10
+    capabilitiesURI("capabilitiesURI"), // 8.2.7/Table 10
+    completionStatus("completionStatus"), // 8.2.7/Table 10, "Processing", "Completed", "Error"
+    percentComplete("percentComplete"), // 8.2.7/Table 10
+
+    valuerange("valuerange"); // 8.4.6/Table 16
+
+
+
+    public final String jsonField;
+
+    JsonField(String jsonField) {
+        this.jsonField = jsonField;
+    }
 }

@@ -33,12 +33,20 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.common.http
+
+import gr.grnet.common.keymap.KeyMap
 
 /**
+ * A high-level view of a Pithos+ HTTP request details.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
-
-}
+case class CommandDescriptor(
+  userID: String,
+  requestURL: String,
+  httpMethod: Method,
+  requestHeaders: KeyMap,
+  queryParameters: KeyMap,
+  successCodes: Set[Int]
+)

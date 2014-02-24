@@ -35,12 +35,12 @@
 
 package gr.grnet.pithosj.core
 
-import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.command.{Command, CommandExecutor, ListObjectsInPath, DeleteObject, PutObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, CopyObject}
-import gr.grnet.pithosj.core.keymap.KeyMap
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 import scala.concurrent.Future
+import gr.grnet.common.keymap.KeyMap
+import gr.grnet.common.http.Result
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.core.Pithos]].
