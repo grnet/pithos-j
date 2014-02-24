@@ -39,4 +39,4 @@ package gr.grnet.pithosj.core
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ConnectionInfo(serverURL: String, userID: String, userToken: String)
+case class ServiceInfo(serviceURL: String, uuid: String, token: String)

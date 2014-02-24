@@ -57,6 +57,15 @@ object HeaderKeys {
   final val AllKeys = Standard.AllKeys ++ Pithos.AllKeys
 
   object Standard {
+    final val Content_Type = HeaderKey[String](Headers.Standard.Content_Type)
+    final val Content_Length = HeaderKey[Long](Headers.Standard.Content_Length)
+    final val Content_Encoding = HeaderKey[String](Headers.Standard.Content_Encoding)
+    final val Content_Disposition = HeaderKey[String](Headers.Standard.Content_Disposition)
+    final val Content_Language = HeaderKey[String](Headers.Standard.Content_Language)
+    final val Date = HeaderKey[ParsedDate](Headers.Standard.Date)
+    final val Last_Modified = HeaderKey[ParsedDate](Headers.Standard.Last_Modified)
+    final val ETag = HeaderKey[String](Headers.Standard.ETag)
+    final val Server = HeaderKey[String](Headers.Standard.Server)
 
     final val AllKeys = Set[HeaderKey[_]](
       Content_Type,
@@ -68,46 +77,9 @@ object HeaderKeys {
       ETag,
       Server
     )
-
-    final val Content_Type = HeaderKey[String](Headers.Standard.Content_Type)
-    final val Content_Length = HeaderKey[Long](Headers.Standard.Content_Length)
-    final val Content_Encoding = HeaderKey[String](Headers.Standard.Content_Encoding)
-    final val Content_Disposition = HeaderKey[String](Headers.Standard.Content_Disposition)
-    final val Content_Language = HeaderKey[String](Headers.Standard.Content_Language)
-    final val Date = HeaderKey[ParsedDate](Headers.Standard.Date)
-    final val Last_Modified = HeaderKey[ParsedDate](Headers.Standard.Last_Modified)
-    final val ETag = HeaderKey[String](Headers.Standard.ETag)
-    final val Server = HeaderKey[String](Headers.Standard.Server)
   }
 
   object Pithos {
-    final val AllKeys = Set[HeaderKey[_]](
-      Destination,
-      X_Auth_Token,
-      X_Copy_From,
-      X_Container_Block_Hash,
-      X_Container_Block_Size,
-      X_Container_Bytes_Used,
-      X_Container_Object_Count,
-      X_Container_Object_Meta,
-      X_Account_Bytes_Used,
-      X_Account_Container_Count,
-      X_Account_Policy_Quota,
-      X_Account_Policy_Versioning,
-      X_Object_Hash,
-      X_Object_UUID,
-      X_Object_Version,
-      X_Object_Version_Timestamp,
-      X_Object_Modified_By,
-      X_Object_Manifest,
-      X_Object_Sharing,
-      X_Object_Shared_By,
-      X_Object_Allowed_To,
-      X_Object_Public,
-      X_Object_Meta_Star,
-      X_Source_Account
-    )
-
     final val Destination = HeaderKey[String](Headers.Pithos.Destination)
 
     final val X_Auth_Token = HeaderKey[String](Headers.Pithos.X_Auth_Token)
@@ -138,5 +110,31 @@ object HeaderKeys {
     final val X_Object_Meta_Star = HeaderKey[String](Headers.Pithos.X_Object_Meta_Star)
     final val X_Source_Account = HeaderKey[String](Headers.Pithos.X_Source_Account)
 
+    final val AllKeys = Set[HeaderKey[_]](
+      Destination,
+      X_Auth_Token,
+      X_Copy_From,
+      X_Container_Block_Hash,
+      X_Container_Block_Size,
+      X_Container_Bytes_Used,
+      X_Container_Object_Count,
+      X_Container_Object_Meta,
+      X_Account_Bytes_Used,
+      X_Account_Container_Count,
+      X_Account_Policy_Quota,
+      X_Account_Policy_Versioning,
+      X_Object_Hash,
+      X_Object_UUID,
+      X_Object_Version,
+      X_Object_Version_Timestamp,
+      X_Object_Modified_By,
+      X_Object_Manifest,
+      X_Object_Sharing,
+      X_Object_Shared_By,
+      X_Object_Allowed_To,
+      X_Object_Public,
+      X_Object_Meta_Star,
+      X_Source_Account
+    )
   }
 }

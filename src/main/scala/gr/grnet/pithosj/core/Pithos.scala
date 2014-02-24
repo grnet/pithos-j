@@ -46,44 +46,44 @@ import scala.concurrent.Future
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait Pithos {
-  def ping(connInfo: ConnectionInfo): Future[Result]
+  def ping(serviceInfo: ServiceInfo): Future[Result]
 
-  def getAccountInfo(connInfo: ConnectionInfo): Future[Result]
+  def getAccountInfo(serviceInfo: ServiceInfo): Future[Result]
 
-  def replaceAccountMeta(connInfo: ConnectionInfo, meta: KeyMap): Future[Result]
+  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: KeyMap): Future[Result]
 
-  def deleteAccountMeta(connInfo: ConnectionInfo, metaKey: String): Future[Result]
+  def deleteAccountMeta(serviceInfo: ServiceInfo, metaKey: String): Future[Result]
 
-  def listContainers(connInfo: ConnectionInfo): Future[Result]
+  def listContainers(serviceInfo: ServiceInfo): Future[Result]
 
-  def createContainer(connInfo: ConnectionInfo, container: String): Future[Result]
+  def createContainer(serviceInfo: ServiceInfo, container: String): Future[Result]
 
-  def getContainerInfo(connInfo: ConnectionInfo, container: String): Future[Result]
+  def getContainerInfo(serviceInfo: ServiceInfo, container: String): Future[Result]
 
-  def deleteContainer(connInfo: ConnectionInfo, container: String): Future[Result]
+  def deleteContainer(serviceInfo: ServiceInfo, container: String): Future[Result]
 
   def createDirectory(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String
   ): Future[Result]
 
-  def getObjectMeta(connInfo: ConnectionInfo, path: String): Future[Result]
+  def getObjectMeta(serviceInfo: ServiceInfo, path: String): Future[Result]
 
   def deleteObjectMeta(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       path: String,
       metaKey: String
   ): Future[Result]
 
   def replaceObjectMeta(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       path: String,
       meta: KeyMap
   ): Future[Result]
 
   def getObject(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String,
       version: String,
@@ -91,13 +91,13 @@ trait Pithos {
   ): Future[Result]
 
   def getObjectInfo(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String
   ): Future[Result]
 
   def putObject(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String,
       in: File,
@@ -108,13 +108,13 @@ trait Pithos {
    * Delete a file or folder.
    */
   def deleteObject(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String
   ): Future[Result]
 
   def copyObject(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       fromContainer: String,
       fromPath: String,
       toContainer: String,
@@ -122,7 +122,7 @@ trait Pithos {
   ): Future[Result]
 
   def moveObject(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       fromContainer: String,
       fromPath: String,
       toContainer: String,
@@ -130,12 +130,12 @@ trait Pithos {
   ): Future[Result]
 
   def listObjectsInContainer(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String
   ): Future[Result]
 
   def listObjectsInPath(
-      connInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String
   ): Future[Result]

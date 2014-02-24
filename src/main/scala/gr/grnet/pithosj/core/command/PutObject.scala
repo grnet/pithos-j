@@ -35,7 +35,7 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.http.{FileRequestBody, Method}
 import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
@@ -46,7 +46,7 @@ import java.io.File
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class PutObject(
-    connectionInfo: ConnectionInfo,
+    serviceInfo: ServiceInfo,
     container: String,
     path: String,
     file: File,
@@ -71,7 +71,7 @@ case class PutObject(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
   override val requestBodyOpt = Some(FileRequestBody(file))
 }

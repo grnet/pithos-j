@@ -50,6 +50,8 @@ case class Result(
     stopMillis: Long,
     resultData: KeyMap // response headers and other command-specific result data
 ) {
+  def completionMillis = stopMillis - startMillis
+
   def isSuccess: Boolean = originator.successCodes(statusCode)
 
   def is200 = statusCode == 200

@@ -35,7 +35,7 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.http.Method
 import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
 
@@ -43,7 +43,7 @@ import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetAccountInfo(connectionInfo: ConnectionInfo) extends CommandSkeleton {
+case class GetAccountInfo(serviceInfo: ServiceInfo) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -58,7 +58,7 @@ case class GetAccountInfo(connectionInfo: ConnectionInfo) extends CommandSkeleto
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(connectionInfo.userID)
+  def serverURLPathElements = Seq(serviceInfo.uuid)
 
   /**
    * Type-safe keys for `HTTP` response headers that are specific to this command.

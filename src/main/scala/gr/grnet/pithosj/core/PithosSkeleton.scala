@@ -68,48 +68,48 @@ trait PithosSkeleton extends Pithos {
     }
   }
 
-  def ping(connectionInfo: ConnectionInfo) = {
-    call(Ping(connectionInfo))
+  def ping(serviceInfo: ServiceInfo) = {
+    call(Ping(serviceInfo))
   }
 
-  def getAccountInfo(connectionInfo: ConnectionInfo) = {
-    call(GetAccountInfo(connectionInfo))
+  def getAccountInfo(serviceInfo: ServiceInfo) = {
+    call(GetAccountInfo(serviceInfo))
   }
 
-  def replaceAccountMeta(connectionInfo: ConnectionInfo, meta: KeyMap) = ???
+  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: KeyMap) = ???
 
-  def deleteAccountMeta(connectionInfo: ConnectionInfo, metaKey: String) = ???
+  def deleteAccountMeta(serviceInfo: ServiceInfo, metaKey: String) = ???
 
-  def listContainers(connectionInfo: ConnectionInfo) = {
-    call(ListContainers(connectionInfo))
+  def listContainers(serviceInfo: ServiceInfo) = {
+    call(ListContainers(serviceInfo))
   }
 
-  def createContainer(connectionInfo: ConnectionInfo, container: String) = ???
+  def createContainer(serviceInfo: ServiceInfo, container: String) = ???
 
-  def getContainerInfo(connectionInfo: ConnectionInfo, container: String) = ???
+  def getContainerInfo(serviceInfo: ServiceInfo, container: String) = ???
 
-  def deleteContainer(connectionInfo: ConnectionInfo, container: String) = ???
+  def deleteContainer(serviceInfo: ServiceInfo, container: String) = ???
 
-  def createDirectory(connectionInfo: ConnectionInfo, container: String, path: String) = {
-    call(CreateDirectory(connectionInfo, container, path))
+  def createDirectory(serviceInfo: ServiceInfo, container: String, path: String) = {
+    call(CreateDirectory(serviceInfo, container, path))
   }
 
-  def getObjectMeta(connectionInfo: ConnectionInfo, path: String) = ???
+  def getObjectMeta(serviceInfo: ServiceInfo, path: String) = ???
 
-  def deleteObjectMeta(connectionInfo: ConnectionInfo, path: String, metaKey: String) = ???
+  def deleteObjectMeta(serviceInfo: ServiceInfo, path: String, metaKey: String) = ???
 
-  def replaceObjectMeta(connectionInfo: ConnectionInfo, path: String, meta: KeyMap) = ???
+  def replaceObjectMeta(serviceInfo: ServiceInfo, path: String, meta: KeyMap) = ???
 
-  def getObject(connectionInfo: ConnectionInfo, container: String, path: String, version: String, out: OutputStream) = {
-    call(GetObject(connectionInfo, container, path, version, out))
+  def getObject(serviceInfo: ServiceInfo, container: String, path: String, version: String, out: OutputStream) = {
+    call(GetObject(serviceInfo, container, path, version, out))
   }
 
-  def getObjectInfo(connectionInfo: ConnectionInfo, container: String, path: String) = {
-    call(GetObjectInfo(connectionInfo, container, path))
+  def getObjectInfo(serviceInfo: ServiceInfo, container: String, path: String) = {
+    call(GetObjectInfo(serviceInfo, container, path))
   }
 
   def putObject(
-      connectionInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String,
       file: File,
@@ -118,19 +118,20 @@ trait PithosSkeleton extends Pithos {
     val contentType = _contentType match {
       case null ⇒
         URLConnection.guessContentTypeFromName(path)
-      case contentType ⇒
-        contentType
+
+      case _ ⇒
+        _contentType
     }
 
-    call(PutObject(connectionInfo, container, path, file, contentType))
+    call(PutObject(serviceInfo, container, path, file, contentType))
   }
 
-  def deleteObject(connectionInfo: ConnectionInfo, container: String, path: String) = {
-    call(DeleteObject(connectionInfo, container, path))
+  def deleteObject(serviceInfo: ServiceInfo, container: String, path: String) = {
+    call(DeleteObject(serviceInfo, container, path))
   }
 
   def copyObject(
-      connectionInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       fromContainer: String,
       fromPath: String,
       _toContainer: String,
@@ -144,28 +145,28 @@ trait PithosSkeleton extends Pithos {
     toContainer.charAt(0)
     toPath.charAt(0)
 
-    call(CopyObject(connectionInfo, fromContainer, fromPath, toContainer, toPath))
+    call(CopyObject(serviceInfo, fromContainer, fromPath, toContainer, toPath))
   }
 
   def moveObject(
-      connectionInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       fromContainer: String,
       fromObj: String,
       toContainer: String,
       toObj: String
   ) = ???
 
-  def listObjectsInContainer(connectionInfo: ConnectionInfo, container: String) = {
-    listObjectsInPath(connectionInfo, container, "")
+  def listObjectsInContainer(serviceInfo: ServiceInfo, container: String) = {
+    listObjectsInPath(serviceInfo, container, "")
   }
 
   def listObjectsInPath(
-      connectionInfo: ConnectionInfo,
+      serviceInfo: ServiceInfo,
       container: String,
       path: String
   ) = {
     require(path ne null, "path ne null")
 
-    call(ListObjectsInPath(connectionInfo, container, path))
+    call(ListObjectsInPath(serviceInfo, container, path))
   }
 }

@@ -37,7 +37,7 @@ package gr.grnet.pithosj.core.command
 
 import gr.grnet.pithosj.core.http.Method
 import gr.grnet.pithosj.core.keymap.HeaderKeys
-import gr.grnet.pithosj.core.{ConnectionInfo, Paths}
+import gr.grnet.pithosj.core.{ServiceInfo, Paths}
 
 /**
  * Copies an object around.
@@ -45,7 +45,7 @@ import gr.grnet.pithosj.core.{ConnectionInfo, Paths}
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class CopyObject(
-    connectionInfo: ConnectionInfo,
+    serviceInfo: ServiceInfo,
     fromContainer: String,
     fromPath: String,
     toContainer: String,

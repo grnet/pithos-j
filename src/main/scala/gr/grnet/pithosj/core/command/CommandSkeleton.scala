@@ -119,7 +119,7 @@ trait CommandSkeleton extends Command {
    * The URL does not contain any needed parameters.
    */
   def serverURLExcludingParameters: String  = {
-    Paths.buildWithFirst(connectionInfo.serverURL, serverURLPathElements: _*)
+    Paths.buildWithFirst(serviceInfo.serviceURL, serverURLPathElements: _*)
   }
 
   /**
@@ -129,14 +129,14 @@ trait CommandSkeleton extends Command {
 
   protected def newDefaultRequestHeaders: KeyMap = {
     KeyMap().
-      set(HeaderKeys.Pithos.X_Auth_Token, connectionInfo.userToken)
+      set(HeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)
   }
 
   protected def newQueryParameters: KeyMap = KeyMap()
 
   def descriptor: CommandDescriptor = {
     CommandDescriptor(
-      userID = connectionInfo.userID,
+      userID = serviceInfo.uuid,
       requestURL = serverURLExcludingParameters,
       httpMethod = httpMethod,
       requestHeaders = requestHeaders,

@@ -35,7 +35,7 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.{Result, ObjectInPathResultData}
 import gr.grnet.pithosj.core.date.DateParsers
 import gr.grnet.pithosj.core.http.{ResponseFormats, Method}
@@ -47,7 +47,7 @@ import scala.xml.XML
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class ListObjectsInPath(
-    connectionInfo: ConnectionInfo,
+    serviceInfo: ServiceInfo,
     container: String,
     path: String
 ) extends CommandSkeleton {
@@ -65,7 +65,7 @@ case class ListObjectsInPath(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(connectionInfo.userID, container)
+  def serverURLPathElements = Seq(serviceInfo.uuid, container)
 
 
   override val queryParameters = {

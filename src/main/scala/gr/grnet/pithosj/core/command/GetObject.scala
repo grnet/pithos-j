@@ -36,7 +36,7 @@
 package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
-import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.Result
 import gr.grnet.pithosj.core.date.DateParsers
 import gr.grnet.pithosj.core.http.Method
@@ -48,7 +48,7 @@ import java.io.OutputStream
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class GetObject(
-    connectionInfo: ConnectionInfo,
+    serviceInfo: ServiceInfo,
     container: String,
     path: String,
     version: String,
@@ -90,7 +90,7 @@ case class GetObject(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
   /**
    * Type-safe keys for `HTTP` response headers that are specific to this command.

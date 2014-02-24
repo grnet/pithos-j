@@ -39,7 +39,7 @@ import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
 import gr.grnet.pithosj.core.http.{RequestBody, Method}
 import gr.grnet.pithosj.core.keymap.{ResultKey, PithosKey, HeaderKey, KeyMap}
-import gr.grnet.pithosj.core.{Paths, ConnectionInfo}
+import gr.grnet.pithosj.core.{Paths, ServiceInfo}
 import gr.grnet.pithosj.core.command.result.Result
 
 /**
@@ -54,13 +54,13 @@ trait Command {
    * Specifies the target against which the command will be executed.
    * This includes the Pithos+ server and the Pithos+ user id and token.
    */
-  def connectionInfo: ConnectionInfo
+  def serviceInfo: ServiceInfo
 
   /**
-   * The account ID for this command. This is the same as `connectionInfo.userID` and
+   * The account ID for this command. This is the same as `serviceInfo.uuid` and
    * is provided for convenience.
    */
-  def account: String = connectionInfo.userID
+  def account: String = serviceInfo.uuid
 
   /**
    * The HTTP method by which the command is implemented.

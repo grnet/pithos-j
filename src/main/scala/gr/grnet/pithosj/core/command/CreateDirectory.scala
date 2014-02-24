@@ -35,7 +35,7 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.http.{ContentTypes, Method}
 import gr.grnet.pithosj.core.keymap.{HeaderKeys, KeyMap}
 import gr.grnet.pithosj.core.command.result.Result
@@ -45,7 +45,7 @@ import gr.grnet.pithosj.core.command.result.Result
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class CreateDirectory(
-    connectionInfo: ConnectionInfo,
+    serviceInfo: ServiceInfo,
     container: String,
     path: String
 ) extends CommandSkeleton {
@@ -72,5 +72,5 @@ case class CreateDirectory(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(connectionInfo.userID, container, path)
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 }

@@ -35,7 +35,7 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.{ContainerResultData, Result}
 import gr.grnet.pithosj.core.date.DateParsers
 import gr.grnet.pithosj.core.http.{ResponseFormats, Method}
@@ -46,7 +46,7 @@ import scala.xml.XML
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleton {
+case class ListContainers(serviceInfo: ServiceInfo) extends CommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -69,7 +69,7 @@ case class ListContainers(connectionInfo: ConnectionInfo) extends CommandSkeleto
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(connectionInfo.userID)
+  def serverURLPathElements = Seq(serviceInfo.uuid)
 
   /**
    * The keys for extra result data pertaining to this command.

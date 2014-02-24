@@ -35,14 +35,14 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.ConnectionInfo
+import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.http.Method
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class Ping(connectionInfo: ConnectionInfo) extends CommandSkeleton {
+case class Ping(serviceInfo: ServiceInfo) extends CommandSkeleton {
   val httpMethod: Method = Method.HEAD
 
   val successCodes: Set[Int] = Set(204)
@@ -51,5 +51,5 @@ case class Ping(connectionInfo: ConnectionInfo) extends CommandSkeleton {
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  val serverURLPathElements = Seq(connectionInfo.userID)
+  val serverURLPathElements = Seq(serviceInfo.uuid)
 }
