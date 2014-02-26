@@ -33,18 +33,12 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.model;
+package gr.grnet.cdmi.model
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public enum CdmiMetadata {
-    cdmi_ctime,
-    cdmi_mtime,
-    cdmi_atime,
-    cdmi_mcount,
-    cdmi_acount,
-    mimetype,
-    filename,
-    metadataFilename,
+class CdmiDomainModel {
+
 }

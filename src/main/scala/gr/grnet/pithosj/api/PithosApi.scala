@@ -33,19 +33,20 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
+package gr.grnet.pithosj.api
 
+import gr.grnet.common.http.Result
+import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
 import java.io.{File, OutputStream}
 import scala.concurrent.Future
-import gr.grnet.common.keymap.KeyMap
-import gr.grnet.common.http.Result
 
 /**
  * Provides the Pithos API.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait Pithos {
+trait PithosApi {
   def ping(serviceInfo: ServiceInfo): Future[Result]
 
   def getAccountInfo(serviceInfo: ServiceInfo): Future[Result]

@@ -33,16 +33,16 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.api
+package gr.grnet.pithosj.impl.asynchttp
 
-import gr.grnet.cdmi.model.CdmiContainerModel
-import scala.concurrent.Future
+import com.ning.http.client.AsyncHttpClient
+import gr.grnet.pithosj.core.PithosSkeleton
 
 /**
- * API for container objects.
+ * Pithos+ client which uses [[com.ning.http.client.AsyncHttpClient]] for the HTTP calls.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait CdmiContainerApi {
-  def getRootContainers(): Future[List[String]]
+final class AsyncHttpPithosClient(http: AsyncHttpClient) extends PithosSkeleton {
+  protected val executor = new AsyncHttpCommandExecutor(http)
 }

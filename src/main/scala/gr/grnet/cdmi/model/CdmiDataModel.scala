@@ -33,13 +33,12 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core;
+package gr.grnet.cdmi.model
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public class PithosNotImplementedException extends PithosException {
-  public PithosNotImplementedException() {
-    super("");
-  }
+class CdmiDataModel {
+
 }

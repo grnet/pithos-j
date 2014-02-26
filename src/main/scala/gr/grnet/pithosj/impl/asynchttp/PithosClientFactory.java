@@ -33,16 +33,34 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.api
+package gr.grnet.pithosj.impl.asynchttp;
 
-import gr.grnet.cdmi.model.CdmiContainerModel
-import scala.concurrent.Future
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import gr.grnet.pithosj.api.PithosApi;
 
 /**
- * API for container objects.
- *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait CdmiContainerApi {
-  def getRootContainers(): Future[List[String]]
+public final class PithosClientFactory {
+  private PithosClientFactory() {}
+
+  public static AsyncHttpClient newDefaultAsyncHttpClient() {
+    final AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder().
+      setAllowPoolingConnection(true).
+      setAllowSslConnectionPool(true).
+      setCompressionEnabled(true).
+      setFollowRedirects(true).
+      setMaximumConnectionsTotal(20);
+
+    return new AsyncHttpClient(builder.build());
+  }
+
+  public static PithosApi newPithosClient(AsyncHttpClient asyncHttp) {
+    return new AsyncHttpPithosClient(asyncHttp);
+  }
+
+  public static PithosApi newPithosClient() {
+    return newPithosClient(newDefaultAsyncHttpClient());
+  }
 }

@@ -81,18 +81,18 @@
       <groupId>com.ning</groupId>
       <artifactId>async-http-client</artifactId>
       <version>1.7.23</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>netty</artifactId>
+          <groupId>io.netty</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>com.ckkloverdos</groupId>
       <artifactId>typedkey</artifactId>
       <version>0.7.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-core_2.10</artifactId>
-      <version>6.12.1</version>
     </dependency>
 
     <dependency>
@@ -112,7 +112,7 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.1.1</version>
-      <scope>test</scope>
+      <!--<scope>test</scope>-->
     </dependency>
   </dependencies>
 
@@ -122,7 +122,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>3.1.5</version>
+        <version>3.1.6</version>
         <configuration>
           <recompileMode>incremental</recompileMode>
           <!--<compileOrder>JavaThenScala</compileOrder>-->
@@ -151,6 +151,22 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>gr.grnet.cdmi.server.CdmiProxyServer</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
       </plugin>
 
       <!-- Make sure tests display failures at the console-->

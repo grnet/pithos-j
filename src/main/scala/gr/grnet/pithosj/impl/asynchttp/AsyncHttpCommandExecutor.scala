@@ -33,17 +33,18 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
-package asynchttp
+package gr.grnet.pithosj.impl.asynchttp
 
+import gr.grnet.common.http.Result
+import gr.grnet.common.http.Method._
 import com.ning.http.client.{AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
-import gr.grnet.pithosj.core.Helpers.RequestBuilder
-import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
 import gr.grnet.common.http.Method
-import Method.{OPTIONS, DELETE, POST, PUT, GET, HEAD, COPY}
+import gr.grnet.pithosj.core.Helpers.RequestBuilder
+import gr.grnet.pithosj.core.PithosException
+import gr.grnet.pithosj.core.asFullScala
+import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
 import gr.grnet.pithosj.core.http.{InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
 import scala.concurrent.Promise
-import gr.grnet.common.http.Result
 
 /**
  *

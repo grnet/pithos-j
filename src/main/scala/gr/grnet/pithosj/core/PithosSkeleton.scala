@@ -35,21 +35,22 @@
 
 package gr.grnet.pithosj.core
 
-import gr.grnet.pithosj.core.command.{Command, CommandExecutor, ListObjectsInPath, DeleteObject, PutObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, CopyObject}
+import gr.grnet.common.http.Result
+import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.api.PithosApi
+import gr.grnet.pithosj.core.command.{ListObjectsInPath, CopyObject, DeleteObject, PutObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, Command, CommandExecutor}
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 import scala.concurrent.Future
-import gr.grnet.common.keymap.KeyMap
-import gr.grnet.common.http.Result
 
 /**
- * Skeleton implementation of [[gr.grnet.pithosj.core.Pithos]].
+ * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].
  * Concrete implementations are required to provide an instance of [[gr.grnet.pithosj.core.command.CommandExecutor]]
  * as the value of `executor`.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait PithosSkeleton extends Pithos {
+trait PithosSkeleton extends PithosApi {
   protected val executor: CommandExecutor
 
   protected def call(command: Command): Future[Result] = {
