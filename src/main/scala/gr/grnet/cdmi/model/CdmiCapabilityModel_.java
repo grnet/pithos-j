@@ -33,18 +33,22 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
+package gr.grnet.cdmi.model;
 
-import gr.grnet.common.keymap.RequestParamKey
-import gr.grnet.pithosj.core.http.RequestParams
+import gr.grnet.cdmi.http.CdmiContentType;
 
 /**
- * Type-indexed keys for request parameters used in the Pithos+ REST API.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object RequestParamKeys {
-  final val Version = RequestParamKey(RequestParams.Version.requestParam())
-  final val Format = RequestParamKey(RequestParams.Format.requestParam())
-  final val Path = RequestParamKey(RequestParams.Path.requestParam())
+public final class CdmiCapabilityModel_ {
+    private String objectType = CdmiContentType.Application_CdmiCapability.contentType();
+    private String objectID = "";
+    private String objectName = "cdmi_capabilities/";
+    private String parentUri = "/";
+    private String parentId = "";
+
+    public static final CdmiCapabilityModel_ Cached = new CdmiCapabilityModel_();
+
+    public final boolean cdmi_create_data_object = true;
 }

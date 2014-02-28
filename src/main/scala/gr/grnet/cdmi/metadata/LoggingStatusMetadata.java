@@ -33,23 +33,19 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
-
-import gr.grnet.common.http.Result
-
+package gr.grnet.cdmi.metadata;
 
 /**
- * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for the [[Result]]s
- * of [[gr.grnet.pithosj.core.command.Command]].
- *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final class ResultKey[T: Manifest] private[keymap](
-    override val name: String
-) extends PithosKey[T](name)
+public enum LoggingStatusMetadata {
+    // CDMI/v1.0.2/20.5
+    cdmi_logging_status;
 
-object ResultKey {
-  def apply[T: Manifest](name: String): ResultKey[T] = {
-    new ResultKey[T](name)
-  }
+    public enum Values {
+        Processing,
+        Halted,
+        Current,
+        Error,
+    }
 }

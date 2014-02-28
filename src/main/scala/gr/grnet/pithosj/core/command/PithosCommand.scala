@@ -33,18 +33,49 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
+package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.keymap.RequestParamKey
-import gr.grnet.pithosj.core.http.RequestParams
+import com.ning.http.client.AsyncHandler.STATE
+import com.ning.http.client.HttpResponseBodyPart
+import gr.grnet.common.http.{Command, Result}
+import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.http.RequestBody
 
 /**
- * Type-indexed keys for request parameters used in the Pithos+ REST API.
+ * A command to be executed via the Pithos+ REST API.
+ * Each command specifies its own input data, which will be used
+ * to build up an HTTP request.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object RequestParamKeys {
-  final val Version = RequestParamKey(RequestParams.Version.requestParam())
-  final val Format = RequestParamKey(RequestParams.Format.requestParam())
-  final val Path = RequestParamKey(RequestParams.Path.requestParam())
+trait PithosCommand extends Command {
+  /**
+   * The application domain of this command.
+   */
+  override def appDomain: String = "Pithos"
+
+  /**
+   * Specifies the target against which the command will be executed.
+   * This includes the Pithos+ server and the Pithos+ user id and token.
+   */
+  def serviceInfo: ServiceInfo
+
+  /**
+   * The account ID for this command. This is the same as `serviceInfo.uuid` and
+   * is provided for convenience.
+   */
+  def account: String = serviceInfo.uuid
+
+  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE]
+
+  /**
+   * Provides the HTTP request body, if any.
+   */
+  def requestBodyOpt: Option[RequestBody]
+
+  /**
+   * A set of all the HTTP status codes that are considered a failure for this command.
+   */
+  override def failureCodes: Set[Int] = Set() // FIXME implement
 }

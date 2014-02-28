@@ -33,18 +33,35 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
+package gr.grnet.common.keymap
 
-import gr.grnet.common.keymap.RequestParamKey
-import gr.grnet.pithosj.core.http.RequestParams
+import com.ckkloverdos.key.TKeyOnly
+import gr.grnet.pithosj.core.http.IRequestParam
 
 /**
- * Type-indexed keys for request parameters used in the Pithos+ REST API.
+ * A typed key for HTTP request parameters.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object RequestParamKeys {
-  final val Version = RequestParamKey(RequestParams.Version.requestParam())
-  final val Format = RequestParamKey(RequestParams.Format.requestParam())
-  final val Path = RequestParamKey(RequestParams.Path.requestParam())
+final class RequestParamKey private[keymap](
+    override val name: String
+) extends TKeyOnly[String](name)
+
+/**
+ * Factory for [[gr.grnet.common.keymap.RequestParamKey]]s.
+ *
+ * @author Christos KK Loverdos <loverdos@gmail.com>
+ */
+object RequestParamKey {
+  /**
+   * Factory method for a [[gr.grnet.common.keymap.RequestParamKey]], given
+   * the key's name.
+   */
+  def apply(name: String): RequestParamKey = new RequestParamKey(name)
+
+  /**
+   * Factory method for a [[gr.grnet.common.keymap.RequestParamKey]], given
+   * a [[gr.grnet.pithosj.core.http.IRequestParam]].
+   */
+  def apply(param: IRequestParam): RequestParamKey = new RequestParamKey(param.requestParam())
 }

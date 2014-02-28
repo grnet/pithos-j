@@ -33,27 +33,12 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core
+package gr.grnet.cdmi.command.dataobject
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final object Paths {
+class CreateCdmiDataObject {
 
-  def buildWithFirst(first: String, others: String*): String = {
-    (Seq(first) ++ others).mkString("/")
-  }
-
-  def buildWithFirst(first: String, others: Array[String]): String = {
-    build(Array(first) ++ others)
-  }
-
-  def build(paths: String*): String = {
-    paths.mkString("/")
-  }
-
-  def build(paths: Array[String]): String = {
-    build(paths:_*)
-  }
 }

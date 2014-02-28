@@ -42,7 +42,7 @@ import gr.grnet.common.http.Method
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class Ping(serviceInfo: ServiceInfo) extends CommandSkeleton {
+case class Ping(serviceInfo: ServiceInfo) extends PithosCommandSkeleton {
   val httpMethod: Method = Method.HEAD
 
   val successCodes: Set[Int] = Set(204)

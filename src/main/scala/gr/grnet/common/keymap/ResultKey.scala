@@ -33,19 +33,22 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
+package gr.grnet.common.keymap
 
 import com.ckkloverdos.key.TKeyOnly
+import gr.grnet.common.http.IHeader
 
 /**
- * Pithos-specific [[com.ckkloverdos.key.TKeyOnly]].
+ * A typed key for domain-specific results of HTTP [[gr.grnet.common.http.Command]]s.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-class PithosKey[T: Manifest] private[keymap](override val name: String) extends TKeyOnly[T](name)
+final class ResultKey[T: Manifest] private[keymap](
+  override val name: String
+) extends TKeyOnly[T](name)
 
-object PithosKey {
-  def apply[T: Manifest](name: String): PithosKey[T] = {
-    new PithosKey[T](name)
-  }
+object ResultKey {
+  def apply[T: Manifest](name: String): ResultKey[T] = new ResultKey[T](name)
+
+  def apply[T: Manifest](header: IHeader): ResultKey[T] = new ResultKey[T](header.headerName())
 }

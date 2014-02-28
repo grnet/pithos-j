@@ -48,7 +48,7 @@ import scala.xml.XML
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ListContainers(serviceInfo: ServiceInfo) extends CommandSkeleton {
+case class ListContainers(serviceInfo: ServiceInfo) extends PithosCommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -83,15 +83,14 @@ case class ListContainers(serviceInfo: ServiceInfo) extends CommandSkeleton {
   )
 
   override def buildResult(
-      initialMap: KeyMap,
-      statusCode: Int,
-      statusText: String,
-      startMillis: Long,
-      stopMillis: Long,
-      getResponseBody: () ⇒ String
+    responseHeaders: KeyMap,
+    statusCode: Int,
+    statusText: String,
+    startMillis: Long,
+    stopMillis: Long,
+    getResponseBody: () ⇒ String,
+    resultData: KeyMap
   ) = {
-
-    val resultData = KeyMap(initialMap)
 
     if(successCodes(statusCode)) {
       val body = getResponseBody()
@@ -151,12 +150,13 @@ case class ListContainers(serviceInfo: ServiceInfo) extends CommandSkeleton {
     }
 
     super.buildResult(
-      resultData,
+      responseHeaders,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      getResponseBody
+      getResponseBody,
+      resultData
     )
   }
 }

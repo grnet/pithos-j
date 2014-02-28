@@ -51,7 +51,7 @@ case class PutObject(
     path: String,
     file: File,
     contentType: String
-) extends CommandSkeleton {
+) extends PithosCommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */

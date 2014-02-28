@@ -42,7 +42,7 @@ import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.Helpers.RequestBuilder
 import gr.grnet.pithosj.core.PithosException
 import gr.grnet.pithosj.core.asFullScala
-import gr.grnet.pithosj.core.command.{Command, CommandExecutor}
+import gr.grnet.pithosj.core.command.{PithosCommand, CommandExecutor}
 import gr.grnet.pithosj.core.http.{InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
 import scala.concurrent.Promise
 
@@ -54,7 +54,7 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
   /**
    * Creates a request builder for this command.
    */
-  private def createRequestBuilder(command: Command): RequestBuilder = {
+  private def createRequestBuilder(command: PithosCommand): RequestBuilder = {
     val url = command.serverURLExcludingParameters
 
     val requestBuilder = command.httpMethod match {
@@ -106,7 +106,7 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
    * Executes the given command and returns a [[java.util.concurrent.Future]]
    * with the command-specific result.
    */
-  def execute(command: Command) = {
+  def execute(command: PithosCommand) = {
     val promise = Promise[Result]()
     val requestBuilder = createRequestBuilder(command)
 

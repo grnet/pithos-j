@@ -37,18 +37,19 @@ package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.pithosj.core.{Helpers, Paths}
-import gr.grnet.pithosj.core.http.{RequestBody}
-import gr.grnet.pithosj.core.keymap.{ResultKeys, ResultKey, HeaderKeys}
-import org.slf4j.LoggerFactory
+import gr.grnet.common.Paths
 import gr.grnet.common.http.{Result, CommandDescriptor}
-import gr.grnet.common.keymap.{HeaderKey, KeyMap}
+import gr.grnet.common.keymap.{ResultKey, HeaderKey, KeyMap}
+import gr.grnet.pithosj.core.Helpers
+import gr.grnet.pithosj.core.http.RequestBody
+import gr.grnet.pithosj.core.keymap.{ResultKeys, HeaderKeys}
+import org.slf4j.LoggerFactory
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait CommandSkeleton extends Command {
+trait PithosCommandSkeleton extends PithosCommand {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE] = None
@@ -85,7 +86,7 @@ trait CommandSkeleton extends Command {
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[HeaderKey]]
+   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
    * and its associated non-String value are recorded in the provided `keyMap`.
    */
   protected def tryParseNonStringResponseHeader(
@@ -106,7 +107,7 @@ trait CommandSkeleton extends Command {
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[HeaderKey]]
+   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
    * and its associated non-String value are recorded in the provided `keyMap`.
    */
   protected def tryParseNonStringResponseHeader(
@@ -169,22 +170,14 @@ trait CommandSkeleton extends Command {
     keyMap
   }
 
-  private def addResponseBody(
-      initialMap: KeyMap,
-      getResponseBody: () => String
-  ): KeyMap = {
-    val resultData = KeyMap(initialMap)
-    resultData.set(ResultKeys.ResponseBody, getResponseBody())
-    resultData
-  }
-
   def buildResult(
-      initialMap: KeyMap,
+      responseHeaders: KeyMap,
       statusCode: Int,
       statusText: String,
       startMillis: Long,
       stopMillis: Long,
-      getResponseBody: () => String
+      getResponseBody: () ⇒ String,
+      resultData: KeyMap
   ) = {
 
     Result(
@@ -193,7 +186,8 @@ trait CommandSkeleton extends Command {
       statusText,
       startMillis,
       stopMillis,
-      addResponseBody(initialMap, getResponseBody)
+      responseHeaders,
+      resultData.set(ResultKeys.ResponseBody, getResponseBody())
     )
   }
 }

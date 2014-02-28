@@ -38,6 +38,7 @@ package gr.grnet.common.http
 import gr.grnet.common.keymap.KeyMap
 
 /**
+ * The result of a [[gr.grnet.common.http.Command]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
@@ -47,6 +48,7 @@ case class Result(
   statusText: String,
   startMillis: Long,
   stopMillis: Long,
+  responseHeaders: KeyMap,
   resultData: KeyMap // response headers and other command-specific result data
 ) {
   def completionMillis = stopMillis - startMillis

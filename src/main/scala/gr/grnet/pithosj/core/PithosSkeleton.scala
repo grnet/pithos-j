@@ -38,7 +38,7 @@ package gr.grnet.pithosj.core
 import gr.grnet.common.http.Result
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.api.PithosApi
-import gr.grnet.pithosj.core.command.{ListObjectsInPath, CopyObject, DeleteObject, PutObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, Command, CommandExecutor}
+import gr.grnet.pithosj.core.command.{ListObjectsInPath, CopyObject, DeleteObject, PutObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, PithosCommand, CommandExecutor}
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 import scala.concurrent.Future
@@ -53,7 +53,7 @@ import scala.concurrent.Future
 trait PithosSkeleton extends PithosApi {
   protected val executor: CommandExecutor
 
-  protected def call(command: Command): Future[Result] = {
+  protected def call(command: PithosCommand): Future[Result] = {
     try {
       command.validate match {
         case Some(error) ⇒

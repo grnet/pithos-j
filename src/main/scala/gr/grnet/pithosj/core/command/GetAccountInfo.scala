@@ -44,7 +44,7 @@ import gr.grnet.pithosj.core.keymap.HeaderKeys
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetAccountInfo(serviceInfo: ServiceInfo) extends CommandSkeleton {
+case class GetAccountInfo(serviceInfo: ServiceInfo) extends PithosCommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */

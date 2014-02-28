@@ -33,38 +33,58 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
-
-import gr.grnet.pithosj.core.http.IRequestParam
+package gr.grnet.cdmi.capability;
 
 /**
- * A [[gr.grnet.pithosj.core.keymap.PithosKey]] for HTTP request parameters.
+ * All known (to us) cdmi capabilities.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-final class RequestParamKey private[keymap](
-    override val name: String
-) extends PithosKey[String](name)
-
-/**
- * Factory for [[gr.grnet.pithosj.core.keymap.RequestParamKey]]s.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
-object RequestParamKey {
-  /**
-   * Factory method for a [[gr.grnet.pithosj.core.keymap.RequestParamKey]], given
-   * the key's name.
-   */
-  def apply(name: String): RequestParamKey = {
-    new RequestParamKey(name)
-  }
-
-  /**
-   * Factory method for a [[gr.grnet.pithosj.core.keymap.RequestParamKey]], given
-   * a [[gr.grnet.pithosj.core.http.IRequestParam]].
-   */
-  def apply(param: IRequestParam): RequestParamKey = {
-    new RequestParamKey(param.requestParam())
-  }
+public enum SystemWideCapability implements ICapability {
+    // CDMI/v1.0.2/12.1.1
+    cdmi_domains,
+    cdmi_export_cifs,
+    cdmi_dataobjects,
+    cdmi_export_iscsi,
+    cdmi_export_nfs,
+    cdmi_export_occi_iscsi,
+    cdmi_export_webdav,
+    cdmi_metadata_maxitems,
+    cdmi_metadata_maxsize,
+    cdmi_metadata_maxtotalsize,
+    cdmi_notification,
+    cdmi_logging,
+    cdmi_query,
+    cdmi_query_regex,
+    cdmi_query_contains,
+    cdmi_query_tags,
+    cdmi_query_value,
+    cdmi_queues,
+    cdmi_security_access_control,
+    cdmi_security_audit,
+    cdmi_security_data_integrity,
+    cdmi_security_encryption,
+    cdmi_security_immutability,
+    cdmi_security_sanitization,
+    cdmi_serialization_json,
+    cdmi_snapshots,
+    cdmi_references,
+    cdmi_object_move_from_local,
+    cdmi_object_move_from_remote,
+    cdmi_object_move_from_ID,
+    cdmi_object_move_to_ID,
+    cdmi_object_copy_from_local,
+    cdmi_object_copy_from_remote,
+    cdmi_object_access_by_ID,
+    cdmi_post_dataobject_by_ID,
+    cdmi_post_queue_by_ID,
+    cdmi_deserialize_dataobject_by_ID,
+    cdmi_deserialize_queue_by_ID,
+    cdmi_serialize_dataobject_to_ID,
+    cdmi_serialize_domain_to_ID,
+    cdmi_serialize_container_to_ID,
+    cdmi_serialize_queue_to_ID,
+    cdmi_copy_dataobject_by_ID,
+    cdmi_copy_queue_by_ID,
+    cdmi_create_reference_by_ID,
 }

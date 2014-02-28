@@ -33,18 +33,40 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
+package gr.grnet.cdmi.model
 
-import gr.grnet.common.keymap.RequestParamKey
-import gr.grnet.pithosj.core.http.RequestParams
+import gr.grnet.cdmi.capability.{ICapability, ContainerCapability}
+import gr.grnet.cdmi.http.CdmiContentType
+import gr.grnet.common.http.IContentType
 
 /**
- * Type-indexed keys for request parameters used in the Pithos+ REST API.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object RequestParamKeys {
-  final val Version = RequestParamKey(RequestParams.Version.requestParam())
-  final val Format = RequestParamKey(RequestParams.Format.requestParam())
-  final val Path = RequestParamKey(RequestParams.Path.requestParam())
+case class CapabilityModel(
+  objectType: IContentType,
+  objectID: String,
+  objectName: String,
+  parentURI: String,
+  parentID: String,
+  capabilities: Map[ICapability, String],
+  childrenRange: String,
+  children: List[String]
+)
+
+object CapabilityModel {
+  def booleanCapabilitiesMap(caps: ICapability*): Map[ICapability, String] =
+    (for(cap ← caps) yield (cap, "true")).toMap
+
+  def rootOf(children: List[String]) =
+    CapabilityModel(
+      objectType = CdmiContentType.Application_CdmiCapability,
+      objectID = "",
+      objectName = "",
+      parentURI = "/",
+      parentID = "",
+      capabilities = booleanCapabilitiesMap(ContainerCapability.cdmi_list_children),
+      childrenRange = if(children.size == 0) "0-0" else s"0-${children.size - 1}",
+      children = children
+    )
 }

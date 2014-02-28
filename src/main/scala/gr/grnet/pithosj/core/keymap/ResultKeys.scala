@@ -35,6 +35,7 @@
 
 package gr.grnet.pithosj.core.keymap
 
+import gr.grnet.common.keymap.ResultKey
 import gr.grnet.pithosj.core.command.result.{ObjectInPathResultData, ContainerResultData}
 
 /**

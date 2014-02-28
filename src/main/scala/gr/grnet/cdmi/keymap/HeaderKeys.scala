@@ -33,14 +33,12 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.model;
+package gr.grnet.cdmi.keymap
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class CdmiCapabilityModel {
-    public static final CdmiCapabilityModel Cached = new CdmiCapabilityModel();
+object HeaderKeys {
 
-    public final boolean cdmi_create_data_object = true;
 }

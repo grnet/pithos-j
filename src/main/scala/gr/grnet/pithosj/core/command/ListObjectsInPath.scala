@@ -52,7 +52,7 @@ case class ListObjectsInPath(
     serviceInfo: ServiceInfo,
     container: String,
     path: String
-) extends CommandSkeleton {
+) extends PithosCommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -128,15 +128,14 @@ case class ListObjectsInPath(
   }
 
   override def buildResult(
-      initialMap: KeyMap,
-      statusCode: Int,
-      statusText: String,
-      startMillis: Long,
-      stopMillis: Long,
-      getResponseBody: () => String
+    responseHeaders: KeyMap,
+    statusCode: Int,
+    statusText: String,
+    startMillis: Long,
+    stopMillis: Long,
+    getResponseBody: () => String,
+    resultData: KeyMap
   ) = {
-
-    val resultData = KeyMap(initialMap)
 
     if(successCodes(statusCode)) {
       val body = getResponseBody()
@@ -174,12 +173,13 @@ case class ListObjectsInPath(
     }
 
     super.buildResult(
-      resultData,
+      responseHeaders,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      getResponseBody
+      getResponseBody,
+      resultData
     )
   }
 }

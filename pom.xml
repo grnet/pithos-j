@@ -162,7 +162,7 @@
             <index>true</index>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>gr.grnet.cdmi.server.CdmiProxyServer</mainClass>
+              <mainClass>gr.grnet.cdmi.service.StdCdmiPithosServer</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
           </archive>

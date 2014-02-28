@@ -33,18 +33,23 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
-
-import gr.grnet.common.keymap.RequestParamKey
-import gr.grnet.pithosj.core.http.RequestParams
+package gr.grnet.common
 
 /**
- * Type-indexed keys for request parameters used in the Pithos+ REST API.
+ * Provides path utilities.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object RequestParamKeys {
-  final val Version = RequestParamKey(RequestParams.Version.requestParam())
-  final val Format = RequestParamKey(RequestParams.Format.requestParam())
-  final val Path = RequestParamKey(RequestParams.Path.requestParam())
+object Paths {
+  def buildWithFirst(first: String, others: String*): String =
+    (Seq(first) ++ others).mkString("/")
+
+  def buildWithFirst(first: String, others: Array[String]): String =
+    build(Array(first) ++ others)
+
+  def build(paths: String*): String =
+    paths.mkString("/")
+
+  def build(paths: Array[String]): String =
+    build(paths:_*)
 }

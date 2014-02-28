@@ -53,7 +53,7 @@ case class GetObject(
     path: String,
     version: String,
     out: OutputStream
-) extends CommandSkeleton {
+) extends PithosCommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -152,15 +152,14 @@ case class GetObject(
   }
 
   override def buildResult(
-      initialMap: KeyMap,
+      responseHeaders: KeyMap,
       statusCode: Int,
       statusText: String,
       startMillis: Long,
       stopMillis: Long,
-      getResponseBody: () => String
+      getResponseBody: () => String,
+      resultData: KeyMap = KeyMap()
   ) = {
-
-    val resultData = KeyMap(initialMap)
 
     if(successCodes(statusCode)) {
       resultData.set(ResultKeys.Commands.Container, container)
@@ -168,12 +167,13 @@ case class GetObject(
     }
 
     super.buildResult(
-      resultData,
+      responseHeaders,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      getResponseBody
+      getResponseBody,
+      resultData
     )
   }
 }

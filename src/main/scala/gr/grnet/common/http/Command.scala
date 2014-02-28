@@ -33,36 +33,25 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
+package gr.grnet.common.http
 
-import com.ning.http.client.AsyncHandler.STATE
-import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.common.http.Method
-import gr.grnet.common.http.{Result, CommandDescriptor}
-import gr.grnet.common.keymap.{HeaderKey, KeyMap}
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.http.RequestBody
-import gr.grnet.pithosj.core.keymap.ResultKey
+import gr.grnet.common.keymap.{ResultKey, HeaderKey, KeyMap}
 
 /**
- * A command to be executed via the Pithos+ REST API.
- * Each command specifies its own input data, which will be used
- * to build up an HTTP request.
+ * A command is executed against an HTTP server and returns a [[gr.grnet.common.http.Result]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait Command {
   /**
-   * Specifies the target against which the command will be executed.
-   * This includes the Pithos+ server and the Pithos+ user id and token.
+   * The application domain of this command.
    */
-  def serviceInfo: ServiceInfo
+  def appDomain: String
 
   /**
-   * The account ID for this command. This is the same as `serviceInfo.uuid` and
-   * is provided for convenience.
+   * The name of this command. Command names are domain-specific.
    */
-  def account: String = serviceInfo.uuid
+  def name: String = getClass.getSimpleName
 
   /**
    * The HTTP method by which the command is implemented.
@@ -103,6 +92,11 @@ trait Command {
   def successCodes: Set[Int]
 
   /**
+   * A set of all the HTTP status codes that are considered a failure for this command.
+   */
+  def failureCodes: Set[Int]
+
+  /**
    * Validates this command. Returns some error iff there is any.
    */
   def validate: Option[String] = None
@@ -119,13 +113,10 @@ trait Command {
    */
   def serverURLPathElements: Seq[String]
 
-  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE]
-
   /**
-   * Provides the HTTP request body, if any.
+   * Parses the response headers in a domain-specific way. This means that the keys contained in
+   * the returned `KeyMap` are domain-specific.
    */
-  def requestBodyOpt: Option[RequestBody]
-
   def parseAllResponseHeaders(responseHeaders: scala.collection.Map[String, List[String]]): KeyMap
 
   /**
@@ -133,12 +124,17 @@ trait Command {
    */
   def descriptor: CommandDescriptor
 
+  /**
+   * Builds the domain-specific result of this command. Each command knows how to parse the HTTP response
+   * in order to produce domain-specific objects.
+   */
   def buildResult(
-      initialMap: KeyMap,
-      statusCode: Int,
-      statusText: String,
-      startMillis: Long,
-      stopMillis: Long,
-      getResponseBody: () ⇒ String
+    responseHeaders: KeyMap,
+    statusCode: Int,
+    statusText: String,
+    startMillis: Long,
+    stopMillis: Long,
+    getResponseBody: () ⇒ String,
+    resultData: KeyMap = KeyMap()
   ): Result
 }

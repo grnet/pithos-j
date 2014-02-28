@@ -49,7 +49,7 @@ case class GetObjectInfo(
     serviceInfo: ServiceInfo,
     container: String,
     path: String
-) extends CommandSkeleton {
+) extends PithosCommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -96,7 +96,7 @@ case class GetObjectInfo(
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[HeaderKey]]
+   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
    * and its associated non-String value are recorded in the provided `keyMap`.
    */
   override protected def tryParseNonStringResponseHeader(
@@ -127,15 +127,14 @@ case class GetObjectInfo(
   }
 
   override def buildResult(
-      initialMap: KeyMap,
-      statusCode: Int,
-      statusText: String,
-      startMillis: Long,
-      stopMillis: Long,
-      getResponseBody: () ⇒ String
+    responseHeaders: KeyMap,
+    statusCode: Int,
+    statusText: String,
+    startMillis: Long,
+    stopMillis: Long,
+    getResponseBody: () ⇒ String,
+    resultData: KeyMap
   ) = {
-
-    val resultData = KeyMap(initialMap)
 
     if(successCodes(statusCode)) {
       resultData.set(ResultKeys.Commands.Container, container)
@@ -143,12 +142,13 @@ case class GetObjectInfo(
     }
 
     super.buildResult(
-      resultData,
+      responseHeaders,
       statusCode,
       statusText,
       startMillis,
       stopMillis,
-      getResponseBody
+      getResponseBody,
+      resultData
     )
   }
 }

@@ -33,18 +33,27 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
-
-import gr.grnet.common.keymap.RequestParamKey
-import gr.grnet.pithosj.core.http.RequestParams
+package gr.grnet.cdmi.capability;
 
 /**
- * Type-indexed keys for request parameters used in the Pithos+ REST API.
- *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object RequestParamKeys {
-  final val Version = RequestParamKey(RequestParams.Version.requestParam())
-  final val Format = RequestParamKey(RequestParams.Format.requestParam())
-  final val Path = RequestParamKey(RequestParams.Path.requestParam())
+public enum DataSystemCapability implements ICapability {
+    // CDMI/v1.0.2/12.1.3
+    cdmi_assignedsize,
+    cdmi_data_redundancy,
+    cdmi_data_dispersion,
+    cdmi_data_retention,
+    cdmi_data_autodelete,
+    cdmi_data_holds,
+    cdmi_encryption,
+    cdmi_geographic_placement,
+    cdmi_immediate_redundancy,
+    cdmi_infrastructure_redundancy,
+    cdmi_latency,
+    cdmi_RPO,
+    cdmi_RTO,
+    cdmi_sanitization_method,
+    cdmi_throughput,
+    cdmi_value_hash,
 }

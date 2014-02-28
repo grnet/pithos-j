@@ -47,7 +47,7 @@ case class CreateDirectory(
     serviceInfo: ServiceInfo,
     container: String,
     path: String
-) extends CommandSkeleton {
+) extends PithosCommandSkeleton {
   /**
    * The HTTP method by which the command is implemented.
    */

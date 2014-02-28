@@ -40,7 +40,7 @@ import gr.grnet.common.http.Result
 
 /**
  * A [[gr.grnet.pithosj.core.command.CommandExecutor]] is responsible to synchronously execute
- * a given [[gr.grnet.pithosj.core.command.Command]].
+ * a given [[gr.grnet.pithosj.core.command.PithosCommand]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
@@ -49,5 +49,5 @@ trait CommandExecutor {
    * Executes the given command and returns a [[scala.concurrent.Future]]
    * with the command-specific result.
    */
-  def execute(command: Command): Future[Result]
+  def execute(command: PithosCommand): Future[Result]
 }
