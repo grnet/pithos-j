@@ -41,7 +41,7 @@ import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ObjectInPathResultData
 import gr.grnet.pithosj.core.http.ResponseFormats
-import gr.grnet.pithosj.core.keymap.{HeaderKeys, ResultKeys, RequestParamKeys}
+import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosResultKeys, PithosRequestParamKeys}
 import scala.xml.XML
 
 /**
@@ -72,20 +72,20 @@ case class ListObjectsInPath(
 
   override val queryParameters = {
     newQueryParameters.
-      set(RequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
-      set(RequestParamKeys.Path, path)
+      set(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
+      set(PithosRequestParamKeys.Path, path)
   }
 
   override val responseHeaderKeys = Seq(
-    HeaderKeys.Pithos.X_Container_Block_Hash,
-    HeaderKeys.Pithos.X_Container_Block_Size,
-    HeaderKeys.Pithos.X_Container_Object_Meta,
-    HeaderKeys.Pithos.X_Container_Object_Count,
-    HeaderKeys.Pithos.X_Container_Bytes_Used
+    PithosHeaderKeys.Pithos.X_Container_Block_Hash,
+    PithosHeaderKeys.Pithos.X_Container_Block_Size,
+    PithosHeaderKeys.Pithos.X_Container_Object_Meta,
+    PithosHeaderKeys.Pithos.X_Container_Object_Count,
+    PithosHeaderKeys.Pithos.X_Container_Bytes_Used
   )
 
   override val resultDataKeys = Seq(
-    ResultKeys.ListObjectsInPath
+    PithosResultKeys.ListObjectsInPath
   )
 
   /**
@@ -102,24 +102,24 @@ case class ListObjectsInPath(
       value: String
   ) = {
     name match {
-      case HeaderKeys.Pithos.X_Container_Block_Hash.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Container_Block_Hash, value)
+      case PithosHeaderKeys.Pithos.X_Container_Block_Hash.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Block_Hash, value)
         true
 
-      case HeaderKeys.Pithos.X_Container_Block_Size.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Container_Block_Size, value.toLong)
+      case PithosHeaderKeys.Pithos.X_Container_Block_Size.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Block_Size, value.toLong)
         true
 
-      case HeaderKeys.Pithos.X_Container_Object_Meta.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Container_Object_Meta, value)
+      case PithosHeaderKeys.Pithos.X_Container_Object_Meta.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Object_Meta, value)
         true
 
-      case HeaderKeys.Pithos.X_Container_Object_Count.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Container_Object_Count, value.toInt)
+      case PithosHeaderKeys.Pithos.X_Container_Object_Count.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Object_Count, value.toInt)
         true
 
-      case HeaderKeys.Pithos.X_Container_Bytes_Used.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Container_Bytes_Used, value.toLong)
+      case PithosHeaderKeys.Pithos.X_Container_Bytes_Used.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Bytes_Used, value.toLong)
         true
 
       case _ ⇒
@@ -169,7 +169,7 @@ case class ListObjectsInPath(
         )
       }
 
-      resultData.set(ResultKeys.ListObjectsInPath, objectsInPath.toList)
+      resultData.set(PithosResultKeys.ListObjectsInPath, objectsInPath.toList)
     }
 
     super.buildResult(

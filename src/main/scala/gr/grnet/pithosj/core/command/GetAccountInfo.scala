@@ -38,7 +38,7 @@ package gr.grnet.pithosj.core.command
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.HeaderKeys
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 
 /**
  *
@@ -69,10 +69,10 @@ case class GetAccountInfo(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
    * Each command must document which keys it supports.
    */
   override val responseHeaderKeys = Seq(
-    HeaderKeys.Pithos.X_Account_Bytes_Used,
-    HeaderKeys.Pithos.X_Account_Container_Count,
-    HeaderKeys.Pithos.X_Account_Policy_Quota,
-    HeaderKeys.Pithos.X_Account_Policy_Versioning
+    PithosHeaderKeys.Pithos.X_Account_Bytes_Used,
+    PithosHeaderKeys.Pithos.X_Account_Container_Count,
+    PithosHeaderKeys.Pithos.X_Account_Policy_Quota,
+    PithosHeaderKeys.Pithos.X_Account_Policy_Versioning
   )
 
 
@@ -90,16 +90,16 @@ case class GetAccountInfo(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
       value: String
   ) = {
     name match {
-      case HeaderKeys.Pithos.X_Account_Bytes_Used.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Account_Bytes_Used, value.toLong)
+      case PithosHeaderKeys.Pithos.X_Account_Bytes_Used.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Bytes_Used, value.toLong)
         true
 
-      case HeaderKeys.Pithos.X_Account_Container_Count.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Account_Container_Count, value.toInt)
+      case PithosHeaderKeys.Pithos.X_Account_Container_Count.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Container_Count, value.toInt)
         true
 
-      case HeaderKeys.Pithos.X_Account_Policy_Quota.name ⇒
-        keyMap.set(HeaderKeys.Pithos.X_Account_Policy_Quota, value.toLong)
+      case PithosHeaderKeys.Pithos.X_Account_Policy_Quota.name ⇒
+        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Policy_Quota, value.toLong)
         true
 
       case _ ⇒

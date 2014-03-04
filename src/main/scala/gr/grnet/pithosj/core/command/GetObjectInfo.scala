@@ -39,7 +39,7 @@ import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.{ResultKeys, HeaderKeys}
+import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosHeaderKeys}
 
 /**
  *
@@ -74,21 +74,21 @@ case class GetObjectInfo(
    * Each command must document which keys it supports.
    */
   override val responseHeaderKeys = Seq(
-    HeaderKeys.Standard.ETag,
-    HeaderKeys.Standard.Content_Type,
-    HeaderKeys.Standard.Content_Length,
-    HeaderKeys.Standard.Last_Modified,
-    HeaderKeys.Pithos.X_Object_Hash,
-    HeaderKeys.Pithos.X_Object_Modified_By,
-    HeaderKeys.Pithos.X_Object_Version_Timestamp,
-    HeaderKeys.Pithos.X_Object_UUID,
-    HeaderKeys.Pithos.X_Object_UUID,
-    HeaderKeys.Pithos.X_Object_Version
+    PithosHeaderKeys.Standard.ETag,
+    PithosHeaderKeys.Standard.Content_Type,
+    PithosHeaderKeys.Standard.Content_Length,
+    PithosHeaderKeys.Standard.Last_Modified,
+    PithosHeaderKeys.Pithos.X_Object_Hash,
+    PithosHeaderKeys.Pithos.X_Object_Modified_By,
+    PithosHeaderKeys.Pithos.X_Object_Version_Timestamp,
+    PithosHeaderKeys.Pithos.X_Object_UUID,
+    PithosHeaderKeys.Pithos.X_Object_UUID,
+    PithosHeaderKeys.Pithos.X_Object_Version
   )
 
   override val resultDataKeys = Seq(
-    ResultKeys.Commands.Container,
-    ResultKeys.Commands.Path
+    PithosResultKeys.Commands.Container,
+    PithosResultKeys.Commands.Path
   )
 
   /**
@@ -105,19 +105,19 @@ case class GetObjectInfo(
       value: String
   ) = {
     name match {
-      case HeaderKeys.Standard.Last_Modified.name ⇒
+      case PithosHeaderKeys.Standard.Last_Modified.name ⇒
         // Wed, 19 Sep 2012 08:18:23 GMT
         val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
         keyMap.set(
-          HeaderKeys.Standard.Last_Modified,
+          PithosHeaderKeys.Standard.Last_Modified,
           parsedDate)
         true
 
-      case HeaderKeys.Pithos.X_Object_Version_Timestamp.name ⇒
+      case PithosHeaderKeys.Pithos.X_Object_Version_Timestamp.name ⇒
         // Wed, 19 Sep 2012 08:18:23 GMT
         val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
         keyMap.set(
-          HeaderKeys.Pithos.X_Object_Version_Timestamp,
+          PithosHeaderKeys.Pithos.X_Object_Version_Timestamp,
           parsedDate)
         true
 
@@ -137,8 +137,8 @@ case class GetObjectInfo(
   ) = {
 
     if(successCodes(statusCode)) {
-      resultData.set(ResultKeys.Commands.Container, container)
-      resultData.set(ResultKeys.Commands.Path, path)
+      resultData.set(PithosResultKeys.Commands.Container, container)
+      resultData.set(PithosResultKeys.Commands.Path, path)
     }
 
     super.buildResult(

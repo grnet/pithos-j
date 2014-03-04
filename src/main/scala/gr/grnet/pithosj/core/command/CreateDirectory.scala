@@ -37,7 +37,7 @@ package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.http.{ContentTypes, Method}
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.HeaderKeys
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 
 /**
  *
@@ -58,8 +58,8 @@ case class CreateDirectory(
    */
   override val requestHeaders = {
     newDefaultRequestHeaders.
-      set(HeaderKeys.Standard.Content_Type, ContentTypes.Application_Directory.contentType()).
-      set(HeaderKeys.Standard.Content_Length, 0L)
+      set(PithosHeaderKeys.Standard.Content_Type, ContentTypes.Application_Directory.contentType()).
+      set(PithosHeaderKeys.Standard.Content_Length, 0L)
   }
 
   /**

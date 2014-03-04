@@ -33,12 +33,11 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.model
+package gr.grnet.common.http;
 
 /**
- *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-class CdmiQueueModel {
-
+public interface IRequestParam {
+  public String requestParam();
 }

@@ -41,7 +41,7 @@ import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ContainerResultData
 import gr.grnet.pithosj.core.http.ResponseFormats
-import gr.grnet.pithosj.core.keymap.{ResultKeys, RequestParamKeys}
+import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosRequestParamKeys}
 import scala.xml.XML
 
 /**
@@ -59,7 +59,7 @@ case class ListContainers(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
    */
   override val queryParameters = {
     newQueryParameters.
-      set(RequestParamKeys.Format, ResponseFormats.XML.responseFormat())
+      set(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat())
   }
 
   /**
@@ -79,7 +79,7 @@ case class ListContainers(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
    * from the `HTTP` response body (`XML` or `JSON`).
    */
   override val resultDataKeys = Seq(
-    ResultKeys.ListContainers
+    PithosResultKeys.ListContainers
   )
 
   override def buildResult(
@@ -128,8 +128,8 @@ case class ListContainers(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
         val policy = KeyMap()
         for((k, v) <- keys.zip(values)) {
           k.toLowerCase match {
-            case ResultKeys.ContainerQuota.name ⇒
-              policy.set(ResultKeys.ContainerQuota, v.toLong)
+            case PithosResultKeys.ContainerQuota.name ⇒
+              policy.set(PithosResultKeys.ContainerQuota, v.toLong)
             case k ⇒
               policy.setString(k, v)
           }
@@ -146,7 +146,7 @@ case class ListContainers(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
         containerResultData
       }
 
-      resultData.set(ResultKeys.ListContainers, containerResults.toList)
+      resultData.set(PithosResultKeys.ListContainers, containerResults.toList)
     }
 
     super.buildResult(

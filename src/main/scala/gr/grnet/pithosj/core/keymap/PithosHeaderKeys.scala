@@ -45,7 +45,7 @@ import gr.grnet.pithosj.core.http.PithosHeader
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object HeaderKeys {
+object PithosHeaderKeys {
   def setFromHeader[T: Manifest](
       key: HeaderKey[T],
       input: KeyMap,

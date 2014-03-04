@@ -42,7 +42,7 @@ import gr.grnet.common.http.{Result, CommandDescriptor}
 import gr.grnet.common.keymap.{ResultKey, HeaderKey, KeyMap}
 import gr.grnet.pithosj.core.Helpers
 import gr.grnet.pithosj.core.http.RequestBody
-import gr.grnet.pithosj.core.keymap.{ResultKeys, HeaderKeys}
+import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosHeaderKeys}
 import org.slf4j.LoggerFactory
 
 /**
@@ -131,7 +131,7 @@ trait PithosCommandSkeleton extends PithosCommand {
 
   protected def newDefaultRequestHeaders: KeyMap = {
     KeyMap().
-      set(HeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)
+      set(PithosHeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)
   }
 
   protected def newQueryParameters: KeyMap = KeyMap()
@@ -187,7 +187,7 @@ trait PithosCommandSkeleton extends PithosCommand {
       startMillis,
       stopMillis,
       responseHeaders,
-      resultData.set(ResultKeys.ResponseBody, getResponseBody())
+      resultData.set(PithosResultKeys.ResponseBody, getResponseBody())
     )
   }
 }

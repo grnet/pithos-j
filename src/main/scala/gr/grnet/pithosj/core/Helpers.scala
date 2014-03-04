@@ -37,7 +37,7 @@ package gr.grnet.pithosj.core
 
 import com.ning.http.client.AsyncHttpClient
 import gr.grnet.common.date.DateParsers
-import gr.grnet.pithosj.core.keymap.HeaderKeys
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import java.util
 import java.util.concurrent.{TimeUnit, Future}
 import org.slf4j.LoggerFactory
@@ -84,16 +84,16 @@ sealed class Helpers {
     values match {
       case value :: _ ⇒
         name match {
-          case HeaderKeys.Standard.Content_Length.name ⇒
-            keyMap.set(HeaderKeys.Standard.Content_Length, value.toLong)
+          case PithosHeaderKeys.Standard.Content_Length.name ⇒
+            keyMap.set(PithosHeaderKeys.Standard.Content_Length, value.toLong)
 
-          case HeaderKeys.Standard.Last_Modified.name ⇒
+          case PithosHeaderKeys.Standard.Last_Modified.name ⇒
             val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-            keyMap.set(HeaderKeys.Standard.Last_Modified, parsedDate)
+            keyMap.set(PithosHeaderKeys.Standard.Last_Modified, parsedDate)
 
-          case HeaderKeys.Standard.Date.name ⇒
+          case PithosHeaderKeys.Standard.Date.name ⇒
             val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-            keyMap.set(HeaderKeys.Standard.Date, parsedDate)
+            keyMap.set(PithosHeaderKeys.Standard.Date, parsedDate)
 
           case name ⇒
             keyMap.set(HeaderKey[String](name), value)

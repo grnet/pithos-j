@@ -38,7 +38,7 @@ package gr.grnet.pithosj.core.command
 import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.http.FileRequestBody
-import gr.grnet.pithosj.core.keymap.HeaderKeys
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import java.io.File
 
 /**
@@ -59,7 +59,7 @@ case class PutObject(
 
   override val requestHeaders = {
     newDefaultRequestHeaders.
-      set(HeaderKeys.Standard.Content_Type, contentType)
+      set(PithosHeaderKeys.Standard.Content_Type, contentType)
   }
 
   /**

@@ -33,12 +33,16 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.http;
+package gr.grnet.cdmi.model
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class Headers {
-  private Headers() {}
-
+object Model {
+  def childrenRangeOf(children: List[String]): String =
+    children match {
+      case Nil ⇒ ""
+      case _   ⇒ s"0-${children.size - 1}"
+    }
 }

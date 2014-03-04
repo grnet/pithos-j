@@ -49,5 +49,5 @@ case class ContainerResultData(
     count: Int,
     lastModified: ParsedDate,
     bytes: Long,
-    policy: KeyMap // Use ResultKeys.ContainerQuota to get "quota"
+    policy: KeyMap // Use PithosResultKeys.ContainerQuota to get "quota"
 )

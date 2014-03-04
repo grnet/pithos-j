@@ -36,7 +36,7 @@
 package gr.grnet.common.keymap
 
 import com.ckkloverdos.key.TKeyOnly
-import gr.grnet.pithosj.core.http.IRequestParam
+import gr.grnet.common.http.IRequestParam
 
 /**
  * A typed key for HTTP request parameters.
@@ -61,7 +61,7 @@ object RequestParamKey {
 
   /**
    * Factory method for a [[gr.grnet.common.keymap.RequestParamKey]], given
-   * a [[gr.grnet.pithosj.core.http.IRequestParam]].
+   * a [[IRequestParam]].
    */
   def apply(param: IRequestParam): RequestParamKey = new RequestParamKey(param.requestParam())
 }

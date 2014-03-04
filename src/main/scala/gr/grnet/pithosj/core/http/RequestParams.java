@@ -35,6 +35,8 @@
 
 package gr.grnet.pithosj.core.http;
 
+import gr.grnet.common.http.IRequestParam;
+
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */

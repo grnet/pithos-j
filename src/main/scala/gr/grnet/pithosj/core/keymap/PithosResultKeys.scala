@@ -43,7 +43,7 @@ import gr.grnet.pithosj.core.command.result.{ObjectInPathResultData, ContainerRe
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object ResultKeys {
+object PithosResultKeys {
 
   private[this] def name(s: String) = "result.data." + s
 

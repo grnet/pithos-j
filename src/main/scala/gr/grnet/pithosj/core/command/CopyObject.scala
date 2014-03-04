@@ -36,7 +36,7 @@
 package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.http.Method
-import gr.grnet.pithosj.core.keymap.HeaderKeys
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.common.Paths
 
@@ -68,7 +68,7 @@ case class CopyObject(
    */
   override val requestHeaders = {
     newDefaultRequestHeaders.
-      set(HeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath))
+      set(PithosHeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath))
   }
 
   def serverURLPathElements = Seq(account, fromContainer, fromPath)
