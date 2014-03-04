@@ -33,22 +33,30 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.model;
+package gr.grnet.common.json
 
-import gr.grnet.cdmi.http.CdmiContentType;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 /**
+ * JSON utilities
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public final class CdmiCapabilityModel_ {
-    private String objectType = CdmiContentType.Application_CdmiCapability.contentType();
-    private String objectID = "";
-    private String objectName = "cdmi_capabilities/";
-    private String parentUri = "/";
-    private String parentId = "";
+object Json {
+  final val Mapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
-    public static final CdmiCapabilityModel_ Cached = new CdmiCapabilityModel_();
+  final val PrettyPrinter = {
+    val printer = new DefaultPrettyPrinter
+    val indenter = new DefaultPrettyPrinter.Lf2SpacesIndenter
+    printer.indentArraysWith(indenter)
+    printer.indentObjectsWith(indenter)
+    printer
+  }
 
-    public final boolean cdmi_create_data_object = true;
+  final val Writer = Mapper.writer(PrettyPrinter)
+
+  def objectToJsonString[A <: AnyRef](obj: A): String =
+    Writer.writeValueAsString(obj)
 }
