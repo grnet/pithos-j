@@ -46,4 +46,11 @@ package object text {
       else if(s.charAt(s.length - 1) == '/') s.substring(0, s.length - 1).noTrailingSlash
       else s
   }
+
+  implicit class NormalizeUri(val uri: String) extends AnyVal {
+    def normalizeUri: String = uri.replaceAll("/+", "/")
+  }
+  implicit class UriToList(val uri: String) extends AnyVal {
+    def uriToList: List[String] = uri.split("/").toList
+  }
 }

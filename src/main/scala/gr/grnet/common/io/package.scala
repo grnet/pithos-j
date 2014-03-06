@@ -33,24 +33,26 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.model
+package gr.grnet.common
 
-import gr.grnet.cdmi.http.CdmiContentType
+import java.io.{File, Closeable}
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ContainerModel(
-  objectType: String = CdmiContentType.Application_CdmiContainer.contentType(),
-  objectID: String,
-  objectName: String,
-  parentURI: String,
-  parentID: String,
-  domainURI: String,
-  capabilitiesURI: String = "/cdmi_capabilities/container/",
-  completionStatus: String = "Complete",
-  metadata: Map[String, String] = Map(),
-  childrenrange: String,
-  children: List[String]
-)
+package object io {
+  implicit class CloseAnyway(val io: Closeable) extends AnyVal {
+    def closeAnyway(): Unit = {
+      try io.close()
+      catch {
+        case _: Exception ⇒
+      }
+    }
+  }
+
+  implicit class DeleteAnyway(val file: File) extends AnyVal {
+    def deleteAnyway(): Unit =
+      try file.delete() catch { case _: Exception ⇒ }
+  }
+}

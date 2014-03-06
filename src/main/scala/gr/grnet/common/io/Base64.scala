@@ -33,24 +33,18 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.model
+package gr.grnet.common.io
 
-import gr.grnet.cdmi.http.CdmiContentType
+import java.io.File
+import java.nio.file.Files
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ContainerModel(
-  objectType: String = CdmiContentType.Application_CdmiContainer.contentType(),
-  objectID: String,
-  objectName: String,
-  parentURI: String,
-  parentID: String,
-  domainURI: String,
-  capabilitiesURI: String = "/cdmi_capabilities/container/",
-  completionStatus: String = "Complete",
-  metadata: Map[String, String] = Map(),
-  childrenrange: String,
-  children: List[String]
-)
+object Base64 {
+  def encodeFile(file: File): String = {
+    val bytes = Files.readAllBytes(file.toPath)
+    com.ning.http.util.Base64.encode(bytes)
+  }
+}
