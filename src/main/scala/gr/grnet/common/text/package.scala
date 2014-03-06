@@ -33,18 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.api
-
+package gr.grnet.common
 
 /**
- * The CDMI API.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait CdmiApi
-  extends CdmiCapabilityApi
-  with    CdmiContainerApi
-  with    CdmiDataApi
-  with    CdmiDomainApi
-  with    CdmiQueueApi {
+package object text {
+  implicit class NoTrailingSlash(val s: String) extends AnyVal {
+    def noTrailingSlash: String =
+      if(s.length == 0) s
+      else if(s.charAt(s.length - 1) == '/') s.substring(0, s.length - 1).noTrailingSlash
+      else s
+  }
 }
