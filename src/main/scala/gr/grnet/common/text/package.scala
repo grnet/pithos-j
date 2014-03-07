@@ -50,7 +50,12 @@ package object text {
   implicit class NormalizeUri(val uri: String) extends AnyVal {
     def normalizeUri: String = uri.replaceAll("/+", "/")
   }
+
   implicit class UriToList(val uri: String) extends AnyVal {
     def uriToList: List[String] = uri.split("/").toList
+  }
+
+  implicit class ParentUri(val uri: String) extends AnyVal {
+    def parentUri: String = uri.substring(0, uri.noTrailingSlash.lastIndexOf('/') + 1)
   }
 }

@@ -41,11 +41,14 @@ package gr.grnet.common
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 object Paths {
+  private def stripLeadingSlash(s: String): String =
+    if(s.startsWith("/")) stripLeadingSlash(s.substring(1)) else s
+
   def buildWithFirst(first: String, others: String*): String =
-    (Seq(first) ++ others).mkString("/")
+    (Seq(first) ++ others.map(stripLeadingSlash)).mkString("/")
 
   def buildWithFirst(first: String, others: Array[String]): String =
-    build(Array(first) ++ others)
+    build(Array(first) ++ others.map(stripLeadingSlash))
 
   def build(paths: String*): String =
     paths.mkString("/")
