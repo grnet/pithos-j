@@ -33,24 +33,21 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.common
-import gr.grnet.common.text.NoLeadingSlash
+package gr.grnet
 
 /**
- * Provides path utilities.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object Paths {
-  def buildWithFirst(first: String, others: String*): String =
-    (Seq(first) ++ others.map(_.noLeadingSlash)).mkString("/")
-
-  def buildWithFirst(first: String, others: Array[String]): String =
-    build(Array(first) ++ others.map(_.noLeadingSlash))
-
-  def build(paths: String*): String =
-    paths.mkString("/")
-
-  def build(paths: Array[String]): String =
-    build(paths:_*)
+package object cdmi {
+  final val Banner =
+    """
+      |         _           _
+      |        | |         (_)
+      |  ___ __| |_ __ ___  _
+      | / __/ _` | '_ ` _ \| |
+      || (_| (_| | | | | | | |
+      | \___\__,_|_| |_| |_|_|
+      |
+    """.stripMargin
 }

@@ -35,15 +35,27 @@
 
 package gr.grnet.common
 
+
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 package object text {
+  implicit class RemovePrefix(val s: String) extends AnyVal {
+    def removePrefix(prefix: String): String =
+      if(s.startsWith(prefix)) s.substring(prefix.length)
+      else s
+  }
+
+  implicit class NoLeadingSlash(val s: String) extends AnyVal {
+    def noLeadingSlash: String =
+      if(s.length > 0 && s.charAt(0) == '/') s.substring(1).noLeadingSlash
+      else s
+  }
+
   implicit class NoTrailingSlash(val s: String) extends AnyVal {
     def noTrailingSlash: String =
-      if(s.length == 0) s
-      else if(s.charAt(s.length - 1) == '/') s.substring(0, s.length - 1).noTrailingSlash
+      if(s.length > 0 && s.charAt(s.length - 1) == '/') s.substring(0, s.length - 1).noTrailingSlash
       else s
   }
 

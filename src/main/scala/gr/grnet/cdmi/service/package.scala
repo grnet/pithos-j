@@ -33,24 +33,17 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.common
-import gr.grnet.common.text.NoLeadingSlash
+package gr.grnet.cdmi
+
+import com.twitter.finagle.http.Response
+import com.twitter.util.Future
 
 /**
- * Provides path utilities.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object Paths {
-  def buildWithFirst(first: String, others: String*): String =
-    (Seq(first) ++ others.map(_.noLeadingSlash)).mkString("/")
-
-  def buildWithFirst(first: String, others: Array[String]): String =
-    build(Array(first) ++ others.map(_.noLeadingSlash))
-
-  def build(paths: String*): String =
-    paths.mkString("/")
-
-  def build(paths: Array[String]): String =
-    build(paths:_*)
+package object service {
+  implicit class FinagleResponseToFuture(val response: Response) extends AnyVal {
+    final def future: Future[Response] = Future.value(response)
+  }
 }
