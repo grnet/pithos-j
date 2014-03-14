@@ -101,17 +101,34 @@ trait PithosApi {
       serviceInfo: ServiceInfo,
       container: String,
       path: String,
-      in: File,
+      file: File,
       contentType: String
   ): Future[Result]
 
+  def putObject(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String,
+    bytes: Array[Byte],
+    contentType: String
+  ): Future[Result]
+
   /**
-   * Delete a file or folder.
+   * Delete a file.
    */
-  def deleteObject(
+  def deleteFile(
       serviceInfo: ServiceInfo,
       container: String,
       path: String
+  ): Future[Result]
+
+  /**
+   * Delete a directory.
+   */
+  def deleteDirectory(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String
   ): Future[Result]
 
   def copyObject(

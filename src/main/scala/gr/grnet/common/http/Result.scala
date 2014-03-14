@@ -50,16 +50,6 @@ case class Result(
   stopMillis: Long,
   responseHeaders: KeyMap,
   resultData: KeyMap // response headers and other command-specific result data
-) {
-  def completionMillis = stopMillis - startMillis
-
-  def isSuccess: Boolean = originator.successCodes(statusCode)
-
-  def is200 = statusCode == 200
-
-  def is201 = statusCode == 201
-
-  def is204 = statusCode == 204
-
-  def is(code: Int) = this.statusCode == code
+) extends TResult[KeyMap] {
+  override val result: KeyMap = resultData
 }

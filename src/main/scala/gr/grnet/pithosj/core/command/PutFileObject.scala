@@ -33,27 +33,45 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.common.http;
+package gr.grnet.pithosj.core.command
+
+import gr.grnet.common.http.Method
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.http.FileRequestBody
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import java.io.File
 
 /**
- * Provides <code>HTTP</code> content types used by the library.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public enum ContentTypes {
-    Application_Directory("application/directory"),
-    Application_CdmiCapability("application/cdmi-capability"),
-    Application_CdmiDomain("application/vnd.org.snia.cdmi-object"),
-    Application_CdmiContainer("application/cdmi-container"),
-    Application_CdmiData("application/cdmi-object");
+case class PutFileObject(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String,
+    file: File,
+    contentType: String
+) extends PithosCommandSkeleton {
+  /**
+   * The HTTP method by which the command is implemented.
+   */
+  def httpMethod = Method.PUT
 
-    private final String contentType;
+  override val requestHeaders = {
+    newDefaultRequestHeaders.
+      set(PithosHeaderKeys.Standard.Content_Type, contentType)
+  }
 
-    ContentTypes(String contentType) {
-        this.contentType = contentType;
-    }
+  /**
+   * A set of all the HTTP status codes that are considered a success for this command.
+   */
+  def successCodes = Set(201)
 
-    public String contentType() {
-        return contentType;
-    }
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
+
+  override val requestBodyOpt = Some(FileRequestBody(file))
 }

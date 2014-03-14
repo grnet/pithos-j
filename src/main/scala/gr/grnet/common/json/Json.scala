@@ -36,7 +36,7 @@
 package gr.grnet.common.json
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 /**
@@ -59,4 +59,7 @@ object Json {
 
   def objectToJsonString[A <: AnyRef](obj: A): String =
     Writer.writeValueAsString(obj)
+
+  def jsonStringToTree(json: String): JsonNode =
+    Mapper.reader().readTree(json)
 }

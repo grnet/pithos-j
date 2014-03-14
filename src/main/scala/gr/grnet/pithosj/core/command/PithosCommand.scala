@@ -37,8 +37,7 @@ package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.common.http.{Command, Result}
-import gr.grnet.common.keymap.KeyMap
+import gr.grnet.common.http.Command
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.http.RequestBody
 

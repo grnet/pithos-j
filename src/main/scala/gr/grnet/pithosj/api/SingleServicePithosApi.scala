@@ -88,7 +88,7 @@ class SingleServicePithosApi(serviceInfo: ServiceInfo, pithos: PithosApi) {
   /**
    * Delete a file or folder.
    */
-  def deleteObject(container: String, path: String) = pithos.deleteObject(serviceInfo, container, path)
+  def deleteObject(container: String, path: String) = pithos.deleteFile(serviceInfo, container, path)
 
   def copyObject(
     fromContainer: String,

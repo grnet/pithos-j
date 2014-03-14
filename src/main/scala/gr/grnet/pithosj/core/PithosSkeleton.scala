@@ -38,10 +38,11 @@ package gr.grnet.pithosj.core
 import gr.grnet.common.http.Result
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.api.PithosApi
-import gr.grnet.pithosj.core.command.{ListObjectsInPath, CopyObject, DeleteObject, PutObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, PithosCommand, CommandExecutor}
+import gr.grnet.pithosj.core.command.{PutBytesObject, DeleteDirectory, ListObjectsInPath, CopyObject, DeleteFile, PutFileObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, PithosCommand, CommandExecutor}
 import java.io.{File, OutputStream}
 import java.net.URLConnection
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].
@@ -52,6 +53,7 @@ import scala.concurrent.Future
  */
 trait PithosSkeleton extends PithosApi {
   protected val executor: CommandExecutor
+  protected implicit val context: ExecutionContext = ExecutionContext.Implicits.global
 
   protected def call(command: PithosCommand): Future[Result] = {
     try {
@@ -124,11 +126,26 @@ trait PithosSkeleton extends PithosApi {
         _contentType
     }
 
-    call(PutObject(serviceInfo, container, path, file, contentType))
+    call(PutFileObject(serviceInfo, container, path, file, contentType))
   }
 
-  def deleteObject(serviceInfo: ServiceInfo, container: String, path: String) = {
-    call(DeleteObject(serviceInfo, container, path))
+
+  override def putObject(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String,
+    bytes: Array[Byte],
+    contentType: String
+  ): Future[Result] = {
+    call(PutBytesObject(serviceInfo, container, path, bytes, contentType))
+  }
+
+  def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) = {
+    call(DeleteFile(serviceInfo, container, path))
+  }
+
+  def deleteDirectory(serviceInfo: ServiceInfo, container: String, path: String): Future[Result] = {
+    call(DeleteDirectory(serviceInfo, container, path))
   }
 
   def copyObject(

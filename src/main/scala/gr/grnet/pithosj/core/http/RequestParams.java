@@ -43,7 +43,8 @@ import gr.grnet.common.http.IRequestParam;
 public enum RequestParams implements IRequestParam {
   Format("format"),
   Version("version"),
-  Path("path");
+  Path("path"),
+  Delimiter("delimiter");
 
   private final String requestParam;
 

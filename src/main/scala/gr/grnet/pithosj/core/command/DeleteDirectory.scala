@@ -33,19 +33,45 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.keymap
+package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.keymap.RequestParamKey
-import gr.grnet.pithosj.core.http.RequestParams
+import gr.grnet.common.http.Method
+import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.keymap.PithosRequestParamKeys
 
 /**
- * Type-indexed keys for request parameters used in the Pithos+ REST API.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object PithosRequestParamKeys {
-  final val Version = RequestParamKey(RequestParams.Version.requestParam())
-  final val Format = RequestParamKey(RequestParams.Format.requestParam())
-  final val Path = RequestParamKey(RequestParams.Path.requestParam())
-  final val Delimiter = RequestParamKey(RequestParams.Delimiter.requestParam())
+case class DeleteDirectory(
+  serviceInfo: ServiceInfo,
+  container: String,
+  path: String,
+  delimiterOpt: Option[String] = Some("/")
+) extends PithosCommandSkeleton {
+  /**
+   * The HTTP method by which the command is implemented.
+   */
+  def httpMethod = Method.DELETE
+
+  /**
+   * A set of all the HTTP status codes that are considered a success for this command.
+   */
+  def successCodes = Set(204)
+
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
+
+  override val queryParameters: KeyMap =
+    delimiterOpt match {
+      case Some(delimiter) ⇒
+        newQueryParameters.set(PithosRequestParamKeys.Delimiter, delimiter)
+
+      case None ⇒
+        newQueryParameters
+    }
 }

@@ -33,26 +33,23 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.cdmi.model
-
-import gr.grnet.cdmi.http.CdmiContentType
+package gr.grnet.common.http;
 
 /**
+ * Provides <code>HTTP</code> content types used by the library.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class DataObjectModel(
-  objectType: String = CdmiContentType.Application_CdmiData.contentType(),
-  objectID: String,
-  objectName: String,
-  parentURI: String,
-  parentID: String,
-  domainURI: String,
-  capabilitiesURI: String = "/cdmi_capabilities/dataobject/",
-  completionStatus: String = "Complete",
-  mimetype: String,
-  metadata: Map[String, String], // e.g. cdmi_size
-  valuetransferencoding: String, // "utf-8" or "base64"
-  valuerange: String,
-  value: String
-)
+public enum StdContentType implements IContentType {
+    Application_Directory("application/directory");
+
+    private final String contentType;
+
+    StdContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String contentType() {
+        return contentType;
+    }
+}

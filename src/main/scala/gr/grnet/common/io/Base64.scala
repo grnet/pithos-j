@@ -47,4 +47,8 @@ object Base64 {
     val bytes = Files.readAllBytes(file.toPath)
     com.ning.http.util.Base64.encode(bytes)
   }
+
+  def decodeString(encoded: String): Array[Byte] = {
+    com.ning.http.util.Base64.decode(encoded)
+  }
 }
