@@ -47,7 +47,8 @@ public enum StdHeader implements IHeader {
     Date("Date"),
     Last_Modified("Last-Modified"),
     ETag("ETag"),
-    Server("Server");
+    Server("Server"),
+    WWW_Authenticate("WWW-Authenticate");
 
     private final String headerName;
 
