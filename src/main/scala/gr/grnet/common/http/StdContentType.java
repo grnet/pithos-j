@@ -41,7 +41,8 @@ package gr.grnet.common.http;
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 public enum StdContentType implements IContentType {
-    Application_Directory("application/directory");
+    Application_Directory("application/directory"),
+    Application_Json("application/json");
 
     private final String contentType;
 
