@@ -96,9 +96,45 @@
     </dependency>
 
     <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-scala_2.10</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>twitter-server_2.10</artifactId>
-      <version>1.5.1</version>
+      <artifactId>finagle-core_2.10</artifactId>
+      <version>6.13.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-http_2.10</artifactId>
+      <version>6.13.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-app_2.10</artifactId>
+      <version>6.13.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-logging_2.10</artifactId>
+      <version>6.13.0</version>
     </dependency>
 
     <dependency>
