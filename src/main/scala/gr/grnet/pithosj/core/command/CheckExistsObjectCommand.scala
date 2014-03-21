@@ -74,12 +74,13 @@ case class CheckExistsObjectCommand(
     getResponseBody: () => String
   ) = {
     val exists = statusCode != 404
-    val existsContainer = statusCode == 204 && path.isEmpty
+    val isContainer = statusCode == 204 && path.isEmpty
     CheckExistsObjectResultData(
+      exists = exists,
+      isContainer = isContainer,
       container = container,
       path = path,
-      contentType = if(exists && !existsContainer) responseHeaders.get(PithosHeaderKeys.Standard.Content_Type) else None,
-      exists = exists,
+      contentType = if(exists && !isContainer) responseHeaders.get(PithosHeaderKeys.Standard.Content_Type) else None,
       contentTypeIsDirectory = contentTypeIsDirectory
     )
   }

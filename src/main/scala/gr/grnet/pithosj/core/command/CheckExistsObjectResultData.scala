@@ -41,16 +41,18 @@ package gr.grnet.pithosj.core.command
  */
 case class CheckExistsObjectResultData(
   exists: Boolean,
+  isContainer: Boolean,
   container: String,
   path: String,
   contentType: Option[String],
   contentTypeIsDirectory: (String) ⇒ Boolean
 ) {
   def isDirectory =
-    contentType match {
-      case Some(ct) if contentTypeIsDirectory(ct) ⇒
-        true
-      case _ ⇒
-        false
-    }
+    exists && !isContainer &&
+      (contentType match {
+        case Some(ct) if contentTypeIsDirectory(ct) ⇒
+          true
+        case _ ⇒
+          false
+      })
 }
