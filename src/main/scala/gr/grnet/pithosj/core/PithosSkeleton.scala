@@ -39,8 +39,10 @@ import gr.grnet.common.http.TResult
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.command._
+import gr.grnet.pithosj.core.http.{ChannelBufferRequestBody, BytesRequestBody, FileRequestBody}
 import java.io.{File, OutputStream}
 import java.net.URLConnection
+import org.jboss.netty.buffer.ChannelBuffer
 import scala.Some
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -117,18 +119,26 @@ trait PithosSkeleton extends PithosApi {
         _contentType
     }
 
-    call(PutFileObjectCommand(serviceInfo, container, path, file, contentType))
+    call(PutObjectCommand(serviceInfo, container, path, FileRequestBody(file), contentType))
   }
 
-
-  override def putObject(
+  def putObject(
     serviceInfo: ServiceInfo,
     container: String,
     path: String,
     bytes: Array[Byte],
     contentType: String
   ) =
-    call(PutBytesObjectCommand(serviceInfo, container, path, bytes, contentType))
+    call(PutObjectCommand(serviceInfo, container, path, BytesRequestBody(bytes), contentType))
+
+  def putObject(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String,
+    buffer: ChannelBuffer,
+    contentType: String
+  ) =
+    call(PutObjectCommand(serviceInfo, container, path, ChannelBufferRequestBody(buffer), contentType))
 
   def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) =
     call(DeleteFileCommand(serviceInfo, container, path))

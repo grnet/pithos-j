@@ -42,8 +42,10 @@ import gr.grnet.pithosj.core.Helpers.RequestBuilder
 import gr.grnet.pithosj.core.PithosException
 import gr.grnet.pithosj.core.asFullScala
 import gr.grnet.pithosj.core.command.{PithosCommand, CommandExecutor}
-import gr.grnet.pithosj.core.http.{InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
+import gr.grnet.pithosj.core.http.{ChannelBufferRequestBody, InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
 import scala.concurrent.Promise
+import com.ning.http.client.Request.EntityWriter
+import java.io.OutputStream
 
 /**
  *
@@ -98,6 +100,11 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
         requestBuilder.setBody(body)
       case InputStreamRequestBody(body) ⇒
         requestBuilder.setBody(body)
+      case ChannelBufferRequestBody(body) ⇒
+        val entityWriter = new EntityWriter {
+          override def writeEntity(out: OutputStream): Unit = body.readBytes(out, body.readableBytes())
+        }
+        requestBuilder.setBody(entityWriter)
     }
   }
 

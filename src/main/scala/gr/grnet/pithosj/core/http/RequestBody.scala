@@ -36,6 +36,7 @@
 package gr.grnet.pithosj.core.http
 
 import java.io.{InputStream, File}
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  *
@@ -47,3 +48,4 @@ case class FileRequestBody(body: File) extends RequestBody
 case class BytesRequestBody(body: Array[Byte]) extends RequestBody
 case class StringRequestBody(body: String) extends RequestBody
 case class InputStreamRequestBody(body: InputStream) extends RequestBody
+case class ChannelBufferRequestBody(body: ChannelBuffer) extends RequestBody

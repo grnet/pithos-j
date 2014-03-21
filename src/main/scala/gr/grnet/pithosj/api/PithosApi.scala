@@ -41,6 +41,7 @@ import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.{CheckExistsObjectResultData, ListObjectsInPathResultData, GetObjectInfoResultData, GetObjectResultData, ListContainersResultData, GetAccountInfoResultData}
 import java.io.{File, OutputStream}
 import scala.concurrent.Future
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Provides the Pithos API.
@@ -111,6 +112,14 @@ trait PithosApi {
     container: String,
     path: String,
     bytes: Array[Byte],
+    contentType: String
+  ): Future[TResult[Unit]]
+
+  def putObject(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String,
+    buffer: ChannelBuffer,
     contentType: String
   ): Future[TResult[Unit]]
 
