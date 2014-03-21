@@ -40,7 +40,7 @@ package gr.grnet.pithosj.core.command
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class GetAccountInfoResultData(
-  X_Account_Bytes_Used: Long,
-  X_Account_Container_Count: Int,
-  X_Account_Policy_Quota: Long
+  X_Account_Bytes_Used: Option[Long],
+  X_Account_Container_Count: Option[Int],
+  X_Account_Policy_Quota: Option[Long]
 )

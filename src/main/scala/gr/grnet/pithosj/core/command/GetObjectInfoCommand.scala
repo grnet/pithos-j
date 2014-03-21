@@ -132,14 +132,14 @@ case class GetObjectInfoCommand(
     GetObjectInfoResultData(
       container = container,
       path = path,
-      ETag = responseHeaders.getEx(PithosHeaderKeys.Standard.ETag),
-      Content_Type = responseHeaders.getEx(PithosHeaderKeys.Standard.Content_Type),
-      Content_Length = responseHeaders.getEx(PithosHeaderKeys.Standard.Content_Length),
-      Last_Modified = responseHeaders.getEx(PithosHeaderKeys.Standard.Last_Modified),
-      X_Object_Hash = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Hash),
-      X_Object_Modified_By = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Modified_By),
-      X_Object_Version_Timestamp = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Version_Timestamp),
-      X_Object_UUID = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_UUID),
-      X_Object_Version = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Version)
+      ETag = responseHeaders.get(PithosHeaderKeys.Standard.ETag),
+      Content_Type = responseHeaders.get(PithosHeaderKeys.Standard.Content_Type),
+      Content_Length = responseHeaders.get(PithosHeaderKeys.Standard.Content_Length),
+      Last_Modified = responseHeaders.get(PithosHeaderKeys.Standard.Last_Modified),
+      X_Object_Hash = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Hash),
+      X_Object_Modified_By = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Modified_By),
+      X_Object_Version_Timestamp = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Version_Timestamp),
+      X_Object_UUID = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_UUID),
+      X_Object_Version = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Version)
     )
 }

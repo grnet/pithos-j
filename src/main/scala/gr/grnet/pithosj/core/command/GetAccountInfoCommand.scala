@@ -114,9 +114,9 @@ case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommand
   ): GetAccountInfoResultData = {
 
     GetAccountInfoResultData(
-      X_Account_Bytes_Used = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Account_Bytes_Used),
-      X_Account_Container_Count = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Account_Container_Count),
-      X_Account_Policy_Quota = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Account_Policy_Quota)
+      X_Account_Bytes_Used = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Bytes_Used),
+      X_Account_Container_Count = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Container_Count),
+      X_Account_Policy_Quota = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Policy_Quota)
     )
   }
 }

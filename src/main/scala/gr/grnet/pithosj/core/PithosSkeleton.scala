@@ -41,21 +41,8 @@ import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.command._
 import java.io.{File, OutputStream}
 import java.net.URLConnection
-import scala.concurrent.{ExecutionContext, Future}
-import gr.grnet.pithosj.core.command.DeleteFileCommand
-import gr.grnet.pithosj.core.command.GetObjectInfoCommand
 import scala.Some
-import gr.grnet.pithosj.core.command.PutBytesObjectCommand
-import gr.grnet.pithosj.core.command.CopyObjectCommand
-import gr.grnet.pithosj.core.command.PutFileObjectCommand
-import gr.grnet.pithosj.core.command.ListObjectsInPathCommand
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.GetObjectCommand
-import gr.grnet.pithosj.core.command.DeleteDirectoryCommand
-import gr.grnet.pithosj.core.command.GetAccountInfoCommand
-import gr.grnet.pithosj.core.command.CreateDirectoryCommand
-import gr.grnet.pithosj.core.command.PingCommand
-import gr.grnet.pithosj.core.command.ListContainersCommand
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].

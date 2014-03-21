@@ -45,4 +45,12 @@ case class CheckExistsObjectResultData(
   path: String,
   contentType: Option[String],
   contentTypeIsDirectory: (String) ⇒ Boolean
-)
+) {
+  def isDirectory =
+    contentType match {
+      case Some(ct) if contentTypeIsDirectory(ct) ⇒
+        true
+      case _ ⇒
+        false
+    }
+}

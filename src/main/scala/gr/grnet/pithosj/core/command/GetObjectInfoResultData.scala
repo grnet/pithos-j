@@ -44,13 +44,13 @@ import gr.grnet.common.date.ParsedDate
 case class GetObjectInfoResultData(
   container: String,
   path: String,
-  ETag: String,
-  Content_Type: String,
-  Content_Length: Long,
-  Last_Modified: ParsedDate,
-  X_Object_Hash: String,
-  X_Object_Modified_By: String,
-  X_Object_Version_Timestamp: ParsedDate,
-  X_Object_UUID: String,
-  X_Object_Version: String
+  ETag: Option[String],
+  Content_Type: Option[String],
+  Content_Length: Option[Long],
+  Last_Modified: Option[ParsedDate],
+  X_Object_Hash: Option[String],
+  X_Object_Modified_By: Option[String],
+  X_Object_Version_Timestamp: Option[ParsedDate],
+  X_Object_UUID: Option[String],
+  X_Object_Version: Option[String]
 )
