@@ -39,7 +39,7 @@ import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.result.ContainerResultData
+import gr.grnet.pithosj.core.command.result.ContainerData
 import gr.grnet.pithosj.core.http.ResponseFormats
 import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosRequestParamKeys}
 import scala.xml.XML
@@ -48,7 +48,7 @@ import scala.xml.XML
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ListContainers(serviceInfo: ServiceInfo) extends PithosCommandSkeleton {
+case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[ListContainersResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -82,81 +82,70 @@ case class ListContainers(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
     PithosResultKeys.ListContainers
   )
 
-  override def buildResult(
+  override def buildResultData(
     responseHeaders: KeyMap,
     statusCode: Int,
     statusText: String,
     startMillis: Long,
     stopMillis: Long,
-    getResponseBody: () ⇒ String,
-    resultData: KeyMap
+    getResponseBody: () ⇒ String
   ) = {
 
-    if(successCodes(statusCode)) {
-      val body = getResponseBody()
-      val xml = XML.loadString(body)
+    val body = getResponseBody()
+    val xml = XML.loadString(body)
 
-      val containerResults = for {
-        container <- xml \ "container"
-        count <- container \ "count"
-        last_modified <- container \ "last_modified"
-        bytes <- container \ "bytes"
-        name <- container \ "name"
-        x_container_policy <- container \ "x_container_policy"
+    val containerResults = for {
+      container <- xml \ "container"
+      count <- container \ "count"
+      last_modified <- container \ "last_modified"
+      bytes <- container \ "bytes"
+      name <- container \ "name"
+      x_container_policy <- container \ "x_container_policy"
+    } yield {
+      // parse:
+      //  <x_container_policy>
+      //    <key>quota</key>
+      //    <value>53687091200</value>
+      //    <key>versioning</key>
+      //
+      //    <value>auto</value>
+      //  </x_container_policy>
+      val kvPairs = for {
+        child <- x_container_policy.nonEmptyChildren if Set("key", "value").contains(child.label.toLowerCase)
       } yield {
-        // parse:
-        //  <x_container_policy>
-        //    <key>quota</key>
-        //    <value>53687091200</value>
-        //    <key>versioning</key>
-        //
-        //    <value>auto</value>
-        //  </x_container_policy>
-        val kvPairs = for {
-          child <- x_container_policy.nonEmptyChildren if Set("key", "value").contains(child.label.toLowerCase)
-        } yield {
-          child.text
-        }
-
-        // A key is at an even index, a value is at an odd index
-        val (keys_i, values_i) = kvPairs.zipWithIndex.partition {
-          case (s, index) => index % 2 == 0
-        }
-        val keys = keys_i.map(_._1) // throw away the index
-        val values = values_i.map(_._1)
-
-        val policy = KeyMap()
-        for((k, v) <- keys.zip(values)) {
-          k.toLowerCase match {
-            case PithosResultKeys.ContainerQuota.name ⇒
-              policy.set(PithosResultKeys.ContainerQuota, v.toLong)
-            case k ⇒
-              policy.setString(k, v)
-          }
-        }
-
-        val containerResultData = ContainerResultData(
-          name.text,
-          count.text.toInt,
-          DateParsers.parse(last_modified.text, DateParsers.Format1Parser),
-          bytes.text.toLong,
-          policy
-        )
-
-        containerResultData
+        child.text
       }
 
-      resultData.set(PithosResultKeys.ListContainers, containerResults.toList)
+      // A key is at an even index, a value is at an odd index
+      val (keys_i, values_i) = kvPairs.zipWithIndex.partition {
+        case (s, index) => index % 2 == 0
+      }
+      val keys = keys_i.map(_._1) // throw away the index
+      val values = values_i.map(_._1)
+
+      val policy = KeyMap()
+      for((k, v) <- keys.zip(values)) {
+        k.toLowerCase match {
+          case PithosResultKeys.ContainerQuota.name ⇒
+            policy.set(PithosResultKeys.ContainerQuota, v.toLong)
+          case k ⇒
+            policy.setString(k, v)
+        }
+      }
+
+      val containerResultData = ContainerData(
+        name.text,
+        count.text.toInt,
+        DateParsers.parse(last_modified.text, DateParsers.Format1Parser),
+        bytes.text.toLong,
+        policy
+      )
+
+      containerResultData
     }
 
-    super.buildResult(
-      responseHeaders,
-      statusCode,
-      statusText,
-      startMillis,
-      stopMillis,
-      getResponseBody,
-      resultData
+    ListContainersResultData(
+      containers = containerResults
     )
   }
 }

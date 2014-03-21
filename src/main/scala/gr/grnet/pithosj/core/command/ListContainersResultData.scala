@@ -33,25 +33,15 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.date.ParsedDate
+import gr.grnet.pithosj.core.command.result.ContainerData
+import scala.collection.immutable.Seq
 
 /**
- * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListObjectsInPath]] command.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ObjectInPathResultData(
-    container: String,
-    path: String,
-    contentType: String,
-    contentLength: Long,
-    lastModified: ParsedDate,
-    xObjectHash: String,
-    xObjectModifiedBy: String,
-    xObjectVersionTimestamp: ParsedDate,
-    xObjectUUID: String,
-    xObjectVersion: String,
-    eTag: Option[String] = None
+case class ListContainersResultData(
+  containers: Seq[ContainerData]
 )

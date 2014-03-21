@@ -35,14 +35,27 @@
 
 package gr.grnet.pithosj.core
 
-import gr.grnet.common.http.Result
+import gr.grnet.common.http.TResult
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.api.PithosApi
-import gr.grnet.pithosj.core.command.{PutBytesObject, DeleteDirectory, ListObjectsInPath, CopyObject, DeleteFile, PutFileObject, GetObjectInfo, GetObject, CreateDirectory, ListContainers, GetAccountInfo, Ping, PithosCommand, CommandExecutor}
+import gr.grnet.pithosj.core.command._
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Success
+import gr.grnet.pithosj.core.command.DeleteFileCommand
+import gr.grnet.pithosj.core.command.GetObjectInfoCommand
+import scala.Some
+import gr.grnet.pithosj.core.command.PutBytesObjectCommand
+import gr.grnet.pithosj.core.command.CopyObjectCommand
+import gr.grnet.pithosj.core.command.PutFileObjectCommand
+import gr.grnet.pithosj.core.command.ListObjectsInPathCommand
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.command.GetObjectCommand
+import gr.grnet.pithosj.core.command.DeleteDirectoryCommand
+import gr.grnet.pithosj.core.command.GetAccountInfoCommand
+import gr.grnet.pithosj.core.command.CreateDirectoryCommand
+import gr.grnet.pithosj.core.command.PingCommand
+import gr.grnet.pithosj.core.command.ListContainersCommand
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].
@@ -55,7 +68,7 @@ trait PithosSkeleton extends PithosApi {
   protected val executor: CommandExecutor
   protected implicit val context: ExecutionContext = ExecutionContext.Implicits.global
 
-  protected def call(command: PithosCommand): Future[Result] = {
+  protected def call[T](command: PithosCommand[T]): Future[TResult[T]] = {
     try {
       command.validate match {
         case Some(error) ⇒
@@ -71,21 +84,15 @@ trait PithosSkeleton extends PithosApi {
     }
   }
 
-  def ping(serviceInfo: ServiceInfo) = {
-    call(Ping(serviceInfo))
-  }
+  def ping(serviceInfo: ServiceInfo) = call(PingCommand(serviceInfo))
 
-  def getAccountInfo(serviceInfo: ServiceInfo) = {
-    call(GetAccountInfo(serviceInfo))
-  }
+  def getAccountInfo(serviceInfo: ServiceInfo) = call(GetAccountInfoCommand(serviceInfo))
 
   def replaceAccountMeta(serviceInfo: ServiceInfo, meta: KeyMap) = ???
 
   def deleteAccountMeta(serviceInfo: ServiceInfo, metaKey: String) = ???
 
-  def listContainers(serviceInfo: ServiceInfo) = {
-    call(ListContainers(serviceInfo))
-  }
+  def listContainers(serviceInfo: ServiceInfo) = call(ListContainersCommand(serviceInfo))
 
   def createContainer(serviceInfo: ServiceInfo, container: String) = ???
 
@@ -93,9 +100,8 @@ trait PithosSkeleton extends PithosApi {
 
   def deleteContainer(serviceInfo: ServiceInfo, container: String) = ???
 
-  def createDirectory(serviceInfo: ServiceInfo, container: String, path: String) = {
-    call(CreateDirectory(serviceInfo, container, path))
-  }
+  def createDirectory(serviceInfo: ServiceInfo, container: String, path: String) =
+    call(CreateDirectoryCommand(serviceInfo, container, path))
 
   def getObjectMeta(serviceInfo: ServiceInfo, path: String) = ???
 
@@ -103,13 +109,11 @@ trait PithosSkeleton extends PithosApi {
 
   def replaceObjectMeta(serviceInfo: ServiceInfo, path: String, meta: KeyMap) = ???
 
-  def getObject(serviceInfo: ServiceInfo, container: String, path: String, version: String, out: OutputStream) = {
-    call(GetObject(serviceInfo, container, path, version, out))
-  }
+  def getObject(serviceInfo: ServiceInfo, container: String, path: String, version: String, out: OutputStream) =
+    call(GetObjectCommand(serviceInfo, container, path, version, out))
 
-  def getObjectInfo(serviceInfo: ServiceInfo, container: String, path: String) = {
-    call(GetObjectInfo(serviceInfo, container, path))
-  }
+  def getObjectInfo(serviceInfo: ServiceInfo, container: String, path: String) =
+    call(GetObjectInfoCommand(serviceInfo, container, path))
 
   def putObject(
       serviceInfo: ServiceInfo,
@@ -126,7 +130,7 @@ trait PithosSkeleton extends PithosApi {
         _contentType
     }
 
-    call(PutFileObject(serviceInfo, container, path, file, contentType))
+    call(PutFileObjectCommand(serviceInfo, container, path, file, contentType))
   }
 
 
@@ -136,17 +140,14 @@ trait PithosSkeleton extends PithosApi {
     path: String,
     bytes: Array[Byte],
     contentType: String
-  ): Future[Result] = {
-    call(PutBytesObject(serviceInfo, container, path, bytes, contentType))
-  }
+  ) =
+    call(PutBytesObjectCommand(serviceInfo, container, path, bytes, contentType))
 
-  def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) = {
-    call(DeleteFile(serviceInfo, container, path))
-  }
+  def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) =
+    call(DeleteFileCommand(serviceInfo, container, path))
 
-  def deleteDirectory(serviceInfo: ServiceInfo, container: String, path: String): Future[Result] = {
-    call(DeleteDirectory(serviceInfo, container, path))
-  }
+  def deleteDirectory(serviceInfo: ServiceInfo, container: String, path: String) =
+    call(DeleteDirectoryCommand(serviceInfo, container, path))
 
   def copyObject(
       serviceInfo: ServiceInfo,
@@ -163,7 +164,7 @@ trait PithosSkeleton extends PithosApi {
     toContainer.charAt(0)
     toPath.charAt(0)
 
-    call(CopyObject(serviceInfo, fromContainer, fromPath, toContainer, toPath))
+    call(CopyObjectCommand(serviceInfo, fromContainer, fromPath, toContainer, toPath))
   }
 
   def moveObject(
@@ -174,9 +175,8 @@ trait PithosSkeleton extends PithosApi {
       toObj: String
   ) = ???
 
-  def listObjectsInContainer(serviceInfo: ServiceInfo, container: String) = {
+  def listObjectsInContainer(serviceInfo: ServiceInfo, container: String) =
     listObjectsInPath(serviceInfo, container, "")
-  }
 
   def listObjectsInPath(
       serviceInfo: ServiceInfo,
@@ -185,6 +185,13 @@ trait PithosSkeleton extends PithosApi {
   ) = {
     require(path ne null, "path ne null")
 
-    call(ListObjectsInPath(serviceInfo, container, path))
+    call(ListObjectsInPathCommand(serviceInfo, container, path))
   }
+
+  def checkExistsObject(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String
+  ) =
+    call(CheckExistsObjectCommand(serviceInfo, container, path))
 }

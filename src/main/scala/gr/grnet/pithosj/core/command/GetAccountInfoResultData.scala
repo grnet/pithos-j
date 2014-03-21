@@ -35,42 +35,12 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.http.{BytesRequestBody, FileRequestBody}
-import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class PutBytesObject(
-    serviceInfo: ServiceInfo,
-    container: String,
-    path: String,
-    bytes: Array[Byte],
-    contentType: String
-) extends PithosCommandSkeleton {
-  /**
-   * The HTTP method by which the command is implemented.
-   */
-  def httpMethod = Method.PUT
-
-  override val requestHeaders = {
-    newDefaultRequestHeaders.
-      set(PithosHeaderKeys.Standard.Content_Type, contentType)
-  }
-
-  /**
-   * A set of all the HTTP status codes that are considered a success for this command.
-   */
-  def successCodes = Set(201)
-
-  /**
-   * Computes that URL path parts that will follow the Pithos+ server URL
-   * in the HTTP call.
-   */
-  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
-
-  override val requestBodyOpt = Some(BytesRequestBody(bytes))
-}
+case class GetAccountInfoResultData(
+  X_Account_Bytes_Used: Long,
+  X_Account_Container_Count: Int,
+  X_Account_Policy_Quota: Long
+)

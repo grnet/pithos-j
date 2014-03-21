@@ -42,7 +42,7 @@ import gr.grnet.common.keymap.{ResultKey, HeaderKey, KeyMap}
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait Command {
+trait Command[T] {
   /**
    * The application domain of this command.
    */
@@ -124,6 +124,15 @@ trait Command {
    */
   def descriptor: CommandDescriptor
 
+  def buildResultData(
+    responseHeaders: KeyMap,
+    statusCode: Int,
+    statusText: String,
+    startMillis: Long,
+    stopMillis: Long,
+    getResponseBody: () ⇒ String
+  ): T
+
   /**
    * Builds the domain-specific result of this command. Each command knows how to parse the HTTP response
    * in order to produce domain-specific objects.
@@ -136,5 +145,5 @@ trait Command {
     stopMillis: Long,
     getResponseBody: () ⇒ String,
     resultData: KeyMap = KeyMap()
-  ): Result
+  ): TResult[T]
 }

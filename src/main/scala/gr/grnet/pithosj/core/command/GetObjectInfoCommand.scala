@@ -35,51 +35,25 @@
 
 package gr.grnet.pithosj.core.command
 
-import com.ning.http.client.AsyncHandler.STATE
 import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.{PithosRequestParamKeys, PithosHeaderKeys, PithosResultKeys}
-import java.io.OutputStream
+import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosHeaderKeys}
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetObject(
+case class GetObjectInfoCommand(
     serviceInfo: ServiceInfo,
     container: String,
-    path: String,
-    version: String,
-    out: OutputStream
-) extends PithosCommandSkeleton {
+    path: String
+) extends PithosCommandSkeleton[GetObjectInfoResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.GET
-
-  /**
-   * The HTTP query parameters that are set by this command.
-   */
-  override val queryParameters = {
-    version match {
-      case null ⇒
-        newQueryParameters
-
-      case version ⇒
-        newQueryParameters.set(PithosRequestParamKeys.Version, version)
-    }
-  }
-
-  override def onBodyPartReceivedOpt = {
-    Some(
-      httpResponseBodyPart ⇒ {
-        httpResponseBodyPart.writeTo(out)
-        STATE.CONTINUE
-      }
-    )
-  }
+  def httpMethod = Method.HEAD
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -151,29 +125,21 @@ case class GetObject(
     }
   }
 
-  override def buildResult(
-      responseHeaders: KeyMap,
-      statusCode: Int,
-      statusText: String,
-      startMillis: Long,
-      stopMillis: Long,
-      getResponseBody: () => String,
-      resultData: KeyMap = KeyMap()
-  ) = {
-
-    if(successCodes(statusCode)) {
-      resultData.set(PithosResultKeys.Commands.Container, container)
-      resultData.set(PithosResultKeys.Commands.Path, path)
-    }
-
-    super.buildResult(
-      responseHeaders,
-      statusCode,
-      statusText,
-      startMillis,
-      stopMillis,
-      getResponseBody,
-      resultData
+  override def buildResultData(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () => String
+  ): GetObjectInfoResultData =
+    GetObjectInfoResultData(
+      container = container,
+      path = path,
+      ETag = responseHeaders.getEx(PithosHeaderKeys.Standard.ETag),
+      Content_Type = responseHeaders.getEx(PithosHeaderKeys.Standard.Content_Type),
+      Content_Length = responseHeaders.getEx(PithosHeaderKeys.Standard.Content_Length),
+      Last_Modified = responseHeaders.getEx(PithosHeaderKeys.Standard.Last_Modified),
+      X_Object_Hash = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Hash),
+      X_Object_Modified_By = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Modified_By),
+      X_Object_Version_Timestamp = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Version_Timestamp),
+      X_Object_UUID = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_UUID),
+      X_Object_Version = responseHeaders.getEx(PithosHeaderKeys.Pithos.X_Object_Version)
     )
-  }
 }

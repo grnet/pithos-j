@@ -35,31 +35,31 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{StdContentType, Method}
+import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.http.{BytesRequestBody, FileRequestBody}
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import gr.grnet.common.keymap.KeyMap
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CreateDirectory(
-    serviceInfo: ServiceInfo,
-    container: String,
-    path: String
-) extends PithosCommandSkeleton {
+case class PutBytesObjectCommand(
+  serviceInfo: ServiceInfo,
+  container: String,
+  path: String,
+  bytes: Array[Byte],
+  contentType: String
+) extends PithosCommandSkeleton[Unit] {
   /**
    * The HTTP method by which the command is implemented.
    */
   def httpMethod = Method.PUT
 
-  /**
-   * The HTTP request headers that are set by this command.
-   */
   override val requestHeaders = {
     newDefaultRequestHeaders.
-      set(PithosHeaderKeys.Standard.Content_Type, StdContentType.Application_Directory.contentType()).
-      set(PithosHeaderKeys.Standard.Content_Length, 0L)
+      set(PithosHeaderKeys.Standard.Content_Type, contentType)
   }
 
   /**
@@ -72,4 +72,11 @@ case class CreateDirectory(
    * in the HTTP call.
    */
   def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
+
+  override val requestBodyOpt = Some(BytesRequestBody(bytes))
+
+  override def buildResultData(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () => String
+  ): Unit = {}
 }

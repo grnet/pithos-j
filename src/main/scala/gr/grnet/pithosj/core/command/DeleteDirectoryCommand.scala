@@ -35,7 +35,7 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
+import gr.grnet.common.http.{Result, TResult, Method}
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosRequestParamKeys
@@ -44,12 +44,12 @@ import gr.grnet.pithosj.core.keymap.PithosRequestParamKeys
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class DeleteDirectory(
+case class DeleteDirectoryCommand(
   serviceInfo: ServiceInfo,
   container: String,
   path: String,
   delimiterOpt: Option[String] = Some("/")
-) extends PithosCommandSkeleton {
+) extends PithosCommandSkeleton[Unit] {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -74,4 +74,9 @@ case class DeleteDirectory(
       case None ⇒
         newQueryParameters
     }
+
+  override def buildResultData(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () => String
+  ): Unit = {}
 }

@@ -35,46 +35,49 @@
 
 package gr.grnet.pithosj.core.command
 
-import com.ning.http.client.AsyncHandler.STATE
-import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.common.http.Command
+import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.http.RequestBody
+import gr.grnet.pithosj.core.http.FileRequestBody
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import java.io.File
+import gr.grnet.common.keymap.KeyMap
 
 /**
- * A command to be executed via the Pithos+ REST API.
- * Each command specifies its own input data, which will be used
- * to build up an HTTP request.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait PithosCommand[T] extends Command[T] {
+case class PutFileObjectCommand(
+  serviceInfo: ServiceInfo,
+  container: String,
+  path: String,
+  file: File,
+  contentType: String
+) extends PithosCommandSkeleton[Unit] {
   /**
-   * The application domain of this command.
+   * The HTTP method by which the command is implemented.
    */
-  override def appDomain: String = "Pithos"
+  def httpMethod = Method.PUT
+
+  override val requestHeaders = {
+    newDefaultRequestHeaders.
+      set(PithosHeaderKeys.Standard.Content_Type, contentType)
+  }
 
   /**
-   * Specifies the target against which the command will be executed.
-   * This includes the Pithos+ server and the Pithos+ user id and token.
+   * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def serviceInfo: ServiceInfo
+  def successCodes = Set(201)
 
   /**
-   * The account ID for this command. This is the same as `serviceInfo.uuid` and
-   * is provided for convenience.
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
    */
-  def account: String = serviceInfo.uuid
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
-  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE]
+  override val requestBodyOpt = Some(FileRequestBody(file))
 
-  /**
-   * Provides the HTTP request body, if any.
-   */
-  def requestBodyOpt: Option[RequestBody]
-
-  /**
-   * A set of all the HTTP status codes that are considered a failure for this command.
-   */
-  override def failureCodes: Set[Int] = Set() // FIXME implement
+  override def buildResultData(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () => String
+  ): Unit = {}
 }

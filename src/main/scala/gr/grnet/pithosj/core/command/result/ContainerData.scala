@@ -33,33 +33,21 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
+package gr.grnet.pithosj.core.command.result
 
-import gr.grnet.common.http.Method
-import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.common.date.ParsedDate
+import gr.grnet.common.keymap.KeyMap
 
 /**
+ * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListContainersCommand]] command.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class DeleteFile(
-    serviceInfo: ServiceInfo,
-    container: String,
-    path: String
-) extends PithosCommandSkeleton {
-  /**
-   * The HTTP method by which the command is implemented.
-   */
-  def httpMethod = Method.DELETE
 
-  /**
-   * A set of all the HTTP status codes that are considered a success for this command.
-   */
-  def successCodes = Set(204)
-
-  /**
-   * Computes that URL path parts that will follow the Pithos+ server URL
-   * in the HTTP call.
-   */
-  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
-}
+case class ContainerData(
+  container: String,
+  count: Int,
+  lastModified: ParsedDate,
+  bytes: Long,
+  policy: KeyMap // Use PithosResultKeys.ContainerQuota to get "quota"
+)

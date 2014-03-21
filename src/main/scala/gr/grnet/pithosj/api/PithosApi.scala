@@ -35,9 +35,10 @@
 
 package gr.grnet.pithosj.api
 
-import gr.grnet.common.http.Result
+import gr.grnet.common.http.TResult
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.command.{CheckExistsObjectResultData, ListObjectsInPathResultData, GetObjectInfoResultData, GetObjectResultData, ListContainersResultData, GetAccountInfoResultData}
 import java.io.{File, OutputStream}
 import scala.concurrent.Future
 
@@ -47,41 +48,41 @@ import scala.concurrent.Future
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait PithosApi {
-  def ping(serviceInfo: ServiceInfo): Future[Result]
+  def ping(serviceInfo: ServiceInfo): Future[TResult[Unit]]
 
-  def getAccountInfo(serviceInfo: ServiceInfo): Future[Result]
+  def getAccountInfo(serviceInfo: ServiceInfo): Future[TResult[GetAccountInfoResultData]]
 
-  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: KeyMap): Future[Result]
+  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: KeyMap): Future[TResult[Unit]]
 
-  def deleteAccountMeta(serviceInfo: ServiceInfo, metaKey: String): Future[Result]
+  def deleteAccountMeta(serviceInfo: ServiceInfo, metaKey: String): Future[TResult[Unit]]
 
-  def listContainers(serviceInfo: ServiceInfo): Future[Result]
+  def listContainers(serviceInfo: ServiceInfo): Future[TResult[ListContainersResultData]]
 
-  def createContainer(serviceInfo: ServiceInfo, container: String): Future[Result]
+  def createContainer(serviceInfo: ServiceInfo, container: String): Future[TResult[Unit]]
 
-  def getContainerInfo(serviceInfo: ServiceInfo, container: String): Future[Result]
+  def getContainerInfo(serviceInfo: ServiceInfo, container: String): Future[TResult[Unit]]
 
-  def deleteContainer(serviceInfo: ServiceInfo, container: String): Future[Result]
+  def deleteContainer(serviceInfo: ServiceInfo, container: String): Future[TResult[Unit]]
 
   def createDirectory(
       serviceInfo: ServiceInfo,
       container: String,
       path: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
-  def getObjectMeta(serviceInfo: ServiceInfo, path: String): Future[Result]
+  def getObjectMeta(serviceInfo: ServiceInfo, path: String): Future[TResult[Unit]]
 
   def deleteObjectMeta(
       serviceInfo: ServiceInfo,
       path: String,
       metaKey: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   def replaceObjectMeta(
       serviceInfo: ServiceInfo,
       path: String,
       meta: KeyMap
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   def getObject(
       serviceInfo: ServiceInfo,
@@ -89,13 +90,13 @@ trait PithosApi {
       path: String,
       version: String,
       out: OutputStream
-  ): Future[Result]
+  ): Future[TResult[GetObjectResultData]]
 
   def getObjectInfo(
       serviceInfo: ServiceInfo,
       container: String,
       path: String
-  ): Future[Result]
+  ): Future[TResult[GetObjectInfoResultData]]
 
   def putObject(
       serviceInfo: ServiceInfo,
@@ -103,7 +104,7 @@ trait PithosApi {
       path: String,
       file: File,
       contentType: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   def putObject(
     serviceInfo: ServiceInfo,
@@ -111,7 +112,7 @@ trait PithosApi {
     path: String,
     bytes: Array[Byte],
     contentType: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   /**
    * Delete a file.
@@ -120,7 +121,7 @@ trait PithosApi {
       serviceInfo: ServiceInfo,
       container: String,
       path: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   /**
    * Delete a directory.
@@ -129,7 +130,7 @@ trait PithosApi {
     serviceInfo: ServiceInfo,
     container: String,
     path: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   def copyObject(
       serviceInfo: ServiceInfo,
@@ -137,7 +138,7 @@ trait PithosApi {
       fromPath: String,
       toContainer: String,
       toPath: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   def moveObject(
       serviceInfo: ServiceInfo,
@@ -145,16 +146,22 @@ trait PithosApi {
       fromPath: String,
       toContainer: String,
       toPath: String
-  ): Future[Result]
+  ): Future[TResult[Unit]]
 
   def listObjectsInContainer(
       serviceInfo: ServiceInfo,
       container: String
-  ): Future[Result]
+  ): Future[TResult[ListObjectsInPathResultData]]
 
   def listObjectsInPath(
       serviceInfo: ServiceInfo,
       container: String,
       path: String
-  ): Future[Result]
+  ): Future[TResult[ListObjectsInPathResultData]]
+
+  def checkExistsObject(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String
+  ): Future[TResult[CheckExistsObjectResultData]]
 }

@@ -35,43 +35,22 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.http.FileRequestBody
-import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import java.io.File
+import gr.grnet.common.date.ParsedDate
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class PutFileObject(
-    serviceInfo: ServiceInfo,
-    container: String,
-    path: String,
-    file: File,
-    contentType: String
-) extends PithosCommandSkeleton {
-  /**
-   * The HTTP method by which the command is implemented.
-   */
-  def httpMethod = Method.PUT
-
-  override val requestHeaders = {
-    newDefaultRequestHeaders.
-      set(PithosHeaderKeys.Standard.Content_Type, contentType)
-  }
-
-  /**
-   * A set of all the HTTP status codes that are considered a success for this command.
-   */
-  def successCodes = Set(201)
-
-  /**
-   * Computes that URL path parts that will follow the Pithos+ server URL
-   * in the HTTP call.
-   */
-  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
-
-  override val requestBodyOpt = Some(FileRequestBody(file))
-}
+case class GetObjectInfoResultData(
+  container: String,
+  path: String,
+  ETag: String,
+  Content_Type: String,
+  Content_Length: Long,
+  Last_Modified: ParsedDate,
+  X_Object_Hash: String,
+  X_Object_Modified_By: String,
+  X_Object_Version_Timestamp: ParsedDate,
+  X_Object_UUID: String,
+  X_Object_Version: String
+)

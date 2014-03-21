@@ -39,7 +39,7 @@ import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.result.ObjectInPathResultData
+import gr.grnet.pithosj.core.command.result.ObjectInPathData
 import gr.grnet.pithosj.core.http.ResponseFormats
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosResultKeys, PithosRequestParamKeys}
 import scala.xml.XML
@@ -48,11 +48,11 @@ import scala.xml.XML
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class ListObjectsInPath(
+case class ListObjectsInPathCommand(
     serviceInfo: ServiceInfo,
     container: String,
     path: String
-) extends PithosCommandSkeleton {
+) extends PithosCommandSkeleton[ListObjectsInPathResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -127,59 +127,48 @@ case class ListObjectsInPath(
     }
   }
 
-  override def buildResult(
+  override def buildResultData(
     responseHeaders: KeyMap,
     statusCode: Int,
     statusText: String,
     startMillis: Long,
     stopMillis: Long,
-    getResponseBody: () => String,
-    resultData: KeyMap
+    getResponseBody: () => String
   ) = {
 
-    if(successCodes(statusCode)) {
-      val body = getResponseBody()
-      val xml = XML.loadString(body)
+    val body = getResponseBody()
+    val xml = XML.loadString(body)
 
-      val objectsInPath = for {
-        obj   <- xml \ "object"
-        hash  <- obj \ "hash"
-        name  <- obj \ "name"
-        bytes <- obj \ "bytes"
-        x_object_version_timestamp <- obj \ "x_object_version_timestamp"
-        x_object_uuid <- obj \ "x_object_uuid"
-        last_modified <- obj \ "last_modified"
-        content_type  <- obj \ "content_type"
-        x_object_hash <- obj \ "x_object_hash"
-        x_object_version     <- obj \ "x_object_version"
-        x_object_modified_by <- obj \ "x_object_modified_by"
-      } yield {
-        ObjectInPathResultData(
-          container = container,
-          path = name.text,
-          contentType = content_type.text,
-          contentLength = bytes.text.toLong,
-          lastModified = DateParsers.parse(last_modified.text, DateParsers.Format1Parser),
-          xObjectHash = x_object_hash.text,
-          xObjectModifiedBy = x_object_modified_by.text,
-          xObjectVersionTimestamp = DateParsers.parse(x_object_version_timestamp.text, DateParsers.Format3Parser),
-          xObjectUUID = x_object_uuid.text,
-          xObjectVersion = x_object_version.text,
-          eTag = None
-        )
-      }
-
-      resultData.set(PithosResultKeys.ListObjectsInPath, objectsInPath.toList)
+    val objectsInPath = for {
+      obj   <- xml \ "object"
+      hash  <- obj \ "hash"
+      name  <- obj \ "name"
+      bytes <- obj \ "bytes"
+      x_object_version_timestamp <- obj \ "x_object_version_timestamp"
+      x_object_uuid <- obj \ "x_object_uuid"
+      last_modified <- obj \ "last_modified"
+      content_type  <- obj \ "content_type"
+      x_object_hash <- obj \ "x_object_hash"
+      x_object_version     <- obj \ "x_object_version"
+      x_object_modified_by <- obj \ "x_object_modified_by"
+    } yield {
+      ObjectInPathData(
+        container = container,
+        path = name.text,
+        contentType = content_type.text,
+        contentLength = bytes.text.toLong,
+        lastModified = DateParsers.parse(last_modified.text, DateParsers.Format1Parser),
+        xObjectHash = x_object_hash.text,
+        xObjectModifiedBy = x_object_modified_by.text,
+        xObjectVersionTimestamp = DateParsers.parse(x_object_version_timestamp.text, DateParsers.Format3Parser),
+        xObjectUUID = x_object_uuid.text,
+        xObjectVersion = x_object_version.text,
+        eTag = None
+      )
     }
 
-    super.buildResult(
-      responseHeaders,
-      statusCode,
-      statusText,
-      startMillis,
-      stopMillis,
-      getResponseBody,
-      resultData
+    ListObjectsInPathResultData(
+      objects = objectsInPath
     )
   }
 }

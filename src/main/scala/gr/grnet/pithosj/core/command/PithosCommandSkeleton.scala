@@ -38,7 +38,7 @@ package gr.grnet.pithosj.core.command
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
 import gr.grnet.common.Paths
-import gr.grnet.common.http.{Result, CommandDescriptor}
+import gr.grnet.common.http.{TResult, Result, CommandDescriptor}
 import gr.grnet.common.keymap.{ResultKey, HeaderKey, KeyMap}
 import gr.grnet.pithosj.core.Helpers
 import gr.grnet.pithosj.core.http.RequestBody
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait PithosCommandSkeleton extends PithosCommand {
+trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE] = None
@@ -170,16 +170,14 @@ trait PithosCommandSkeleton extends PithosCommand {
     keyMap
   }
 
-  def buildResult(
-      responseHeaders: KeyMap,
-      statusCode: Int,
-      statusText: String,
-      startMillis: Long,
-      stopMillis: Long,
-      getResponseBody: () ⇒ String,
-      resultData: KeyMap
-  ) = {
-
+  /**
+   * Builds the domain-specific result of this command. Each command knows how to parse the HTTP response
+   * in order to produce domain-specific objects.
+   */
+  override def buildResult(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () ⇒ String, resultData: KeyMap
+  ): TResult[T] =
     Result(
       descriptor,
       statusCode,
@@ -187,7 +185,17 @@ trait PithosCommandSkeleton extends PithosCommand {
       startMillis,
       stopMillis,
       responseHeaders,
-      resultData.set(PithosResultKeys.ResponseBody, getResponseBody())
+      if(successCodes(statusCode))
+        Some(
+          buildResultData(
+            responseHeaders = responseHeaders,
+            statusCode = statusCode,
+            statusText = statusText,
+            startMillis = startMillis,
+            stopMillis = stopMillis,
+            getResponseBody = getResponseBody
+          )
+        )
+      else None
     )
-  }
 }

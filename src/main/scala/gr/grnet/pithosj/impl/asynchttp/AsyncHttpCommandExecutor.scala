@@ -35,10 +35,9 @@
 
 package gr.grnet.pithosj.impl.asynchttp
 
-import gr.grnet.common.http.Result
-import gr.grnet.common.http.Method._
 import com.ning.http.client.{AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
-import gr.grnet.common.http.Method
+import gr.grnet.common.http.Method._
+import gr.grnet.common.http.{TResult, Result, Method}
 import gr.grnet.pithosj.core.Helpers.RequestBuilder
 import gr.grnet.pithosj.core.PithosException
 import gr.grnet.pithosj.core.asFullScala
@@ -54,7 +53,7 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
   /**
    * Creates a request builder for this command.
    */
-  private def createRequestBuilder(command: PithosCommand): RequestBuilder = {
+  private def createRequestBuilder[T](command: PithosCommand[T]): RequestBuilder = {
     val url = command.serverURLExcludingParameters
 
     val requestBuilder = command.httpMethod match {
@@ -106,14 +105,14 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
    * Executes the given command and returns a [[java.util.concurrent.Future]]
    * with the command-specific result.
    */
-  def execute(command: PithosCommand) = {
-    val promise = Promise[Result]()
+  def execute[T](command: PithosCommand[T]) = {
+    val promise = Promise[TResult[T]]()
     val requestBuilder = createRequestBuilder(command)
 
     val startMillis = System.currentTimeMillis()
     val onBodyPartReceivedOpt = command.onBodyPartReceivedOpt
 
-    val handler = new AsyncCompletionHandler[Result] {
+    val handler = new AsyncCompletionHandler[TResult[T]] {
       override def onBodyPartReceived(content: HttpResponseBodyPart) = {
         onBodyPartReceivedOpt match {
           case Some(onBodyPartReceived) ⇒

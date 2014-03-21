@@ -35,8 +35,8 @@
 
 package gr.grnet.pithosj.core.command
 
+import gr.grnet.common.http.TResult
 import scala.concurrent.Future
-import gr.grnet.common.http.Result
 
 /**
  * A [[gr.grnet.pithosj.core.command.CommandExecutor]] is responsible to synchronously execute
@@ -49,5 +49,5 @@ trait CommandExecutor {
    * Executes the given command and returns a [[scala.concurrent.Future]]
    * with the command-specific result.
    */
-  def execute(command: PithosCommand): Future[Result]
+  def execute[T](command: PithosCommand[T]): Future[TResult[T]]
 }

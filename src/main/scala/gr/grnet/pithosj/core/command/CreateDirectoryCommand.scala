@@ -33,21 +33,49 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command.result
+package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.date.ParsedDate
+import gr.grnet.common.http.{Result, TResult, StdContentType, Method}
 import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 
 /**
- * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListContainers]] command.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-
-case class ContainerResultData(
+case class CreateDirectoryCommand(
+    serviceInfo: ServiceInfo,
     container: String,
-    count: Int,
-    lastModified: ParsedDate,
-    bytes: Long,
-    policy: KeyMap // Use PithosResultKeys.ContainerQuota to get "quota"
-)
+    path: String
+) extends PithosCommandSkeleton[Unit] {
+  /**
+   * The HTTP method by which the command is implemented.
+   */
+  def httpMethod = Method.PUT
+
+  /**
+   * The HTTP request headers that are set by this command.
+   */
+  override val requestHeaders = {
+    newDefaultRequestHeaders.
+      set(PithosHeaderKeys.Standard.Content_Type, StdContentType.Application_Directory.contentType()).
+      set(PithosHeaderKeys.Standard.Content_Length, 0L)
+  }
+
+  /**
+   * A set of all the HTTP status codes that are considered a success for this command.
+   */
+  def successCodes = Set(201)
+
+  /**
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
+   */
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
+
+  override def buildResultData(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () => String
+  ): Unit = {}
+}

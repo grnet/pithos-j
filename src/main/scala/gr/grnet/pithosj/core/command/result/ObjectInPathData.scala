@@ -33,48 +33,25 @@
  * or implied, of GRNET S.A.
  */
 
-package gr.grnet.pithosj.core.command
+package gr.grnet.pithosj.core.command.result
 
-import com.ning.http.client.AsyncHandler.STATE
-import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.common.http.Command
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.http.RequestBody
+import gr.grnet.common.date.ParsedDate
 
 /**
- * A command to be executed via the Pithos+ REST API.
- * Each command specifies its own input data, which will be used
- * to build up an HTTP request.
+ * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListObjectsInPathCommand]] command.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait PithosCommand[T] extends Command[T] {
-  /**
-   * The application domain of this command.
-   */
-  override def appDomain: String = "Pithos"
-
-  /**
-   * Specifies the target against which the command will be executed.
-   * This includes the Pithos+ server and the Pithos+ user id and token.
-   */
-  def serviceInfo: ServiceInfo
-
-  /**
-   * The account ID for this command. This is the same as `serviceInfo.uuid` and
-   * is provided for convenience.
-   */
-  def account: String = serviceInfo.uuid
-
-  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE]
-
-  /**
-   * Provides the HTTP request body, if any.
-   */
-  def requestBodyOpt: Option[RequestBody]
-
-  /**
-   * A set of all the HTTP status codes that are considered a failure for this command.
-   */
-  override def failureCodes: Set[Int] = Set() // FIXME implement
-}
+case class ObjectInPathData(
+  container: String,
+  path: String,
+  contentType: String,
+  contentLength: Long,
+  lastModified: ParsedDate,
+  xObjectHash: String,
+  xObjectModifiedBy: String,
+  xObjectVersionTimestamp: ParsedDate,
+  xObjectUUID: String,
+  xObjectVersion: String,
+  eTag: Option[String] = None
+)

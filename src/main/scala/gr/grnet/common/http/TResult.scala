@@ -42,7 +42,7 @@ import gr.grnet.common.keymap.KeyMap
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-trait TResult[+T <: AnyRef] {
+trait TResult[+T] {
   val originator: CommandDescriptor
 
   val statusCode: Int
@@ -55,7 +55,7 @@ trait TResult[+T <: AnyRef] {
 
   val responseHeaders: KeyMap
 
-  val result: T
+  val successData: Option[T]
 
   def completionMillis = stopMillis - startMillis
 

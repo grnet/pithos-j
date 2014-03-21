@@ -35,20 +35,23 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
+import gr.grnet.common.http.{Result, TResult, Method}
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import gr.grnet.common.keymap.KeyMap
 
 /**
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class GetAccountInfo(serviceInfo: ServiceInfo) extends PithosCommandSkeleton {
+case class DeleteFileCommand(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String
+) extends PithosCommandSkeleton[Unit] {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.HEAD
+  def httpMethod = Method.DELETE
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -59,51 +62,10 @@ case class GetAccountInfo(serviceInfo: ServiceInfo) extends PithosCommandSkeleto
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(serviceInfo.uuid)
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
-  /**
-   * Type-safe keys for `HTTP` response headers that are specific to this command.
-   * These usually correspond to Pithos-specific headers, not general-purpose
-   * `HTTP` response headers but there may be exceptions.
-   *
-   * Each command must document which keys it supports.
-   */
-  override val responseHeaderKeys = Seq(
-    PithosHeaderKeys.Pithos.X_Account_Bytes_Used,
-    PithosHeaderKeys.Pithos.X_Account_Container_Count,
-    PithosHeaderKeys.Pithos.X_Account_Policy_Quota,
-    PithosHeaderKeys.Pithos.X_Account_Policy_Versioning
-  )
-
-
-  /**
-   * Parse a response header that is specific to this command and whose value must be of non-String type.
-   *
-   * Returns `true` iff the header is parsed.
-   *
-   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `keyMap`.
-   */
-  override protected def tryParseNonStringResponseHeader(
-      keyMap: KeyMap,
-      name: String,
-      value: String
-  ) = {
-    name match {
-      case PithosHeaderKeys.Pithos.X_Account_Bytes_Used.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Bytes_Used, value.toLong)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Account_Container_Count.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Container_Count, value.toInt)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Account_Policy_Quota.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Policy_Quota, value.toLong)
-        true
-
-      case _ ⇒
-        false
-    }
-  }
+  override def buildResultData(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () => String
+  ): Unit = {}
 }

@@ -36,7 +36,7 @@
 package gr.grnet.pithosj.core.keymap
 
 import gr.grnet.common.keymap.ResultKey
-import gr.grnet.pithosj.core.command.result.{ObjectInPathResultData, ContainerResultData}
+import gr.grnet.pithosj.core.command.result.{ObjectInPathData, ContainerData}
 
 /**
  * Miscellaneous type-safe keys.
@@ -45,18 +45,18 @@ import gr.grnet.pithosj.core.command.result.{ObjectInPathResultData, ContainerRe
  */
 object PithosResultKeys {
 
-  private[this] def name(s: String) = "result.data." + s
+  private[this] def name(s: String) = "result.successData." + s
 
   final val ResponseBody = ResultKey[String](name("response.body"))
-  final val ListContainers = ResultKey[List[ContainerResultData]](name("list.containers"))
-  final val ListObjectsInPath = ResultKey[List[ObjectInPathResultData]](name("list.objects.in.path"))
-  final val ContainerQuota = ResultKey[Long]("quota") // the name is exactly as it comes from ListContainers command
+  final val ListContainers = ResultKey[List[ContainerData]](name("list.containers"))
+  final val ListObjectsInPath = ResultKey[List[ObjectInPathData]](name("list.objects.in.path"))
+  final val ContainerQuota = ResultKey[Long]("quota") // the name is exactly as it comes from ListContainersCommand command
 
   /**
    * Keys for data specified in commands.
    */
   object Commands {
-    private[this] def name(s: String) = "command.data." + s
+    private[this] def name(s: String) = "command.successData." + s
 
     final val Container = ResultKey[String](name("container"))
     final val Path = ResultKey[String](name("path"))

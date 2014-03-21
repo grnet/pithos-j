@@ -35,23 +35,24 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
+import gr.grnet.common.http.{TResult, Result, Method}
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.common.Paths
+import gr.grnet.common.keymap.KeyMap
 
 /**
  * Copies an object around.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CopyObject(
-    serviceInfo: ServiceInfo,
-    fromContainer: String,
-    fromPath: String,
-    toContainer: String,
-    toPath: String
-) extends PithosCommandSkeleton {
+case class CopyObjectCommand(
+  serviceInfo: ServiceInfo,
+  fromContainer: String,
+  fromPath: String,
+  toContainer: String,
+  toPath: String
+) extends PithosCommandSkeleton[Unit] {
 
   /**
    * The HTTP method by which the command is implemented.
@@ -72,4 +73,10 @@ case class CopyObject(
   }
 
   def serverURLPathElements = Seq(account, fromContainer, fromPath)
+
+
+  override def buildResultData(
+    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    getResponseBody: () => String
+  ): Unit = {}
 }

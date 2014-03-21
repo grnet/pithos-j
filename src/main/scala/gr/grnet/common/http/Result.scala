@@ -38,18 +38,16 @@ package gr.grnet.common.http
 import gr.grnet.common.keymap.KeyMap
 
 /**
- * The result of a [[gr.grnet.common.http.Command]].
+ * Standard implementation of a [[gr.grnet.common.http.TResult]].
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class Result(
+case class Result[T](
   originator: CommandDescriptor,
   statusCode: Int,
   statusText: String,
   startMillis: Long,
   stopMillis: Long,
   responseHeaders: KeyMap,
-  resultData: KeyMap // response headers and other command-specific result data
-) extends TResult[KeyMap] {
-  override val result: KeyMap = resultData
-}
+  successData: Option[T] // command-specific result data
+) extends TResult[T]
