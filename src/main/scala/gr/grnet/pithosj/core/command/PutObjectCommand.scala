@@ -17,45 +17,45 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{TResult, Result, Method}
-import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.common.Paths
+import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.http.RequestBody
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 
 /**
- * Copies an object around.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-case class CopyObjectCommand(
+case class PutObjectCommand(
   serviceInfo: ServiceInfo,
-  fromContainer: String,
-  fromPath: String,
-  toContainer: String,
-  toPath: String
+  container: String,
+  path: String,
+  payload: RequestBody,
+  contentType: String
 ) extends PithosCommandSkeleton[Unit] {
-
   /**
    * The HTTP method by which the command is implemented.
    */
-  val httpMethod = Method.COPY
+  def httpMethod = Method.PUT
+
+  override val requestHeaders = {
+    newDefaultRequestHeaders.
+      set(PithosHeaderKeys.Standard.Content_Type, contentType)
+  }
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  val successCodes = Set(201)
+  def successCodes = Set(201)
 
   /**
-   * The HTTP request headers that are set by this command.
+   * Computes that URL path parts that will follow the Pithos+ server URL
+   * in the HTTP call.
    */
-  override val requestHeaders = {
-    newDefaultRequestHeaders.
-      set(PithosHeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath))
-  }
+  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
-  def serverURLPathElements = Seq(account, fromContainer, fromPath)
-
+  override val requestBodyOpt = Some(payload)
 
   override def buildResultData(
     responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
