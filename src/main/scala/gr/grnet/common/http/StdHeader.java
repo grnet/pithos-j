@@ -30,7 +30,8 @@ public enum StdHeader implements IHeader {
     Last_Modified("Last-Modified"),
     ETag("ETag"),
     Server("Server"),
-    WWW_Authenticate("WWW-Authenticate");
+    WWW_Authenticate("WWW-Authenticate"),
+    Accept("Accept");
 
     private final String headerName;
 
