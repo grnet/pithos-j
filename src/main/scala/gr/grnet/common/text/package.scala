@@ -41,15 +41,17 @@ package object text {
       else s
   }
 
-  implicit class NormalizeUri(val uri: String) extends AnyVal {
-    def normalizeUri: String = uri.replaceAll("/+", "/")
+  implicit class NormalizePath(val path: String) extends AnyVal {
+    def normalizePath: String = path.replaceAll("/+", "/")
   }
 
-  implicit class UriToList(val uri: String) extends AnyVal {
-    def uriToList: List[String] = uri.split("/").toList
+  implicit class PathToList(val path: String) extends AnyVal {
+    def pathToList: List[String] = path.split("/").toList
   }
 
-  implicit class ParentUri(val uri: String) extends AnyVal {
-    def parentUri: String = uri.substring(0, uri.noTrailingSlash.lastIndexOf('/') + 1)
+  implicit class ParentPath(val path: String) extends AnyVal {
+    // Note that the parent path of "/" is "".
+    // This is OK for the Pithos backend, since a Pithos container path is always a prefix to any requested URI
+    def parentPath: String = path.substring(0, path.noTrailingSlash.lastIndexOf('/') + 1)
   }
 }
