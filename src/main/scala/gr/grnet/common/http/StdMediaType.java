@@ -15,31 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package gr.grnet.cdmi.http;
-
-import gr.grnet.common.http.IContentType;
+package gr.grnet.common.http;
 
 /**
- * CDMI-specific content types.
- *
- * This is according to http://www.ietf.org/rfc/rfc6208.txt.
+ * Provides a few standard <code>HTTP</code> media types used by the library.
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public enum CdmiContentType implements IContentType {
-    Application_CdmiCapability("application/cdmi-capability"),
-    Application_CdmiContainer ("application/cdmi-container"),
-    Application_CdmiDomain    ("application/cdmi-domain"),
-    Application_CdmiObject    ("application/cdmi-object"),
-    Application_CdmiQueue     ("application/cdmi-queue");
+public enum StdMediaType implements IMediaType {
+    Application_Directory("application/directory"),
+    Application_Folder("application/folder"),
+    Text_Plain("text/plain"),
+    Text_Html("text/html"),
+    Application_Json("application/json");
 
-    private final String contentType;
+    private final String value;
 
-    CdmiContentType(String contentType) {
-        this.contentType = contentType;
+    StdMediaType(String value) {
+        this.value = value;
     }
 
-    public String contentType() {
-        return this.contentType;
+    public String value() {
+        return value;
+    }
+
+    public boolean is(String contentType) {
+        return this.value.equals(contentType);
     }
 }

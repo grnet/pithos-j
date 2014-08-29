@@ -17,7 +17,7 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{StdContentType, Method}
+import gr.grnet.common.http.{StdMediaType, Method}
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
@@ -70,9 +70,9 @@ case class CheckExistsObjectCommand(
 
 object CheckExistsObjectCommand {
   final val StdContentTypeIsDirectory: (String) ⇒ Boolean = contentType ⇒ {
-    StdContentType.Application_Directory.is(contentType) ||
-    StdContentType.Application_Folder.is(contentType) ||
-    contentType.startsWith(StdContentType.Application_Directory.contentType()) ||
-    contentType.startsWith(StdContentType.Application_Folder.contentType())
+    StdMediaType.Application_Directory.is(contentType) ||
+    StdMediaType.Application_Folder.is(contentType) ||
+    contentType.startsWith(StdMediaType.Application_Directory.value()) ||
+    contentType.startsWith(StdMediaType.Application_Folder.value())
   }
 }

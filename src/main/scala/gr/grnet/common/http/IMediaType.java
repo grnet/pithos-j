@@ -18,8 +18,12 @@
 package gr.grnet.common.http;
 
 /**
+ *
+ * An internet media type without any parameter. So technically this is just
+ * in the `type/subtype` form as in `text/plain`.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public interface IContentType {
-    String contentType();
+public interface IMediaType {
+    String value();
 }
