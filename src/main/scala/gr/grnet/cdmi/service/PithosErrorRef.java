@@ -15,11 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package gr.grnet.common.http;
+package gr.grnet.cdmi.service;
 
 /**
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public interface IContentType {
-    String contentType();
+public enum PithosErrorRef implements IErrorRef {
+    // Pithos backend bad requests
+    PBR001,
+    PBR002,
+    PBR003,
+    PBR004,
+    PBR005,
+    PBR006,
+    PBR007,
+    PBR008,
+    PBR009,
+
+    // Pithos backend internal server errors
+    PIE001,
+    PIE002,
+    PIE003,
+    PIE004,
+    PIE005,
+    PIE006,
+    PIE007,
+    PIE008,
 }

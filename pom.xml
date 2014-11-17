@@ -48,6 +48,7 @@
   <!--Common project settings-->
   <properties>
     <scala.version>2.10.3</scala.version>
+    <finagle.version>6.20.0</finagle.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
   </properties>
@@ -98,25 +99,25 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-core_2.10</artifactId>
-      <version>6.13.0</version>
+      <version>${finagle.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>finagle-http_2.10</artifactId>
-      <version>6.13.0</version>
+      <version>${finagle.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-app_2.10</artifactId>
-      <version>6.13.0</version>
+      <version>${finagle.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>util-logging_2.10</artifactId>
-      <version>6.13.0</version>
+      <version>${finagle.version}</version>
     </dependency>
 
     <dependency>

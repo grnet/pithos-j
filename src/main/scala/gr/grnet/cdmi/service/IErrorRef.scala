@@ -15,31 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package gr.grnet.common.http;
+package gr.grnet.cdmi.service
 
 /**
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public enum StdHeader implements IHeader {
-    Content_Type("Content-Type"),
-    Content_Length("Content-Length"),
-    Content_Encoding("Content-Encoding"),
-    Content_Disposition("Content-Disposition"),
-    Content_Language("Content-Language"),
-    Date("Date"),
-    Last_Modified("Last-Modified"),
-    ETag("ETag"),
-    Server("Server"),
-    WWW_Authenticate("WWW-Authenticate"),
-    Accept("Accept");
-
-    private final String headerName;
-
-    StdHeader(String headerName) {
-        this.headerName = headerName;
-    }
-
-    public String headerName() {
-        return headerName;
-    }
-}
+trait IErrorRef

@@ -17,8 +17,8 @@
 
 package gr.grnet.cdmi.model
 
-import gr.grnet.cdmi.capability.{ICapability, ContainerCapability}
-import gr.grnet.cdmi.http.CdmiContentType
+import gr.grnet.cdmi.capability.ICapability
+import gr.grnet.cdmi.http.CdmiMediaType
 
 /**
  *
@@ -44,19 +44,16 @@ object CapabilityModel {
     parentID: String = "",
     parentURI: String = "/",
     objectID: String = "",
-    objectName: String = "cdmi_capabilities/"
+    objectName: String = "cdmi_capabilities/",
+    capabilities: Map[ICapability, String] = Map()
   ) =
     CapabilityModel(
-      objectType = CdmiContentType.Application_CdmiCapability.contentType(),
+      objectType = CdmiMediaType.Application_CdmiCapability.value(),
       objectID = objectID,
       objectName = objectName,
       parentURI = parentURI,
       parentID = parentID,
-      capabilities = booleanCapabilitiesMap(
-        ContainerCapability.cdmi_list_children,
-        ContainerCapability.cdmi_create_container,
-        ContainerCapability.cdmi_delete_container
-      ),
+      capabilities = capabilities,
       childrenRange = if(children.size == 0) "0-0" else s"0-${children.size - 1}",
       children = children
     )

@@ -18,28 +18,12 @@
 package gr.grnet.common.http;
 
 /**
+ *
+ * An internet media type without any parameter. So technically this is just
+ * in the `type/subtype` form as in `text/plain`.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public enum StdHeader implements IHeader {
-    Content_Type("Content-Type"),
-    Content_Length("Content-Length"),
-    Content_Encoding("Content-Encoding"),
-    Content_Disposition("Content-Disposition"),
-    Content_Language("Content-Language"),
-    Date("Date"),
-    Last_Modified("Last-Modified"),
-    ETag("ETag"),
-    Server("Server"),
-    WWW_Authenticate("WWW-Authenticate"),
-    Accept("Accept");
-
-    private final String headerName;
-
-    StdHeader(String headerName) {
-        this.headerName = headerName;
-    }
-
-    public String headerName() {
-        return headerName;
-    }
+public interface IMediaType {
+    String value();
 }

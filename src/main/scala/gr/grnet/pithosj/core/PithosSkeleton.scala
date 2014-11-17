@@ -17,15 +17,15 @@
 
 package gr.grnet.pithosj.core
 
+import java.io.{File, OutputStream}
+import java.net.URLConnection
+
 import gr.grnet.common.http.TResult
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.command._
-import gr.grnet.pithosj.core.http.{ChannelBufferRequestBody, BytesRequestBody, FileRequestBody}
-import java.io.{File, OutputStream}
-import java.net.URLConnection
+import gr.grnet.pithosj.core.http.{BytesRequestBody, ChannelBufferRequestBody, FileRequestBody}
 import org.jboss.netty.buffer.ChannelBuffer
-import scala.Some
 import scala.concurrent.{ExecutionContext, Future}
 
 /**

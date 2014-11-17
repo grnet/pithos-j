@@ -17,27 +17,31 @@
 
 package gr.grnet.cdmi.service
 
-import com.ning.http.client
-import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient}
-import com.twitter.app.App
-import com.twitter.app.GlobalFlag
-import com.twitter.finagle.http.Status
-import com.twitter.logging.{Logging, Level}
-import com.twitter.util.{Return, Throw, Promise, Future}
-import gr.grnet.cdmi.metadata.StorageSystemMetadata
-import gr.grnet.cdmi.model.{ObjectModel, Model, ContainerModel}
-import gr.grnet.common.http.{StdContentType, StdHeader}
-import gr.grnet.common.io.{Base64, CloseAnyway, DeleteAnyway}
-import gr.grnet.common.json.Json
-import gr.grnet.common.text.{ParentPath, RemovePrefix, NoTrailingSlash}
-import gr.grnet.pithosj.api.PithosApi
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import gr.grnet.pithosj.impl.asynchttp.PithosClientFactory
-import java.io.{FileOutputStream, File}
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.file.Files
 import java.util.Locale
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
+
+import com.fasterxml.jackson.databind.node.JsonNodeType
+import com.ning.http.client
+import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient}
+import com.twitter.app.{App, GlobalFlag}
+import com.twitter.finagle.http.Status
+import com.twitter.logging.{Level, Logging}
+import com.twitter.util.{Future, Promise, Return, Throw}
+import gr.grnet.cdmi.metadata.StorageSystemMetadata
+import gr.grnet.cdmi.model.{ContainerModel, Model, ObjectModel}
+import gr.grnet.common.http.{StdMediaType, StdHeader, TResult}
+import gr.grnet.common.io.{Base64, CloseAnyway, DeleteAnyway}
+import gr.grnet.common.json.Json
+import gr.grnet.common.text.{NoTrailingSlash, ParentPath, RemovePrefix}
+import gr.grnet.pithosj.api.PithosApi
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.command.CheckExistsObjectResultData
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import gr.grnet.pithosj.impl.asynchttp.PithosClientFactory
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus}
+
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
@@ -51,10 +55,17 @@ object authRedirect extends GlobalFlag[Boolean](true, "Redirect to 'authURL' if 
 object tokensURL    extends GlobalFlag[String]("https://accounts.okeanos.grnet.gr/identity/v2.0/tokens", "Used to obtain UUID from token")
 
 /**
+ * A Pithos-based implementation for the CDMI service
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-object StdCdmiPithosServer extends CdmiRestService with App with Logging {
+object StdCdmiPithosServer extends CdmiRestService
+  with App with Logging
+  with CdmiRestServiceTypes
+  with CdmiRestServiceHandlers
+  with CdmiRestServiceMethods
+  with CdmiRestServiceResponse {
+
   sealed trait PithosResult[+T]
   final case class GoodPithosResult[T](value: T) extends PithosResult[T]
   final case class BadPithosResult(status: HttpResponseStatus, extraInfo: String = "") extends PithosResult[Nothing]
@@ -117,9 +128,9 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
       val response = request.response
       response.status = Status.Unauthorized
       val rh = response.headers()
-      rh.set(StdHeader.Content_Type.headerName(), StdContentType.Text_Html.contentType())
-      rh.set(StdHeader.WWW_Authenticate.headerName(), s"Keystone uri='${authURL()}'")
-      rh.set(StdHeader.Content_Length.headerName(), "0")
+      rh.set(HeaderNames.Content_Type,     MediaTypes.Text_Html)
+      rh.set(HeaderNames.WWW_Authenticate, s"Keystone uri='${authURL()}'")
+      rh.set(HeaderNames.Content_Length,   "0")
 
       response.future
     }
@@ -153,7 +164,7 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
       val promise = newResultPromise[String]
 
       val reqBuilder = asyncHttp.preparePost(tokensURL())
-      reqBuilder.setHeader(StdHeader.Content_Type.headerName(), StdContentType.Application_Json.contentType())
+      reqBuilder.setHeader(StdHeader.Content_Type.headerName(), StdMediaType.Application_Json.value())
       reqBuilder.setBody(jsonPayload)
       val handler = new AsyncCompletionHandler[Unit] {
         override def onThrowable(t: Throwable): Unit =
@@ -200,7 +211,7 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
                       if(idTree.isTextual) {
                         val uuid = idTree.asText()
                         request.headers().set("X-Pithos-UUID", uuid)
-                        log.info(s"Derived X-Pithos-UUID: ${uuid}")
+                        log.info(s"Derived X-Pithos-UUID: $uuid")
                       }
                     }
                   }
@@ -210,21 +221,25 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
               getPithosUUID(request) match {
                 case null ⇒
                   // still not found
-                  internalServerError(request, new Exception(s"Could not retrieve UUID from ${tokensURL()}"))
+                  internalServerError(
+                    request,
+                    new Exception(s"Could not retrieve UUID from ${tokensURL()}"),
+                    PithosErrorRef.PIE001
+                  )
                 case _ ⇒
                   service(request)
               }
 
-            case Return(BadPithosResult(status, extraInfo)) ⇒
-              response(request, status, extraInfo, "BadPithosResult").future
+            case Return(bpr @ BadPithosResult(status, extraInfo)) ⇒
+              textPlain(request, status, extraInfo, bpr.toString)
 
             case Throw(t) ⇒
               log.error(s"Calling ${tokensURL()}")
-              internalServerError(request, t)
+              internalServerError(request, t, PithosErrorRef.PIE001)
           }
 
         case uuid if uuid ne null ⇒
-          log.info(s"Given X-Pithos-UUID: ${uuid}")
+          log.info(s"Given X-Pithos-UUID: $uuid")
           service(request)
 
         case _ ⇒
@@ -242,8 +257,8 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
 
       val errorBuffer = new java.lang.StringBuilder()
       def addError(s: String): Unit = {
+        if(errorBuffer.length() > 0) { errorBuffer.append('\n') }
         errorBuffer.append(s)
-        errorBuffer.append('\n')
       }
 
       val url = getPithosURL(request)
@@ -262,7 +277,11 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
       }
 
       if(errorBuffer.length() > 0) {
-        response(request, Status.BadRequest, errorBuffer).future
+        badRequest(
+          request,
+          PithosErrorRef.PBR001,
+          errorBuffer
+        )
       }
       else {
         service(request)
@@ -279,16 +298,22 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
 
   def fixPathFromContentType(path: String, contentType: String): String =
     contentType match {
-      case "application/directory" | "application/folder" ⇒
+      case MediaTypes.Application_Directory | MediaTypes.Application_Folder ⇒
         s"$path/"
 
-      case _ if contentType.startsWith("application/directory;") ||
-                contentType.startsWith("application/folder;") ⇒
+      case MediaTypes.Application_CdmiContainer ⇒
+        s"$path/"
+
+      case _ if contentType.startsWith(MediaTypes.Application_DirectorySemi) ||
+                contentType.startsWith(MediaTypes.Application_FolderSemi) ⇒
         s"$path/"
 
       case _ ⇒
         path
     }
+
+  def isPithosFolderOrContainer(result: CheckExistsObjectResultData): Boolean =
+    result.isDirectory || result.isContainer
 
   def checkExistsPithosFolderOrContainer(serviceInfo: ServiceInfo, container: String, folderPath: String): Future[PithosResult[Boolean]] = {
     val promise = newResultPromise[Boolean]
@@ -299,7 +324,8 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
         if(result.isSuccess) {
           result.successData match {
             case Some(data) ⇒
-              promise.setValue(GoodPithosResult(data.isDirectory || data.isContainer))
+              log.debug(s"checkExistsObject('$container', '$folderPath') ⇒ $data")
+              promise.setValue(GoodPithosResult(isPithosFolderOrContainer(data)))
 
             case None ⇒
               promise.setValue(GoodPithosResult(false))
@@ -321,10 +347,36 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
     (container, path)
   }
 
+  def completeToPromise(sFuture: scala.concurrent.Future[TResult[Unit]], tPromise: Promise[PithosResult[Unit]]): Unit = {
+    sFuture.onComplete {
+      case Success(result) ⇒
+        if(result.isSuccess) {
+          tPromise.setValue(GoodPithosResult(()))
+        }
+        else {
+          tPromise.setValue(BadPithosResult(HttpResponseStatus.valueOf(result.statusCode)))
+        }
+
+      case Failure(t) ⇒
+        tPromise.setException(t)
+    }
+  }
+
+
+  /**
+   * We delegate to `DELETE_object_cdmi`.
+   *
+   * @note The relevant sections from CDMI 1.0.2 are 8.8, 11.5 and 11.7.
+   */
+  def DELETE_object_or_queue_or_queuevalue_cdmi(request: Request, path: List[String]): Future[StdCdmiPithosServer.Response] = {
+    // We support only data objects
+    DELETE_object_cdmi(request, path)
+  }
+
   /**
    * Lists the contents of a container.
    */
-  override def GET_container(
+  override def GET_container_cdmi(
     request: Request, containerPath: List[String]
   ): Future[Response] = {
 
@@ -333,11 +385,11 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
     val path = containerPath.tail mkString "/" match { case "" ⇒ "/"; case s ⇒ "/" + s }
 
     checkExistsPithosFolderOrContainer(serviceInfo, container, path).flatMap {
-      case BadPithosResult(status, extraInfo) ⇒
-        response(request, status, extraInfo, "BadPithosResult").future
+      case bpr @ BadPithosResult(status, extraInfo) ⇒
+        textPlain(request, status, extraInfo, bpr.toString)
 
       case GoodPithosResult(false) ⇒
-        response(request, Status.NotFound).future
+        notFound(request)
 
       case GoodPithosResult(true) ⇒
         val promise = newResultPromise[Seq[String]]
@@ -353,6 +405,7 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
                 } yield {
                   // Pithos returns all the path part after the pithos container.
                   // Note that Pithos container is not the same as CDMI container.
+                  log.debug(s"Child: '${oip.container}/${oip.path}' = ${oip.contentType}")
                   val path = oip.path.lastIndexOf('/') match {
                     case -1 ⇒ oip.path
                     case i ⇒ oip.path.substring(i + 1)
@@ -386,21 +439,18 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
               children = children
             )
             val jsonContainer = Json.objectToJsonString(container)
-            response(request, Status.Ok, jsonContainer).future
+            okJson(request, jsonContainer)
 
-          case Return(BadPithosResult(status, extraInfo)) ⇒
-            response(request, status, extraInfo, "BadPithosResult").future
+          case Return(bpr @ BadPithosResult(status, extraInfo)) ⇒
+            textPlain(request, status, extraInfo, bpr.toString)
 
           case Throw(t) ⇒
-            internalServerError(request, t)
+            internalServerError(request, t, PithosErrorRef.PIE002)
         }
     }
   }
 
-  /**
-   * Creates a new container.
-   */
-  override def PUT_container(
+  def PUT_container_(
     request: Request, containerPath: List[String]
   ): Future[Response] = {
 
@@ -412,18 +462,7 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
     // FIXME If the folder does not exist, the result here is just an empty folder
     val sf_result = pithos.createDirectory(serviceInfo, container, path)
 
-    sf_result.onComplete {
-      case Success(result) ⇒
-        if(result.isSuccess) {
-          promise.setValue(GoodPithosResult(()))
-        }
-        else {
-          promise.setValue(BadPithosResult(HttpResponseStatus.valueOf(result.statusCode)))
-        }
-
-      case Failure(t) ⇒
-        promise.setException(t)
-    }
+    completeToPromise(sf_result, promise)
 
     promise.transform {
       case Return(GoodPithosResult(_)) ⇒
@@ -442,16 +481,42 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
           children = children
         )
         val jsonContainer = Json.objectToJsonString(container)
-        response(request, Status.Ok, jsonContainer).future
+        okJson(request, jsonContainer)
 
       case Return(bpr @ BadPithosResult(status, extraInfo)) ⇒
-        response(request, Status.BadRequest, "", bpr.toString).future
+        badRequest(
+          request,
+          PithosErrorRef.PBR002,
+          bpr.toString
+        )
 
       case Throw(t) ⇒
-        internalServerError(request, t)
+        internalServerError(request, t, PithosErrorRef.PIE003)
     }
   }
 
+
+  /**
+   * Creates a container using CDMI content type.
+   *
+   * @note Section 9.2 of CDMI 1.0.2: Create a Container Object using CDMI Content Type
+   */
+  override def PUT_container_cdmi_create(
+    request: Request, containerPath: List[String]
+  ): Future[Response] =
+    PUT_container_(request, containerPath)
+
+
+  /**
+   * Creates/updates a container using CDMI content type.
+   *
+   * @note Section 9.2 of CDMI 1.0.2: Create a Container Object using CDMI Content Type
+   * @note Section 9.5 of CDMI 1.0.2: Update a Container Object using CDMI Content Type
+   */
+  override def PUT_container_cdmi_create_or_update(
+    request: Request, containerPath: List[String]
+  ): Future[Response] =
+    PUT_container_(request, containerPath)
 
   /**
    * Deletes a container.
@@ -466,73 +531,50 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
     val path = containerPath.tail mkString "/" match { case "" ⇒ "/"; case s ⇒ "/" + s }
     val sf_result = pithos.deleteDirectory(serviceInfo, container, path)
 
-    sf_result.onComplete {
-      case Success(result) ⇒
-        if(result.isSuccess) {
-          promise.setValue(GoodPithosResult(()))
-        }
-        else {
-          promise.setValue(BadPithosResult(HttpResponseStatus.valueOf(result.statusCode)))
-        }
-
-      case Failure(t) ⇒
-        promise.setException(t)
-    }
+    completeToPromise(sf_result, promise)
 
     promise.transform {
       case Return(GoodPithosResult(_)) ⇒
-        response(request, Status.Ok).future
+        okTextPlain(request)
 
-      case Return(BadPithosResult(status, extraInfo)) ⇒
-        response(request, status, extraInfo, "BadPithosResult").future
+      case Return(bpr @ BadPithosResult(status, extraInfo)) ⇒
+        textPlain(request, status, extraInfo, bpr.toString)
 
       case Throw(t) ⇒
-        internalServerError(request, t)
+        internalServerError(request, t, PithosErrorRef.PIE004)
     }
   }
 
-  override def GET_objectById(
-    request: Request, objectIdPath: List[String]
-  ): Future[Response] = {
-    // No real object IDs here
-    GET_object(request, objectIdPath)
-  }
-
-
-  /**
-   * Read the contents or value of a data object.
-   */
-  override def GET_object(
-    request: Request, objectPath: List[String]
-  ): Future[Response] = {
-
+  def GET_object_(
+    request: Request,
+    objectPath: List[String]
+  )(continuation: (GetFileInfo) ⇒ Future[Response]): Future[Response] = {
     val serviceInfo = getPithosServiceInfo(request)
 
     val (container, path) = splitPithosContainerAndPath(objectPath)
 
     checkExistsPithosFolderOrContainer(serviceInfo, container, path).flatMap {
-      case BadPithosResult(status, extraInfo) ⇒
-        response(request, status, extraInfo, "BadPithosResult").future
+      case bpr @ BadPithosResult(status, extraInfo) ⇒
+        textPlain(request, status, extraInfo, bpr.toString)
 
       case GoodPithosResult(true) ⇒
         // This is a folder or container, not a file. Go away!
-        response(request, Status.NotFound).future
+        notFound(request)
 
       case GoodPithosResult(false) ⇒
         val promise = newResultPromise[GetFileInfo]
         val tmpFile = Files.createTempFile("cdmi-pithos-", null).toFile
         val tmpFileOut = new FileOutputStream(tmpFile)
+        log.info(s"Saving file at $container/$path to ${tmpFile.getAbsolutePath}")
         val sf_result = pithos.getObject(serviceInfo, container, path, null, tmpFileOut)
         sf_result.onComplete {
           case Success(result) ⇒
             tmpFileOut.closeAnyway()
 
             if(result.isSuccess) {
-              promise.setValue(
-                GoodPithosResult(
-                  GetFileInfo(tmpFile, result.responseHeaders.getEx(PithosHeaderKeys.Standard.Content_Type))
-                )
-              )
+              val resultContentType = result.responseHeaders.getEx(PithosHeaderKeys.Standard.Content_Type)
+              log.info(s"'${HeaderNames.Content_Type}' for $container/$path is '$resultContentType'")
+              promise.setValue(GoodPithosResult(GetFileInfo(tmpFile, resultContentType)))
             }
             else {
               promise.setValue(BadPithosResult(HttpResponseStatus.valueOf(result.statusCode)))
@@ -544,44 +586,87 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
         }
 
         promise.transform {
-          case Return(GoodPithosResult(GetFileInfo(file, contentType))) ⇒
-            val size = file.length()
-            val requestPath = request.path
-            val requestPathNoObjectIdPrefix = requestPath.removePrefix("/cdmi_objectid")
-            val parentPath = requestPathNoObjectIdPrefix.parentPath
-            val isTextPlain = contentType == "text/plain"
-            val value = if(isTextPlain) new String(Files.readAllBytes(file.toPath), "UTF-8") else Base64.encodeFile(file)
-            val vte = if(isTextPlain) "utf-8" else "base64"
+          case Return(GoodPithosResult(getFileInfo)) ⇒
+            continuation(getFileInfo)
 
-            val model = ObjectModel(
-              objectID = requestPathNoObjectIdPrefix,
-              objectName = requestPathNoObjectIdPrefix,
-              parentURI = parentPath,
-              parentID = parentPath,
-              domainURI = "",
-              mimetype = contentType,
-              metadata = Map(StorageSystemMetadata.cdmi_size.name() → size.toString),
-              valuetransferencoding = vte,
-              valuerange = s"0-${size - 1}",
-              value = value
-            )
-            val jsonModel = Json.objectToJsonString(model)
-            file.deleteAnyway()
-            response(request, Status.Ok, jsonModel).future
-
-          case Return(BadPithosResult(status, extraInfo)) ⇒
-            response(request, status, extraInfo, "BadPithosResult").future
+          case bpr @ Return(BadPithosResult(status, extraInfo)) ⇒
+            textPlain(request, status, extraInfo, bpr.toString)
 
           case Throw(t) ⇒
-            internalServerError(request, t)
+            internalServerError(request, t, PithosErrorRef.PIE005)
         }
     }
   }
 
+
+  /**
+   * Read a data object using CDMI content type.
+   *
+   * @note Section 8.4 of CDMI 1.0.2: Read a Data Object using CDMI Content Type
+   */
+  override def GET_object_cdmi(request: Request, objectPath: List[String]): Future[Response] = {
+    GET_object_(request, objectPath) {
+      case GetFileInfo(file, contentType) ⇒
+        val size = file.length()
+        val requestPath = request.path
+        val requestPathNoObjectIdPrefix = requestPath.removePrefix("/cdmi_objectid")
+        val parentPath = requestPathNoObjectIdPrefix.parentPath
+        val isTextPlain = contentType == MediaTypes.Text_Plain
+        val value = if(isTextPlain) new String(Files.readAllBytes(file.toPath), "UTF-8") else Base64.encodeFile(file)
+        val vte = if(isTextPlain) "utf-8" else "base64"
+
+        val model = ObjectModel(
+          objectID = requestPathNoObjectIdPrefix,
+          objectName = requestPathNoObjectIdPrefix,
+          parentURI = parentPath,
+          parentID = parentPath,
+          domainURI = "",
+          mimetype = contentType,
+          metadata = Map(StorageSystemMetadata.cdmi_size.name() → size.toString),
+          valuetransferencoding = vte,
+          valuerange = s"0-${size - 1}",
+          value = value
+        )
+        val jsonModel = Json.objectToJsonString(model)
+        file.deleteAnyway()
+
+        okAppCdmiObject(request, jsonModel)
+    }
+  }
+
+  /**
+   * Read a data object using non-CDMI content type.
+   *
+   * @note Section 8.5 of CDMI 1.0.2: Read a Data Object using a Non-CDMI Content Type
+   */
+  override def GET_object_noncdmi(request: Request, objectPath: List[String]): Future[Response] = {
+    GET_object_(request, objectPath) {
+      case GetFileInfo(file, contentType) ⇒
+        val status = Status.Ok
+        val httpResponse = new DefaultHttpResponse(request.getProtocolVersion(), status)
+        val response = Response(httpResponse)
+
+        response.headers().set(HeaderNames.X_CDMI_Specification_Version, currentCdmiVersion)
+
+        val fis = new FileInputStream(file)
+        val fileChannel = fis.getChannel
+        val length = file.length().toInt
+        val bodyChannelBuffer = ChannelBuffers.dynamicBuffer()
+
+        val howmanyWritten = bodyChannelBuffer.writeBytes(fileChannel, length)
+        response.contentType = contentType
+        response.contentLength = howmanyWritten
+        response.content = bodyChannelBuffer
+
+        end(request, response).future
+    }
+  }
+
+
   /**
    * Create a data object in a container using CDMI content type.
    */
-  override def PUT_object_cdmi(
+  override def PUT_object_cdmi_create_or_update(
     request: Request, objectPath: List[String]
   ): Future[Response] = {
 
@@ -590,30 +675,57 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
     val (container, path) = splitPithosContainerAndPath(objectPath)
 
     val content = request.contentString
-    val jsonTree = Json.jsonStringToTree(content)
+    val jsonTree =
+      try Json.jsonStringToTree(content)
+      catch {
+        case e: com.fasterxml.jackson.core.JsonParseException ⇒
+          log.error(e.toString)
+          return badRequest(
+            request,
+            PithosErrorRef.PBR008,
+            s"Could not parse input as JSON.\n${e.getMessage}"
+          )
+      }
+
     val mimeTypeNode = jsonTree.get("mimetype")
     val valueNode = jsonTree.get("value")
     val vteNode = jsonTree.get("valuetransferencoding")
 
     if((mimeTypeNode ne null) && !mimeTypeNode.isTextual) {
-      return response(request, Status.BadRequest, s"Incorrect type of mimetype field [${mimeTypeNode.getNodeType}]").future
+      return badRequest(
+        request,
+        PithosErrorRef.PBR003,
+        s"Incorrect type ${mimeTypeNode.getNodeType} of 'mimetype' field. Should be ${JsonNodeType.STRING}"
+      )
     }
 
     if((vteNode ne null) && !vteNode.isTextual) {
-      return response(request, Status.BadRequest, s"Incorrect type of valuetransferencoding field [${mimeTypeNode.getNodeType}]").future
+      return badRequest(
+        request,
+        PithosErrorRef.PBR004,
+        s"Incorrect type ${vteNode.getNodeType} of 'valuetransferencoding' field. Should be ${JsonNodeType.STRING}"
+      )
     }
 
     // Not mandated by the spec but we currently support only the presence of "value"
     if(valueNode eq null) {
-      return response(request, Status.BadRequest, "value is null").future
+      return badRequest(
+        request,
+        PithosErrorRef.PBR005,
+        "'value' is not present"
+      )
     }
     if(!valueNode.isTextual) {
-      return response(request, Status.BadRequest, s"Incorrect type of value field [${mimeTypeNode.getNodeType}]").future
+      return badRequest(
+        request,
+        PithosErrorRef.PBR006,
+        s"Incorrect type ${valueNode.getNodeType} of 'value' field. Should be ${JsonNodeType.STRING}"
+      )
     }
 
     val mimetype = mimeTypeNode match {
-      case null ⇒ "text/plain"
-      case _ ⇒ mimeTypeNode.asText()
+      case null ⇒ MediaTypes.Text_Plain
+      case _    ⇒ mimeTypeNode.asText()
     }
 
     val vte = vteNode match {
@@ -626,7 +738,11 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
             text
 
           case text ⇒
-            return response(request, Status.BadRequest, s"Incorrect value of valuetransferencoding field [${text}]").future
+            return badRequest(
+              request,
+              PithosErrorRef.PBR007,
+              s"Incorrect value of 'valuetransferencoding' field [$text]"
+            )
         }
     }
 
@@ -642,18 +758,7 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
     }
 
     val sf_result = pithos.putObject(serviceInfo, container, path, bytes, mimetype)
-    sf_result.onComplete {
-      case Success(result) ⇒
-        if(result.isSuccess) {
-          promise.setValue(GoodPithosResult(()))
-        }
-        else {
-          promise.setValue(BadPithosResult(HttpResponseStatus.valueOf(result.statusCode)))
-        }
-
-      case Failure(t) ⇒
-        promise.setException(t)
-    }
+    completeToPromise(sf_result, promise)
 
     promise.transform {
       case Return(GoodPithosResult(_)) ⇒
@@ -661,6 +766,8 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
         val requestPath = request.path
         val requestPathNoObjectIdPrefix = requestPath.removePrefix("/cdmi_objectid")
         val parentPath = requestPathNoObjectIdPrefix.parentPath
+        val valueRangeEnd = if(size == 0) 0 else size - 1
+
         val model = ObjectModel(
           objectID = requestPath,
           objectName = requestPath,
@@ -670,22 +777,29 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
           mimetype = mimetype,
           metadata = Map(StorageSystemMetadata.cdmi_size.name() → size.toString),
           valuetransferencoding = vte,
-          valuerange = s"0-${size - 1}",
+          valuerange = s"0-$valueRangeEnd",
           value = "" // TODO technically should not be present
         )
 
         val jsonModel = Json.objectToJsonString(model)
-        response(request, Status.Ok, jsonModel).future
+        okJson(request, jsonModel)
 
-
-      case Return(BadPithosResult(status, extraInfo)) ⇒
-        response(request, status, extraInfo, "BadPithosResult").future
+      case Return(bpr @ BadPithosResult(status, extraInfo)) ⇒
+        textPlain(request, status, extraInfo, bpr.toString)
 
       case Throw(t) ⇒
-        internalServerError(request, t)
+        internalServerError(request, t, PithosErrorRef.PIE006)
     }
   }
 
+
+  /**
+   * Creates a data object in a container using CDMI content type.
+   *
+   * @note Section 8.2 of CDMI 1.0.2: Create a Data Object Using CDMI Content Type
+   */
+  override def PUT_object_cdmi_create(request: Request, objectPath: List[String]): Future[Response] =
+    PUT_object_cdmi_create_or_update(request, objectPath)
 
   /**
    * Create a data object in a container using non-CDMI content type.
@@ -701,65 +815,57 @@ object StdCdmiPithosServer extends CdmiRestService with App with Logging {
 
     val payload = request.getContent()
     val sf_result = pithos.putObject(serviceInfo, container, path, payload, contentType)
-    sf_result.onComplete {
-      case Success(result) ⇒
-        if(result.isSuccess) {
-          promise.setValue(GoodPithosResult(()))
-        }
-        else {
-          promise.setValue(BadPithosResult(HttpResponseStatus.valueOf(result.statusCode)))
-        }
-
-      case Failure(t) ⇒
-        promise.setException(t)
-    }
+    completeToPromise(sf_result, promise)
 
     promise.transform {
       case Return(GoodPithosResult(_)) ⇒
-        response(request, Status.Ok).future
+        okTextPlain(request)
 
-      case Return(BadPithosResult(status, extraInfo)) ⇒
-        response(request, status, extraInfo, "BadPithosResult").future
+      case Return(bpr @ BadPithosResult(status, extraInfo)) ⇒
+        textPlain(request, status, extraInfo, bpr.toString)
 
       case Throw(t) ⇒
-        internalServerError(request, t)
+        internalServerError(request, t, PithosErrorRef.PIE007)
     }
   }
 
   /**
    * Delete a data object (file).
    */
-  override def DELETE_object(
-    request: Request, objectPath: List[String]
-  ): Future[Response] = {
-
+  def DELETE_object_(request: Request, objectPath: List[String]): Future[Response] = {
     val serviceInfo = getPithosServiceInfo(request)
     val promise = newResultPromise[Unit]
     val (container, path) = splitPithosContainerAndPath(objectPath)
 
     val sf_result = pithos.deleteFile(serviceInfo, container, path)
-    sf_result.onComplete {
-      case Success(result) ⇒
-        if(result.isSuccess) {
-          promise.setValue(GoodPithosResult(()))
-        }
-        else {
-          promise.setValue(BadPithosResult(HttpResponseStatus.valueOf(result.statusCode)))
-        }
-
-      case Failure(t) ⇒
-        internalServerError(request, t)
-    }
+    completeToPromise(sf_result, promise)
 
     promise.transform {
       case Return(GoodPithosResult(_)) ⇒
-        response(request, Status.Ok).future
+        okTextPlain(request)
 
-      case Return(BadPithosResult(status, extraInfo)) ⇒
-        response(request, status, extraInfo, "BadPithosResult").future
+      case Return(bpr @ BadPithosResult(status, extraInfo)) ⇒
+        textPlain(request, status, extraInfo, bpr.toString)
 
       case Throw(t) ⇒
-        internalServerError(request, t)
+        internalServerError(request, t, PithosErrorRef.PIE008)
     }
   }
+
+  /**
+   * Deletes a data object in a container using CDMI content type.
+   *
+   * @note Section 8.8 of CDMI 1.0.2: Delete a Data Object using CDMI Content Type
+   */
+  override def DELETE_object_cdmi(request: Request, objectPath: List[String]): Future[Response] =
+    DELETE_object_(request, objectPath)
+
+
+  /**
+   * Deletes a data object in a container using non-CDMI content type.
+   *
+   * @note Section 8.9 of CDMI 1.0.2: Delete a Data Object using a Non-CDMI Content Type
+   */
+  override def DELETE_object_noncdmi(request: Request, objectPath: List[String]): Future[Response] =
+    DELETE_object_(request, objectPath)
 }

@@ -15,31 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package gr.grnet.common.http;
+package gr.grnet.cdmi.http;
+
+import gr.grnet.common.http.IMediaType;
 
 /**
+ * CDMI-specific media types.
+ *
+ * The provided values are according to http://www.ietf.org/rfc/rfc6208.txt.
+ *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-public enum StdHeader implements IHeader {
-    Content_Type("Content-Type"),
-    Content_Length("Content-Length"),
-    Content_Encoding("Content-Encoding"),
-    Content_Disposition("Content-Disposition"),
-    Content_Language("Content-Language"),
-    Date("Date"),
-    Last_Modified("Last-Modified"),
-    ETag("ETag"),
-    Server("Server"),
-    WWW_Authenticate("WWW-Authenticate"),
-    Accept("Accept");
+public enum CdmiMediaType implements IMediaType {
+    Application_CdmiCapability("application/cdmi-capability"),
+    Application_CdmiContainer ("application/cdmi-container"),
+    Application_CdmiDomain    ("application/cdmi-domain"),
+    Application_CdmiObject    ("application/cdmi-object"),
+    Application_CdmiQueue     ("application/cdmi-queue");
 
-    private final String headerName;
+    private final String value;
 
-    StdHeader(String headerName) {
-        this.headerName = headerName;
+    CdmiMediaType(String value) {
+        this.value = value;
     }
 
-    public String headerName() {
-        return headerName;
+    public String value() {
+        return this.value;
     }
 }
