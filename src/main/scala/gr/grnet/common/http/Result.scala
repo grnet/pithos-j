@@ -31,5 +31,6 @@ case class Result[T](
   startMillis: Long,
   stopMillis: Long,
   responseHeaders: KeyMap,
-  successData: Option[T] // command-specific result data
+  successData: Option[T], // command-specific result data
+  errorDetails: Option[String]
 ) extends TResult[T]

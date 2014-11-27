@@ -39,6 +39,8 @@ trait TResult[+T] {
 
   val successData: Option[T]
 
+  def errorDetails: Option[String]
+
   def completionMillis = stopMillis - startMillis
 
   def isSuccess: Boolean = originator.successCodes(statusCode)

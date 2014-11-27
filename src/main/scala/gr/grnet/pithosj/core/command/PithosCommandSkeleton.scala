@@ -159,7 +159,9 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   override def buildResult(
     responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () ⇒ String, resultData: KeyMap
-  ): TResult[T] =
+  ): TResult[T] = {
+
+    val isSuccess = successCodes(statusCode)
     Result(
       descriptor,
       statusCode,
@@ -167,17 +169,20 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
       startMillis,
       stopMillis,
       responseHeaders,
-      if(successCodes(statusCode))
-        Some(
-          buildResultData(
-            responseHeaders = responseHeaders,
-            statusCode = statusCode,
-            statusText = statusText,
-            startMillis = startMillis,
-            stopMillis = stopMillis,
-            getResponseBody = getResponseBody
-          )
-        )
-      else None
+      if(isSuccess)
+        Some(buildResultData(
+          responseHeaders = responseHeaders,
+          statusCode = statusCode,
+          statusText = statusText,
+          startMillis = startMillis,
+          stopMillis = stopMillis,
+          getResponseBody = getResponseBody
+        ))
+      else None,
+      if(!isSuccess)
+        Some(getResponseBody())
+      else
+        None
     )
+  }
 }
