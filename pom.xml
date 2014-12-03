@@ -48,6 +48,7 @@
   <!--Common project settings-->
   <properties>
     <scala.version>2.10.4</scala.version>
+    <snfcommonj.version>0.3.0-SNAPSHOT</snfcommonj.version>
     <finagle.version>6.20.0</finagle.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
@@ -58,6 +59,12 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>gr.grnet</groupId>
+      <artifactId>snf-common-j</artifactId>
+      <version>${snfcommonj.version}</version>
     </dependency>
 
     <dependency>
