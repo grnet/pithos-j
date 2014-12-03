@@ -47,7 +47,7 @@
 
   <!--Common project settings-->
   <properties>
-    <scala.version>2.10.3</scala.version>
+    <scala.version>2.10.4</scala.version>
     <finagle.version>6.20.0</finagle.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
