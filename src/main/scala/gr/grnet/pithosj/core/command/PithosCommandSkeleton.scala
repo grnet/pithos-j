@@ -20,17 +20,12 @@ package gr.grnet.pithosj.core.command
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
 import gr.grnet.common.Paths
-import gr.grnet.common.http.{TResult, Result, CommandDescriptor}
-import gr.grnet.common.keymap.{ResultKey, HeaderKey, KeyMap}
+import gr.grnet.common.http.{CommandDescriptor, RequestBody, Result, TResult}
+import gr.grnet.common.keymap.{HeaderKey, KeyMap, ResultKey}
 import gr.grnet.pithosj.core.Helpers
-import gr.grnet.pithosj.core.http.RequestBody
-import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosHeaderKeys}
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import org.slf4j.LoggerFactory
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 

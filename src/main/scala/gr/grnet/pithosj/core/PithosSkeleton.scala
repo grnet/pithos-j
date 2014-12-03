@@ -20,20 +20,19 @@ package gr.grnet.pithosj.core
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 
-import gr.grnet.common.http.TResult
+import gr.grnet.common.http.{BytesRequestBody, FileRequestBody, TResult}
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.command._
-import gr.grnet.pithosj.core.http.{BytesRequestBody, ChannelBufferRequestBody, FileRequestBody}
+import gr.grnet.pithosj.core.http.ChannelBufferRequestBody
 import org.jboss.netty.buffer.ChannelBuffer
+
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].
  * Concrete implementations are required to provide an instance of [[gr.grnet.pithosj.core.command.CommandExecutor]]
  * as the value of `executor`.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait PithosSkeleton extends PithosApi {
   protected val executor: CommandExecutor

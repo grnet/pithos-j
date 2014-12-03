@@ -22,8 +22,6 @@ import gr.grnet.pithosj.core.command.result.{ObjectInPathData, ContainerData}
 
 /**
  * Miscellaneous type-safe keys.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 object PithosResultKeys {
 

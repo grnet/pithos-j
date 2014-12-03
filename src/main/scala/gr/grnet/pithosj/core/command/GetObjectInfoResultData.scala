@@ -19,10 +19,6 @@ package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.date.ParsedDate
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class GetObjectInfoResultData(
   container: String,
   path: String,

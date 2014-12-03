@@ -23,8 +23,6 @@ import java.io.{File, OutputStream}
 
 /**
  * Provides the Pithos API.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 class SingleServicePithosApi(serviceInfo: ServiceInfo, pithos: PithosApi) {
   def ping() = pithos.ping(serviceInfo)

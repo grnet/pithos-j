@@ -21,9 +21,6 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import gr.grnet.pithosj.api.PithosApi;
 
-/**
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 public final class PithosClientFactory {
   private PithosClientFactory() {}
 

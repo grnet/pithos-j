@@ -20,10 +20,6 @@ package gr.grnet.pithosj.core.command
 import gr.grnet.pithosj.core.command.result.ContainerData
 import scala.collection.immutable.Seq
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class ListContainersResultData(
   containers: Seq[ContainerData]
 )

@@ -21,8 +21,6 @@ import gr.grnet.common.date.ParsedDate
 
 /**
  * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListObjectsInPathCommand]] command.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class ObjectInPathData(
   container: String,

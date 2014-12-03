@@ -17,10 +17,6 @@
 
 package gr.grnet.pithosj.core.command
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class CheckExistsObjectResultData(
   exists: Boolean,
   isContainer: Boolean,

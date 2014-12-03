@@ -17,9 +17,6 @@
 
 package gr.grnet.pithosj.core.http;
 
-/**
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 public enum ResponseFormats {
   NOFORMAT(""),
   XML("xml"),

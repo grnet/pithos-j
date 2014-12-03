@@ -26,10 +26,6 @@ import gr.grnet.pithosj.core.http.ResponseFormats
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosResultKeys, PithosRequestParamKeys}
 import scala.xml.XML
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class ListObjectsInPathCommand(
     serviceInfo: ServiceInfo,
     container: String,

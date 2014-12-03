@@ -17,18 +17,15 @@
 
 package gr.grnet.pithosj.core.command
 
+import java.io.OutputStream
+
 import com.ning.http.client.AsyncHandler.STATE
 import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.{PithosRequestParamKeys, PithosHeaderKeys, PithosResultKeys}
-import java.io.OutputStream
+import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosRequestParamKeys, PithosResultKeys}
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class GetObjectCommand(
   serviceInfo: ServiceInfo,
   container: String,

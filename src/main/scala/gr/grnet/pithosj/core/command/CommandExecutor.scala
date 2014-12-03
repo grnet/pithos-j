@@ -23,8 +23,6 @@ import scala.concurrent.Future
 /**
  * A [[gr.grnet.pithosj.core.command.CommandExecutor]] is responsible to synchronously execute
  * a given [[gr.grnet.pithosj.core.command.PithosCommand]].
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait CommandExecutor {
   /**

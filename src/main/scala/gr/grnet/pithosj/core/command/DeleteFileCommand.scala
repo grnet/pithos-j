@@ -17,14 +17,10 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{Result, TResult, Method}
-import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class DeleteFileCommand(
     serviceInfo: ServiceInfo,
     container: String,

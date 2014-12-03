@@ -23,10 +23,6 @@ import gr.grnet.common.keymap.{HeaderKey, KeyMap}
 import gr.grnet.pithosj.core.http
 import gr.grnet.pithosj.core.http.PithosHeader
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 object PithosHeaderKeys {
   def setFromHeader[T: Manifest](
       key: HeaderKey[T],

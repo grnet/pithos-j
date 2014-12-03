@@ -17,16 +17,14 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{TResult, Result, Method}
-import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.common.Paths
+import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 
 /**
  * Copies an object around.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class CopyObjectCommand(
   serviceInfo: ServiceInfo,

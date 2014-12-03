@@ -27,8 +27,6 @@ import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Provides the Pithos API.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait PithosApi {
   def ping(serviceInfo: ServiceInfo): Future[TResult[Unit]]

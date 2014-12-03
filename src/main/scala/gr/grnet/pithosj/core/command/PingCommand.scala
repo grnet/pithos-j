@@ -21,10 +21,6 @@ import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class PingCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[Unit] {
   val httpMethod: Method = Method.HEAD
 

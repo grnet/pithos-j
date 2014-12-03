@@ -24,8 +24,6 @@ import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 
 /**
  * Checks that a directory exists.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 case class CheckExistsObjectCommand(
   serviceInfo: ServiceInfo,

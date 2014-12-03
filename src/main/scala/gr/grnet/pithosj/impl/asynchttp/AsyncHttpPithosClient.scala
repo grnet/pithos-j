@@ -22,8 +22,6 @@ import gr.grnet.pithosj.core.PithosSkeleton
 
 /**
  * Pithos+ client which uses [[com.ning.http.client.AsyncHttpClient]] for the HTTP calls.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 final class AsyncHttpPithosClient(http: AsyncHttpClient) extends PithosSkeleton {
   protected val executor = new AsyncHttpCommandExecutor(http)

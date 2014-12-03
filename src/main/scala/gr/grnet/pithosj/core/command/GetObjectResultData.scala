@@ -20,10 +20,6 @@ package gr.grnet.pithosj.core.command
 import gr.grnet.common.date.ParsedDate
 import java.io.OutputStream
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class GetObjectResultData(
   stream: OutputStream,
   container: String,

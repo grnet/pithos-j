@@ -22,8 +22,6 @@ import gr.grnet.pithosj.core.http.RequestParams
 
 /**
  * Type-indexed keys for request parameters used in the Pithos+ REST API.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 object PithosRequestParamKeys {
   final val Version = RequestParamKey(RequestParams.Version.requestParam())

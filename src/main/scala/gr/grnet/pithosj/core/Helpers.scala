@@ -25,13 +25,7 @@ import java.util.concurrent.{TimeUnit, Future}
 import org.slf4j.LoggerFactory
 import gr.grnet.common.keymap.{HeaderKey, KeyMap}
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 sealed class Helpers {
-
-
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
 
   @inline def jListOne[T](item: T): util.List[T] = {
@@ -88,6 +82,6 @@ sealed class Helpers {
   }
 }
 
-final object Helpers extends Helpers {
+object Helpers extends Helpers {
   type RequestBuilder = AsyncHttpClient#BoundRequestBuilder
 }

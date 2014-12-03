@@ -20,10 +20,6 @@ package gr.grnet.pithosj.core.command
 import scala.collection.immutable.Seq
 import gr.grnet.pithosj.core.command.result.ObjectInPathData
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 case class ListObjectsInPathResultData(
   objects: Seq[ObjectInPathData]
 )

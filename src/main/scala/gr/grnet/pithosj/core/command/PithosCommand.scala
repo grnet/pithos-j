@@ -19,16 +19,13 @@ package gr.grnet.pithosj.core.command
 
 import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.common.http.Command
+import gr.grnet.common.http.{Command, RequestBody}
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.http.RequestBody
 
 /**
  * A command to be executed via the Pithos+ REST API.
  * Each command specifies its own input data, which will be used
  * to build up an HTTP request.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 trait PithosCommand[T] extends Command[T] {
   /**

@@ -17,22 +17,19 @@
 
 package gr.grnet.pithosj.impl.asynchttp
 
-import com.ning.http.client.{AsyncCompletionHandler, Response, HttpResponseBodyPart, AsyncHttpClient}
-import gr.grnet.common.http.Method._
-import gr.grnet.common.http.{TResult, Result, Method}
-import gr.grnet.pithosj.core.Helpers.RequestBuilder
-import gr.grnet.pithosj.core.PithosException
-import gr.grnet.pithosj.core.asFullScala
-import gr.grnet.pithosj.core.command.{PithosCommand, CommandExecutor}
-import gr.grnet.pithosj.core.http.{ChannelBufferRequestBody, InputStreamRequestBody, StringRequestBody, BytesRequestBody, FileRequestBody, RequestBody}
-import scala.concurrent.Promise
-import com.ning.http.client.Request.EntityWriter
 import java.io.OutputStream
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
+import com.ning.http.client.Request.EntityWriter
+import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, HttpResponseBodyPart, Response}
+import gr.grnet.common.http.Method._
+import gr.grnet.common.http._
+import gr.grnet.pithosj.core.Helpers.RequestBuilder
+import gr.grnet.pithosj.core.{PithosException, asFullScala}
+import gr.grnet.pithosj.core.command.{CommandExecutor, PithosCommand}
+import gr.grnet.pithosj.core.http.ChannelBufferRequestBody
+
+import scala.concurrent.Promise
+
 class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
   /**
    * Creates a request builder for this command.

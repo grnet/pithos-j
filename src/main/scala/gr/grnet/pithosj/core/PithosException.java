@@ -17,9 +17,6 @@
 
 package gr.grnet.pithosj.core;
 
-/**
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
 public class PithosException extends RuntimeException {
   public PithosException(Throwable cause, String fmt, Object... args) {
     super(String.format(fmt, args), cause);

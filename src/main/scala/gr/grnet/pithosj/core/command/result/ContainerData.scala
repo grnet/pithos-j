@@ -22,8 +22,6 @@ import gr.grnet.common.keymap.KeyMap
 
 /**
  * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListContainersCommand]] command.
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 
 case class ContainerData(

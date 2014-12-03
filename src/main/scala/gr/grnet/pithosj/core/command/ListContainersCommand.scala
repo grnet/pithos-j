@@ -26,10 +26,7 @@ import gr.grnet.pithosj.core.http.ResponseFormats
 import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosRequestParamKeys}
 import scala.xml.XML
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
+
 case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[ListContainersResultData] {
   /**
    * The HTTP method by which the command is implemented.

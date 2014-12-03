@@ -21,12 +21,9 @@ import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
 import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosHeaderKeys}
+import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosResultKeys}
 
-/**
- *
- * @author Christos KK Loverdos <loverdos@gmail.com>
- */
+
 case class GetObjectInfoCommand(
     serviceInfo: ServiceInfo,
     container: String,
