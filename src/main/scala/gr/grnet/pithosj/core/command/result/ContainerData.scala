@@ -18,7 +18,7 @@
 package gr.grnet.pithosj.core.command.result
 
 import gr.grnet.common.date.ParsedDate
-import gr.grnet.common.keymap.KeyMap
+import typedkey.env.ImEnv
 
 /**
  * Holds parsed result data for the [[gr.grnet.pithosj.core.command.ListContainersCommand]] command.
@@ -29,5 +29,5 @@ case class ContainerData(
   count: Int,
   lastModified: ParsedDate,
   bytes: Long,
-  policy: KeyMap // Use PithosResultKeys.ContainerQuota to get "quota"
+  policy: ImEnv // Use PithosResultKeys.ContainerQuota to get "quota"
 )

@@ -19,11 +19,14 @@ package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ContainerData
 import gr.grnet.pithosj.core.http.ResponseFormats
-import gr.grnet.pithosj.core.keymap.{PithosResultKeys, PithosRequestParamKeys}
+import gr.grnet.pithosj.core.keymap.{PithosRequestParamKeys, PithosResultKeys}
+import typedkey.env.ImEnv
+import typedkey.env.MEnv
+import typedkey.Key
+
 import scala.xml.XML
 
 
@@ -36,10 +39,10 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
   /**
    * The HTTP query parameters that are set by this command.
    */
-  override val queryParameters = {
+  override val queryParameters =
     newQueryParameters.
-      set(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat())
-  }
+      update(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
+      toImmutable
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -62,7 +65,7 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
   )
 
   override def buildResultData(
-    responseHeaders: KeyMap,
+    responseHeaders: ImEnv,
     statusCode: Int,
     statusText: String,
     startMillis: Long,
@@ -102,13 +105,15 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
       val keys = keys_i.map(_._1) // throw away the index
       val values = values_i.map(_._1)
 
-      val policy = KeyMap()
+      val policy = MEnv()
       for((k, v) <- keys.zip(values)) {
         k.toLowerCase match {
           case PithosResultKeys.ContainerQuota.name ⇒
-            policy.set(PithosResultKeys.ContainerQuota, v.toLong)
-          case k ⇒
-            policy.setString(k, v)
+            policy.update(PithosResultKeys.ContainerQuota, v.toLong)
+
+          case _ ⇒
+            // All other keys are stored as String keys
+            policy.update(Key[String](k), v)
         }
       }
 
@@ -117,7 +122,7 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
         count.text.toInt,
         DateParsers.parse(last_modified.text, DateParsers.Format1Parser),
         bytes.text.toLong,
-        policy
+        policy.toImmutable
       )
 
       containerResultData

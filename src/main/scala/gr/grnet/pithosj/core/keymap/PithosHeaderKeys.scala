@@ -19,22 +19,12 @@ package gr.grnet.pithosj.core.keymap
 
 import gr.grnet.common.date.ParsedDate
 import gr.grnet.common.http.StdHeader
-import gr.grnet.common.keymap.{HeaderKey, KeyMap}
+import gr.grnet.common.key.HeaderKey
 import gr.grnet.pithosj.core.http
 import gr.grnet.pithosj.core.http.PithosHeader
+import typedkey.env.{MEnv, Env}
 
 object PithosHeaderKeys {
-  def setFromHeader[T: Manifest](
-      key: HeaderKey[T],
-      input: KeyMap,
-      output: KeyMap,
-      f: String ⇒ T
-  ) {
-    for(value ← input.getOneForName(key.name)) {
-      output.set(key, f(value.toString))
-    }
-  }
-
   final val AllKeys = Standard.AllKeys ++ Pithos.AllKeys
 
   object Standard {

@@ -49,7 +49,9 @@
   <properties>
     <scala.version>2.10.4</scala.version>
     <snfcommonj.version>0.3.0-SNAPSHOT</snfcommonj.version>
-    <finagle.version>6.20.0</finagle.version>
+    <jackson.version>2.4.3</jackson.version>
+    <asynchttp.version>1.7.3</asynchttp.version>
+    <netty.version>3.9.4.Final</netty.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
   </properties>
@@ -68,9 +70,15 @@
     </dependency>
 
     <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.ning</groupId>
       <artifactId>async-http-client</artifactId>
-      <version>1.7.23</version>
+      <version>${asynchttp.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>netty</artifactId>
@@ -82,49 +90,25 @@
     <dependency>
       <groupId>com.ckkloverdos</groupId>
       <artifactId>typedkey</artifactId>
-      <version>0.7.0</version>
+      <version>0.8.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.3.2</version>
+      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.3.2</version>
+      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-scala_2.10</artifactId>
-      <version>2.3.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-core_2.10</artifactId>
-      <version>${finagle.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>finagle-http_2.10</artifactId>
-      <version>${finagle.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>util-app_2.10</artifactId>
-      <version>${finagle.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>util-logging_2.10</artifactId>
-      <version>${finagle.version}</version>
+      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>
@@ -177,22 +161,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <archive>
-            <index>true</index>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>gr.grnet.cdmi.service.StdCdmiPithosServer</mainClass>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-          </archive>
-        </configuration>
       </plugin>
 
       <!-- Make sure tests display failures at the console-->

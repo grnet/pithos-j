@@ -18,9 +18,9 @@
 package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import typedkey.env.{ImEnv, MEnv}
 
 case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[GetAccountInfoResultData] {
   /**
@@ -59,25 +59,25 @@ case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommand
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `keyMap`.
+   * The parsed [[gr.grnet.common.key.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `env`.
    */
   override protected def tryParseNonStringResponseHeader(
-      keyMap: KeyMap,
-      name: String,
-      value: String
+    env: MEnv,
+    name: String,
+    value: String
   ) = {
     name match {
       case PithosHeaderKeys.Pithos.X_Account_Bytes_Used.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Bytes_Used, value.toLong)
+        env.update(PithosHeaderKeys.Pithos.X_Account_Bytes_Used, value.toLong)
         true
 
       case PithosHeaderKeys.Pithos.X_Account_Container_Count.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Container_Count, value.toInt)
+        env.update(PithosHeaderKeys.Pithos.X_Account_Container_Count, value.toInt)
         true
 
       case PithosHeaderKeys.Pithos.X_Account_Policy_Quota.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Account_Policy_Quota, value.toLong)
+        env.update(PithosHeaderKeys.Pithos.X_Account_Policy_Quota, value.toLong)
         true
 
       case _ ⇒
@@ -87,7 +87,7 @@ case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommand
 
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: ImEnv, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () => String
   ): GetAccountInfoResultData = {
 

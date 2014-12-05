@@ -20,6 +20,4 @@ package gr.grnet.pithosj.core.command
 import gr.grnet.pithosj.core.command.result.ContainerData
 import scala.collection.immutable.Seq
 
-case class ListContainersResultData(
-  containers: Seq[ContainerData]
-)
+case class ListContainersResultData(containers: Seq[ContainerData])

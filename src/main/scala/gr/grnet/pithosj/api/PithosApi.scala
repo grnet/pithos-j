@@ -17,13 +17,14 @@
 
 package gr.grnet.pithosj.api
 
-import gr.grnet.common.http.TResult
-import gr.grnet.common.keymap.KeyMap
-import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.{CheckExistsObjectResultData, ListObjectsInPathResultData, GetObjectInfoResultData, GetObjectResultData, ListContainersResultData, GetAccountInfoResultData}
 import java.io.{File, OutputStream}
+
+import gr.grnet.common.http.{RequestBody, TResult}
+import gr.grnet.pithosj.core.ServiceInfo
+import gr.grnet.pithosj.core.command.{CheckExistsObjectResultData, GetAccountInfoResultData, GetObjectInfoResultData, GetObjectResultData, ListContainersResultData, ListObjectsInPathResultData}
+import typedkey.env.immutable.Env
+
 import scala.concurrent.Future
-import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Provides the Pithos API.
@@ -33,7 +34,7 @@ trait PithosApi {
 
   def getAccountInfo(serviceInfo: ServiceInfo): Future[TResult[GetAccountInfoResultData]]
 
-  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: KeyMap): Future[TResult[Unit]]
+  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: Env): Future[TResult[Unit]]
 
   def deleteAccountMeta(serviceInfo: ServiceInfo, metaKey: String): Future[TResult[Unit]]
 
@@ -62,7 +63,7 @@ trait PithosApi {
   def replaceObjectMeta(
       serviceInfo: ServiceInfo,
       path: String,
-      meta: KeyMap
+      meta: Env
   ): Future[TResult[Unit]]
 
   def getObject(
@@ -99,7 +100,7 @@ trait PithosApi {
     serviceInfo: ServiceInfo,
     container: String,
     path: String,
-    buffer: ChannelBuffer,
+    payload: RequestBody,
     contentType: String
   ): Future[TResult[Unit]]
 

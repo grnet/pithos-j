@@ -24,9 +24,8 @@ import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, HttpRespon
 import gr.grnet.common.http.Method._
 import gr.grnet.common.http._
 import gr.grnet.pithosj.core.Helpers.RequestBuilder
-import gr.grnet.pithosj.core.{PithosException, asFullScala}
 import gr.grnet.pithosj.core.command.{CommandExecutor, PithosCommand}
-import gr.grnet.pithosj.core.http.ChannelBufferRequestBody
+import gr.grnet.pithosj.core.{PithosException, asFullScala}
 
 import scala.concurrent.Promise
 
@@ -53,13 +52,13 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
     }
 
     val headers = command.requestHeaders.toMap
-    for((name, value) ← headers) {
-      requestBuilder.setHeader(name, String.valueOf(value))
+    for((key, value) ← headers) {
+      requestBuilder.setHeader(key.name, String.valueOf(value))
     }
 
     val queryParams = command.queryParameters.toMap
-    for((name, value) ← queryParams) {
-      requestBuilder.addQueryParameter(name, String.valueOf(value))
+    for((key, value) ← queryParams) {
+      requestBuilder.addQueryParameter(key.name, String.valueOf(value))
     }
 
     for(requestBody ← command.requestBodyOpt) {
@@ -71,14 +70,11 @@ class AsyncHttpCommandExecutor(http: AsyncHttpClient) extends CommandExecutor {
 
   private def setBody(requestBuilder: RequestBuilder, requestBody: RequestBody) {
     requestBody match {
-      case FileRequestBody(body) ⇒
-        requestBuilder.setBody(body)
-      case BytesRequestBody(body) ⇒
-        requestBuilder.setBody(body)
-      case StringRequestBody(body) ⇒
-        requestBuilder.setBody(body)
-      case InputStreamRequestBody(body) ⇒
-        requestBuilder.setBody(body)
+      case FileRequestBody(body)        ⇒ requestBuilder.setBody(body)
+      case BytesRequestBody(body)       ⇒ requestBuilder.setBody(body)
+      case StringRequestBody(body)      ⇒ requestBuilder.setBody(body)
+      case InputStreamRequestBody(body) ⇒ requestBuilder.setBody(body)
+
       case ChannelBufferRequestBody(body) ⇒
         val entityWriter = new EntityWriter {
           override def writeEntity(out: OutputStream): Unit = body.readBytes(out, body.readableBytes())

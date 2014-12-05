@@ -18,9 +18,9 @@
 package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.http.{Method, RequestBody}
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import typedkey.env.immutable.Env
 
 case class PutObjectCommand(
   serviceInfo: ServiceInfo,
@@ -34,10 +34,10 @@ case class PutObjectCommand(
    */
   def httpMethod = Method.PUT
 
-  override val requestHeaders = {
+  override val requestHeaders =
     newDefaultRequestHeaders.
-      set(PithosHeaderKeys.Standard.Content_Type, contentType)
-  }
+      update(PithosHeaderKeys.Standard.Content_Type, contentType).
+      toImmutable
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -53,7 +53,7 @@ case class PutObjectCommand(
   override val requestBodyOpt = Some(payload)
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () => String
   ): Unit = {}
 }

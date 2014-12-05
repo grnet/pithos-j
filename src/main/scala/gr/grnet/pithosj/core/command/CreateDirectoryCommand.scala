@@ -18,9 +18,9 @@
 package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.http.{Method, StdMediaType}
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import typedkey.env.immutable.Env
 
 case class CreateDirectoryCommand(
     serviceInfo: ServiceInfo,
@@ -35,11 +35,11 @@ case class CreateDirectoryCommand(
   /**
    * The HTTP request headers that are set by this command.
    */
-  override val requestHeaders = {
+  override val requestHeaders =
     newDefaultRequestHeaders.
-      set(PithosHeaderKeys.Standard.Content_Type, StdMediaType.Application_Directory.value()).
-      set(PithosHeaderKeys.Standard.Content_Length, 0L)
-  }
+      update(PithosHeaderKeys.Standard.Content_Type, StdMediaType.Application_Directory.value()).
+      update(PithosHeaderKeys.Standard.Content_Length, 0L).
+      toImmutable
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -53,7 +53,7 @@ case class CreateDirectoryCommand(
   def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () => String
   ): Unit = {}
 }

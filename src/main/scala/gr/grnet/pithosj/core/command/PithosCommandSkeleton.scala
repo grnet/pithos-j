@@ -21,10 +21,11 @@ import com.ning.http.client.AsyncHandler.STATE
 import com.ning.http.client.HttpResponseBodyPart
 import gr.grnet.common.Paths
 import gr.grnet.common.http.{CommandDescriptor, RequestBody, Result, TResult}
-import gr.grnet.common.keymap.{HeaderKey, KeyMap, ResultKey}
+import gr.grnet.common.key.{HeaderKey, ResultKey}
 import gr.grnet.pithosj.core.Helpers
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import org.slf4j.LoggerFactory
+import typedkey.env.{Env, ImEnv, MEnv}
 
 trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   protected val logger = LoggerFactory.getLogger(this.getClass)
@@ -34,7 +35,7 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   /**
    * The HTTP query parameters that are set by this command.
    */
-  val queryParameters = newQueryParameters
+  val queryParameters = newQueryParameters.toImmutable
 
   /**
    * Type-safe keys for `HTTP` response headers that are specific to this command.
@@ -56,24 +57,24 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   /**
    * The HTTP request headers that are set by this command.
    */
-  val requestHeaders = newDefaultRequestHeaders
+  val requestHeaders = newDefaultRequestHeaders.toImmutable
 
   /**
    * Parse a response header that is specific to this command and whose value must be of non-String type.
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `keyMap`.
+   * The parsed [[gr.grnet.common.key.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `env`.
    */
   protected def tryParseNonStringResponseHeader(
-      keyMap: KeyMap,
+      env: MEnv,
       name: String,
       values: List[String]
   ): Boolean = {
     values match {
       case value :: _ ⇒
-        tryParseNonStringResponseHeader(keyMap, name, value)
+        tryParseNonStringResponseHeader(env, name, value)
       case _ ⇒
         false
     }
@@ -84,11 +85,11 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `keyMap`.
+   * The parsed [[gr.grnet.common.key.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `env`.
    */
   protected def tryParseNonStringResponseHeader(
-      keyMap: KeyMap,
+      keyMap: MEnv,
       name: String,
       value: String
   ): Boolean = false
@@ -106,26 +107,24 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
    */
   val requestBodyOpt: Option[RequestBody] = None
 
-  protected def newDefaultRequestHeaders: KeyMap = {
-    KeyMap().
-      set(PithosHeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)
-  }
+  protected def newDefaultRequestHeaders: MEnv =
+    MEnv.ofOne(PithosHeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)
 
-  protected def newQueryParameters: KeyMap = KeyMap()
+  protected def newQueryParameters: MEnv = MEnv()
 
   def descriptor: CommandDescriptor = {
     CommandDescriptor(
       userID = serviceInfo.uuid,
       requestURL = serverURLExcludingParameters,
       httpMethod = httpMethod,
-      requestHeaders = requestHeaders,
-      queryParameters = queryParameters,
+      requestHeaders = requestHeaders.toImmutable,
+      queryParameters = queryParameters.toImmutable,
       successCodes = successCodes
     )
   }
 
-  def parseAllResponseHeaders(responseHeaders: scala.collection.Map[String, List[String]]): KeyMap = {
-    val keyMap = KeyMap()
+  def parseAllResponseHeaders(responseHeaders: scala.collection.Map[String, List[String]]): ImEnv = {
+    val env = MEnv()
     val myKeyNames = this.responseHeaderKeys.map(_.name).toSet
 
     for(keyName ← responseHeaders.keySet) {
@@ -134,17 +133,17 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
       if(myKeyNames.contains(keyName)) {
         // It is a header specific to this command.
         // Try parse it specifically
-        if(!tryParseNonStringResponseHeader(keyMap, keyName, keyValues)) {
+        if(!tryParseNonStringResponseHeader(env, keyName, keyValues)) {
           // No specific parsing needed, so just handle it generically.
-          Helpers.parseGenericResponseHeader(keyMap, keyName, keyValues)
+          Helpers.parseGenericResponseHeader(env, keyName, keyValues)
         }
       }
       else {
-        Helpers.parseGenericResponseHeader(keyMap, keyName, keyValues)
+        Helpers.parseGenericResponseHeader(env, keyName, keyValues)
       }
     }
 
-    keyMap
+    env.toImmutable
   }
 
   /**
@@ -152,8 +151,13 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
    * in order to produce domain-specific objects.
    */
   override def buildResult(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () ⇒ String, resultData: KeyMap
+    responseHeaders: ImEnv,
+    statusCode: Int,
+    statusText: String,
+    startMillis: Long,
+    stopMillis: Long,
+    getResponseBody: () ⇒ String,
+    resultData: ImEnv
   ): TResult[T] = {
 
     val isSuccess = successCodes(statusCode)

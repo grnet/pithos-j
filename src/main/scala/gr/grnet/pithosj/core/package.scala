@@ -17,30 +17,11 @@
 
 package gr.grnet.pithosj
 
-import scala.collection.mutable
-import scala.collection.{JavaConversions => JC}
-import com.ckkloverdos.key.TKey
-import scala.concurrent.{Await, Future}
+import scala.collection.{JavaConversions => JC, mutable}
 import scala.concurrent.duration.Duration.Inf
+import scala.concurrent.{Await, Future}
 
 package object core {
-
-  /**
-   * This is to overcome a bug in our usage of the typedkey library.
-   * In particular it was compiled with a previous (< 2.10) version of Scala
-   * and the `toString` method fails miserably.
-   *
-   * The error is of the form
-   * <p/>
-   * `java.lang.NoSuchMethodError: scala.Predef$.augmentString(Ljava/lang/String;)Lscala/collection/immutable/StringOps;`
-   *
-   * @param tkey
-   * @tparam T
-   */
-  implicit class RichTKey[T](val tkey: TKey[T]) extends AnyVal {
-    def s = s"${tkey.getClass.getSimpleName}[${tkey.keyType}](${tkey.name})"
-  }
-
   // Anti-pattern. I use this in tests
   implicit class BadFuture[T](val future: Future[T]) extends AnyVal {
     def get(): T = Await.result(future, Inf)

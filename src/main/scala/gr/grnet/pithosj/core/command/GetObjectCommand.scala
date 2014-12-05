@@ -22,9 +22,10 @@ import java.io.OutputStream
 import com.ning.http.client.AsyncHandler.STATE
 import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosRequestParamKeys, PithosResultKeys}
+import typedkey.env.MEnv
+import typedkey.env.immutable.Env
 
 case class GetObjectCommand(
   serviceInfo: ServiceInfo,
@@ -41,15 +42,14 @@ case class GetObjectCommand(
   /**
    * The HTTP query parameters that are set by this command.
    */
-  override val queryParameters = {
-    version match {
+  override val queryParameters =
+    (version match {
       case null ⇒
         newQueryParameters
 
-      case version ⇒
-        newQueryParameters.set(PithosRequestParamKeys.Version, version)
-    }
-  }
+      case _ ⇒
+        newQueryParameters.update(PithosRequestParamKeys.Version, version)
+    }).toImmutable
 
   override def onBodyPartReceivedOpt = {
     Some(
@@ -100,11 +100,11 @@ case class GetObjectCommand(
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `keyMap`.
+   * The parsed [[gr.grnet.common.key.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `env`.
    */
   override protected def tryParseNonStringResponseHeader(
-      keyMap: KeyMap,
+      env: MEnv,
       name: String,
       value: String
   ) = {
@@ -112,17 +112,13 @@ case class GetObjectCommand(
       case PithosHeaderKeys.Standard.Last_Modified.name ⇒
         // Wed, 19 Sep 2012 08:18:23 GMT
         val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-        keyMap.set(
-          PithosHeaderKeys.Standard.Last_Modified,
-          parsedDate)
+        env.update(PithosHeaderKeys.Standard.Last_Modified, parsedDate)
         true
 
       case PithosHeaderKeys.Pithos.X_Object_Version_Timestamp.name ⇒
         // Wed, 19 Sep 2012 08:18:23 GMT
         val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-        keyMap.set(
-          PithosHeaderKeys.Pithos.X_Object_Version_Timestamp,
-          parsedDate)
+        env.update(PithosHeaderKeys.Pithos.X_Object_Version_Timestamp, parsedDate)
         true
 
       case _ ⇒
@@ -131,7 +127,7 @@ case class GetObjectCommand(
   }
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () => String
   ): GetObjectResultData =
     GetObjectResultData(

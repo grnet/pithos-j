@@ -17,9 +17,9 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
+import gr.grnet.pithosj.core.ServiceInfo
+import typedkey.env.immutable.Env
 
 case class PingCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[Unit] {
   val httpMethod: Method = Method.HEAD
@@ -33,7 +33,7 @@ case class PingCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[U
   val serverURLPathElements = Seq(serviceInfo.uuid)
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () => String
   ): Unit = {}
 }

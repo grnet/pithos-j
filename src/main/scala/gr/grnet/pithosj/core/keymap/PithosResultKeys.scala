@@ -17,8 +17,8 @@
 
 package gr.grnet.pithosj.core.keymap
 
-import gr.grnet.common.keymap.ResultKey
-import gr.grnet.pithosj.core.command.result.{ObjectInPathData, ContainerData}
+import gr.grnet.common.key.ResultKey
+import gr.grnet.pithosj.core.command.result.{ContainerData, ObjectInPathData}
 
 /**
  * Miscellaneous type-safe keys.

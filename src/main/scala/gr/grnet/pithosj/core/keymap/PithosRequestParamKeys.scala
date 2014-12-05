@@ -17,7 +17,7 @@
 
 package gr.grnet.pithosj.core.keymap
 
-import gr.grnet.common.keymap.RequestParamKey
+import gr.grnet.common.key.RequestParamKey
 import gr.grnet.pithosj.core.http.RequestParams
 
 /**

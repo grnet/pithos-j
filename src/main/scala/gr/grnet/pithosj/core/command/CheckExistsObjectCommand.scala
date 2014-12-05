@@ -17,10 +17,10 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{StdMediaType, Method}
-import gr.grnet.common.keymap.KeyMap
+import gr.grnet.common.http.{Method, StdMediaType}
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import typedkey.env.immutable.Env
 
 /**
  * Checks that a directory exists.
@@ -50,7 +50,11 @@ case class CheckExistsObjectCommand(
   def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: Env,
+    statusCode: Int,
+    statusText: String,
+    startMillis: Long,
+    stopMillis: Long,
     getResponseBody: () => String
   ) = {
     val exists = statusCode != 404

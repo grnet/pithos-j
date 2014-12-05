@@ -19,9 +19,9 @@ package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.Paths
 import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import typedkey.env.ImEnv
 
 /**
  * Copies an object around.
@@ -47,16 +47,16 @@ case class CopyObjectCommand(
   /**
    * The HTTP request headers that are set by this command.
    */
-  override val requestHeaders = {
+  override val requestHeaders =
     newDefaultRequestHeaders.
-      set(PithosHeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath))
-  }
+      update(PithosHeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath)).
+      toImmutable
 
   def serverURLPathElements = Seq(account, fromContainer, fromPath)
 
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: ImEnv, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () => String
   ): Unit = {}
 }

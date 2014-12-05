@@ -17,13 +17,15 @@
 
 package gr.grnet.pithosj.core
 
+import java.util
+import java.util.concurrent.{Future, TimeUnit}
+
 import com.ning.http.client.AsyncHttpClient
 import gr.grnet.common.date.DateParsers
+import gr.grnet.common.key.HeaderKey
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import java.util
-import java.util.concurrent.{TimeUnit, Future}
 import org.slf4j.LoggerFactory
-import gr.grnet.common.keymap.{HeaderKey, KeyMap}
+import typedkey.env.MEnv
 
 sealed class Helpers {
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
@@ -53,32 +55,30 @@ sealed class Helpers {
   }
 
   final def parseGenericResponseHeader(
-      keyMap: KeyMap,
+      env: MEnv,
       name: String,
       values: List[String]
-  ): KeyMap = {
+  ): Unit = {
     values match {
       case value :: _ ⇒
         name match {
           case PithosHeaderKeys.Standard.Content_Length.name ⇒
-            keyMap.set(PithosHeaderKeys.Standard.Content_Length, value.toLong)
+            env.update(PithosHeaderKeys.Standard.Content_Length, value.toLong)
 
           case PithosHeaderKeys.Standard.Last_Modified.name ⇒
             val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-            keyMap.set(PithosHeaderKeys.Standard.Last_Modified, parsedDate)
+            env.update(PithosHeaderKeys.Standard.Last_Modified, parsedDate)
 
           case PithosHeaderKeys.Standard.Date.name ⇒
             val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-            keyMap.set(PithosHeaderKeys.Standard.Date, parsedDate)
+            env.update(PithosHeaderKeys.Standard.Date, parsedDate)
 
-          case name ⇒
-            keyMap.set(HeaderKey[String](name), value)
+          case _ ⇒
+            env.update(HeaderKey[String](name), value)
         }
 
       case _ ⇒
     }
-
-    keyMap
   }
 }
 

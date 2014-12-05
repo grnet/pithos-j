@@ -20,12 +20,10 @@ package gr.grnet.pithosj.core
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 
-import gr.grnet.common.http.{BytesRequestBody, FileRequestBody, TResult}
-import gr.grnet.common.keymap.KeyMap
+import gr.grnet.common.http.{BytesRequestBody, FileRequestBody, RequestBody, TResult}
 import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.command._
-import gr.grnet.pithosj.core.http.ChannelBufferRequestBody
-import org.jboss.netty.buffer.ChannelBuffer
+import typedkey.env.immutable.Env
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,7 +56,7 @@ trait PithosSkeleton extends PithosApi {
 
   def getAccountInfo(serviceInfo: ServiceInfo) = call(GetAccountInfoCommand(serviceInfo))
 
-  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: KeyMap) = ???
+  def replaceAccountMeta(serviceInfo: ServiceInfo, meta: Env) = ???
 
   def deleteAccountMeta(serviceInfo: ServiceInfo, metaKey: String) = ???
 
@@ -77,7 +75,7 @@ trait PithosSkeleton extends PithosApi {
 
   def deleteObjectMeta(serviceInfo: ServiceInfo, path: String, metaKey: String) = ???
 
-  def replaceObjectMeta(serviceInfo: ServiceInfo, path: String, meta: KeyMap) = ???
+  def replaceObjectMeta(serviceInfo: ServiceInfo, path: String, meta: Env) = ???
 
   def getObject(serviceInfo: ServiceInfo, container: String, path: String, version: String, out: OutputStream) =
     call(GetObjectCommand(serviceInfo, container, path, version, out))
@@ -116,10 +114,10 @@ trait PithosSkeleton extends PithosApi {
     serviceInfo: ServiceInfo,
     container: String,
     path: String,
-    buffer: ChannelBuffer,
+    payload: RequestBody,
     contentType: String
   ) =
-    call(PutObjectCommand(serviceInfo, container, path, ChannelBufferRequestBody(buffer), contentType))
+    call(PutObjectCommand(serviceInfo, container, path, payload, contentType))
 
   def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) =
     call(DeleteFileCommand(serviceInfo, container, path))

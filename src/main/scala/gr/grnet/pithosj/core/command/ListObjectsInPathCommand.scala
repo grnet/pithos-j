@@ -19,11 +19,13 @@ package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.date.DateParsers
 import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ObjectInPathData
 import gr.grnet.pithosj.core.http.ResponseFormats
-import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosResultKeys, PithosRequestParamKeys}
+import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosRequestParamKeys, PithosResultKeys}
+import typedkey.env.MEnv
+import typedkey.env.immutable.Env
+
 import scala.xml.XML
 
 case class ListObjectsInPathCommand(
@@ -48,11 +50,11 @@ case class ListObjectsInPathCommand(
   def serverURLPathElements = Seq(serviceInfo.uuid, container)
 
 
-  override val queryParameters = {
+  override val queryParameters =
     newQueryParameters.
-      set(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
-      set(PithosRequestParamKeys.Path, path)
-  }
+      update(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
+      update(PithosRequestParamKeys.Path, path).
+      toImmutable
 
   override val responseHeaderKeys = Seq(
     PithosHeaderKeys.Pithos.X_Container_Block_Hash,
@@ -71,33 +73,33 @@ case class ListObjectsInPathCommand(
    *
    * Returns `true` iff the header is parsed.
    *
-   * The parsed [[gr.grnet.common.keymap.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `keyMap`.
+   * The parsed [[gr.grnet.common.key.HeaderKey]]
+   * and its associated non-String value are recorded in the provided `env`.
    */
   override protected def tryParseNonStringResponseHeader(
-      keyMap: KeyMap,
-      name: String,
-      value: String
+    env: MEnv,
+    name: String,
+    value: String
   ) = {
     name match {
       case PithosHeaderKeys.Pithos.X_Container_Block_Hash.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Block_Hash, value)
+        env.update(PithosHeaderKeys.Pithos.X_Container_Block_Hash, value)
         true
 
       case PithosHeaderKeys.Pithos.X_Container_Block_Size.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Block_Size, value.toLong)
+        env.update(PithosHeaderKeys.Pithos.X_Container_Block_Size, value.toLong)
         true
 
       case PithosHeaderKeys.Pithos.X_Container_Object_Meta.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Object_Meta, value)
+        env.update(PithosHeaderKeys.Pithos.X_Container_Object_Meta, value)
         true
 
       case PithosHeaderKeys.Pithos.X_Container_Object_Count.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Object_Count, value.toInt)
+        env.update(PithosHeaderKeys.Pithos.X_Container_Object_Count, value.toInt)
         true
 
       case PithosHeaderKeys.Pithos.X_Container_Bytes_Used.name ⇒
-        keyMap.set(PithosHeaderKeys.Pithos.X_Container_Bytes_Used, value.toLong)
+        env.update(PithosHeaderKeys.Pithos.X_Container_Bytes_Used, value.toLong)
         true
 
       case _ ⇒
@@ -106,7 +108,7 @@ case class ListObjectsInPathCommand(
   }
 
   override def buildResultData(
-    responseHeaders: KeyMap,
+    responseHeaders: Env,
     statusCode: Int,
     statusText: String,
     startMillis: Long,

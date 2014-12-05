@@ -18,9 +18,9 @@
 package gr.grnet.pithosj.core.command
 
 import gr.grnet.common.http.Method
-import gr.grnet.common.keymap.KeyMap
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosRequestParamKeys
+import typedkey.env.ImEnv
 
 
 case class DeleteDirectoryCommand(
@@ -45,17 +45,17 @@ case class DeleteDirectoryCommand(
    */
   def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
-  override val queryParameters: KeyMap =
-    delimiterOpt match {
+  override val queryParameters: ImEnv =
+    (delimiterOpt match {
       case Some(delimiter) ⇒
-        newQueryParameters.set(PithosRequestParamKeys.Delimiter, delimiter)
+        newQueryParameters.update(PithosRequestParamKeys.Delimiter, delimiter)
 
       case None ⇒
         newQueryParameters
-    }
+    }).toImmutable
 
   override def buildResultData(
-    responseHeaders: KeyMap, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
+    responseHeaders: ImEnv, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
     getResponseBody: () => String
   ): Unit = {}
 }

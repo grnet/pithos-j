@@ -17,9 +17,10 @@
 
 package gr.grnet.pithosj.api
 
-import gr.grnet.common.keymap.KeyMap
-import gr.grnet.pithosj.core.ServiceInfo
 import java.io.{File, OutputStream}
+
+import gr.grnet.pithosj.core.ServiceInfo
+import typedkey.env.immutable.Env
 
 /**
  * Provides the Pithos API.
@@ -29,7 +30,7 @@ class SingleServicePithosApi(serviceInfo: ServiceInfo, pithos: PithosApi) {
 
   def getAccountInfo() = pithos.getAccountInfo(serviceInfo)
 
-  def replaceAccountMeta(meta: KeyMap) = pithos.replaceAccountMeta(serviceInfo, meta)
+  def replaceAccountMeta(meta: Env) = pithos.replaceAccountMeta(serviceInfo, meta)
 
   def deleteAccountMeta(metaKey: String) = pithos.deleteAccountMeta(serviceInfo, metaKey)
 
@@ -47,7 +48,7 @@ class SingleServicePithosApi(serviceInfo: ServiceInfo, pithos: PithosApi) {
 
   def deleteObjectMeta(path: String, metaKey: String) = pithos.deleteObjectMeta(serviceInfo, path, metaKey)
 
-  def replaceObjectMeta(path: String, meta: KeyMap) = pithos.replaceObjectMeta(serviceInfo, path, meta)
+  def replaceObjectMeta(path: String, meta: Env) = pithos.replaceObjectMeta(serviceInfo, path, meta)
 
   def getObject(
     container: String,
