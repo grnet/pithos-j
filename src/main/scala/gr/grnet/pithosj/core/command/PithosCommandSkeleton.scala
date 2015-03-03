@@ -17,20 +17,20 @@
 
 package gr.grnet.pithosj.core.command
 
-import com.ning.http.client.AsyncHandler.STATE
-import com.ning.http.client.HttpResponseBodyPart
+import com.twitter.finagle.httpx.Response
+import com.twitter.io.Buf
 import gr.grnet.common.Paths
-import gr.grnet.common.http.{CommandDescriptor, RequestBody, Result, TResult}
+import gr.grnet.common.http.{Result, TResult}
 import gr.grnet.common.key.{HeaderKey, ResultKey}
 import gr.grnet.pithosj.core.Helpers
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import org.slf4j.LoggerFactory
-import typedkey.env.{Env, ImEnv, MEnv}
+import typedkey.env.{ImEnv, MEnv}
 
 trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
-  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE] = None
+  def onResponseOpt: Option[(Buf) ⇒ Unit] = None
 
   /**
    * The HTTP query parameters that are set by this command.
@@ -60,41 +60,6 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   val requestHeaders = newDefaultRequestHeaders.toImmutable
 
   /**
-   * Parse a response header that is specific to this command and whose value must be of non-String type.
-   *
-   * Returns `true` iff the header is parsed.
-   *
-   * The parsed [[gr.grnet.common.key.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `env`.
-   */
-  protected def tryParseNonStringResponseHeader(
-      env: MEnv,
-      name: String,
-      values: List[String]
-  ): Boolean = {
-    values match {
-      case value :: _ ⇒
-        tryParseNonStringResponseHeader(env, name, value)
-      case _ ⇒
-        false
-    }
-  }
-
-  /**
-   * Parse a response header that is specific to this command and whose value must be of non-String type.
-   *
-   * Returns `true` iff the header is parsed.
-   *
-   * The parsed [[gr.grnet.common.key.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `env`.
-   */
-  protected def tryParseNonStringResponseHeader(
-      keyMap: MEnv,
-      name: String,
-      value: String
-  ): Boolean = false
-
-  /**
    * Computes the URL that will be used in the HTTP call.
    * The URL does not contain any needed parameters.
    */
@@ -105,83 +70,25 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   /**
    * Provides the HTTP request body, if any.
    */
-  val requestBodyOpt: Option[RequestBody] = None
+  val requestBodyOpt: Option[Buf] = None
 
   protected def newDefaultRequestHeaders: MEnv =
     MEnv.ofOne(PithosHeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)
 
   protected def newQueryParameters: MEnv = MEnv()
 
-  def descriptor: CommandDescriptor = {
-    CommandDescriptor(
-      userID = serviceInfo.uuid,
-      requestURL = serverURLExcludingParameters,
-      httpMethod = httpMethod,
-      requestHeaders = requestHeaders.toImmutable,
-      queryParameters = queryParameters.toImmutable,
-      successCodes = successCodes
-    )
-  }
+  def buildResult(response: Response, startMillis: Long, stopMillis: Long): TResult[T] = {
+    val status = response.status
+    val isSuccess = successStatuses(status)
 
-  def parseAllResponseHeaders(responseHeaders: scala.collection.Map[String, List[String]]): ImEnv = {
-    val env = MEnv()
-    val myKeyNames = this.responseHeaderKeys.map(_.name).toSet
-
-    for(keyName ← responseHeaders.keySet) {
-      val keyValues = responseHeaders(keyName)
-
-      if(myKeyNames.contains(keyName)) {
-        // It is a header specific to this command.
-        // Try parse it specifically
-        if(!tryParseNonStringResponseHeader(env, keyName, keyValues)) {
-          // No specific parsing needed, so just handle it generically.
-          Helpers.parseGenericResponseHeader(env, keyName, keyValues)
-        }
-      }
-      else {
-        Helpers.parseGenericResponseHeader(env, keyName, keyValues)
-      }
-    }
-
-    env.toImmutable
-  }
-
-  /**
-   * Builds the domain-specific result of this command. Each command knows how to parse the HTTP response
-   * in order to produce domain-specific objects.
-   */
-  override def buildResult(
-    responseHeaders: ImEnv,
-    statusCode: Int,
-    statusText: String,
-    startMillis: Long,
-    stopMillis: Long,
-    getResponseBody: () ⇒ String,
-    resultData: ImEnv
-  ): TResult[T] = {
-
-    val isSuccess = successCodes(statusCode)
     Result(
-      descriptor,
-      statusCode,
-      statusText,
+      successStatuses,
+      status,
       startMillis,
       stopMillis,
-      responseHeaders,
-      if(isSuccess)
-        Some(buildResultData(
-          responseHeaders = responseHeaders,
-          statusCode = statusCode,
-          statusText = statusText,
-          startMillis = startMillis,
-          stopMillis = stopMillis,
-          getResponseBody = getResponseBody
-        ))
-      else None,
-      if(!isSuccess)
-        Some(getResponseBody())
-      else
-        None
+      response.headerMap,
+      if(isSuccess)  Some(buildResultData(response, startMillis, stopMillis)) else None,
+      if(!isSuccess) Some(response.contentString) else None
     )
   }
 }

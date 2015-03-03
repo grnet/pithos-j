@@ -17,9 +17,9 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
+import com.twitter.finagle.httpx.Method.Delete
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.pithosj.core.ServiceInfo
-import typedkey.env.immutable.Env
 
 case class DeleteFileCommand(
     serviceInfo: ServiceInfo,
@@ -29,12 +29,12 @@ case class DeleteFileCommand(
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.DELETE
+  def httpMethod = Delete
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(204)
+  def successStatuses = Set(204).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -42,8 +42,5 @@ case class DeleteFileCommand(
    */
   def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
-  override def buildResultData(
-    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): Unit = {}
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

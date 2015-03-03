@@ -23,7 +23,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>gr.grnet</groupId>
   <artifactId>pithosj</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.4.0</version>
 
   <!-- Project details-->
   <name>PithosJ</name>
@@ -47,11 +47,10 @@
 
   <!--Common project settings-->
   <properties>
-    <scala.version>2.10.4</scala.version>
-    <snfcommonj.version>0.3.0-SNAPSHOT</snfcommonj.version>
+    <scala.version>2.11.4</scala.version>
+    <snfcommonj.version>0.4.0</snfcommonj.version>
     <jackson.version>2.4.3</jackson.version>
-    <asynchttp.version>1.7.3</asynchttp.version>
-    <netty.version>3.9.4.Final</netty.version>
+    <finagle.version>6.24.1-MONOCACHE</finagle.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
   </properties>
@@ -64,27 +63,15 @@
     </dependency>
 
     <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-xml_2.11</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+
+    <dependency>
       <groupId>gr.grnet</groupId>
       <artifactId>snf-common-j</artifactId>
       <version>${snfcommonj.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty</artifactId>
-      <version>${netty.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.ning</groupId>
-      <artifactId>async-http-client</artifactId>
-      <version>${asynchttp.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>netty</artifactId>
-          <groupId>io.netty</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -107,14 +94,26 @@
 
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-scala_2.10</artifactId>
+      <artifactId>jackson-module-scala_2.11</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>finagle-httpx_2.11</artifactId>
+      <version>${finagle.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>util-core_2.11</artifactId>
+      <version>6.23.0</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
 

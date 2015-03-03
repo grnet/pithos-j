@@ -17,10 +17,11 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{Method, StdMediaType}
+import com.twitter.finagle.httpx.Method.Put
+import com.twitter.finagle.httpx.{Response, Status}
+import gr.grnet.common.http.StdMediaType
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import typedkey.env.immutable.Env
 
 case class CreateDirectoryCommand(
     serviceInfo: ServiceInfo,
@@ -30,7 +31,7 @@ case class CreateDirectoryCommand(
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.PUT
+  def httpMethod = Put
 
   /**
    * The HTTP request headers that are set by this command.
@@ -44,7 +45,7 @@ case class CreateDirectoryCommand(
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(201)
+  def successStatuses = Set(201).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -52,8 +53,5 @@ case class CreateDirectoryCommand(
    */
   def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
-  override def buildResultData(
-    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): Unit = {}
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

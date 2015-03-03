@@ -22,7 +22,6 @@ import gr.grnet.common.http.StdHeader
 import gr.grnet.common.key.HeaderKey
 import gr.grnet.pithosj.core.http
 import gr.grnet.pithosj.core.http.PithosHeader
-import typedkey.env.{MEnv, Env}
 
 object PithosHeaderKeys {
   final val AllKeys = Standard.AllKeys ++ Pithos.AllKeys

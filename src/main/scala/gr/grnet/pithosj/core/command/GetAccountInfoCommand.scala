@@ -17,21 +17,22 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
+import com.twitter.finagle.httpx.Method.Head
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import typedkey.env.{ImEnv, MEnv}
+import typedkey.env.MEnv
 
 case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[GetAccountInfoResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.HEAD
+  def httpMethod = Head
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(204)
+  def successStatuses = Set(204).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -54,47 +55,12 @@ case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommand
   )
 
 
-  /**
-   * Parse a response header that is specific to this command and whose value must be of non-String type.
-   *
-   * Returns `true` iff the header is parsed.
-   *
-   * The parsed [[gr.grnet.common.key.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `env`.
-   */
-  override protected def tryParseNonStringResponseHeader(
-    env: MEnv,
-    name: String,
-    value: String
-  ) = {
-    name match {
-      case PithosHeaderKeys.Pithos.X_Account_Bytes_Used.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Account_Bytes_Used, value.toLong)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Account_Container_Count.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Account_Container_Count, value.toInt)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Account_Policy_Quota.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Account_Policy_Quota, value.toLong)
-        true
-
-      case _ ⇒
-        false
-    }
-  }
-
-
-  override def buildResultData(
-    responseHeaders: ImEnv, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): GetAccountInfoResultData = {
-
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): GetAccountInfoResultData = {
+    val responseHeaders = response.headerMap
     GetAccountInfoResultData(
-      X_Account_Bytes_Used = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Bytes_Used),
-      X_Account_Container_Count = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Container_Count),
-      X_Account_Policy_Quota = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Policy_Quota)
+      X_Account_Bytes_Used = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Bytes_Used.name).map(_.toLong),
+      X_Account_Container_Count = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Container_Count.name).map(_.toInt),
+      X_Account_Policy_Quota = responseHeaders.get(PithosHeaderKeys.Pithos.X_Account_Policy_Quota.name).map(_.toLong)
     )
   }
 }

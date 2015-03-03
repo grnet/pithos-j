@@ -17,7 +17,8 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
+import com.twitter.finagle.httpx.Method.Delete
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosRequestParamKeys
 import typedkey.env.ImEnv
@@ -32,12 +33,12 @@ case class DeleteDirectoryCommand(
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.DELETE
+  def httpMethod = Delete
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(204)
+  def successStatuses = Set(204).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -54,8 +55,5 @@ case class DeleteDirectoryCommand(
         newQueryParameters
     }).toImmutable
 
-  override def buildResultData(
-    responseHeaders: ImEnv, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): Unit = {}
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

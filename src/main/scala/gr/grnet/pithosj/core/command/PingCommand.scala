@@ -17,14 +17,14 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.Method
+import com.twitter.finagle.httpx.Method.Head
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.pithosj.core.ServiceInfo
-import typedkey.env.immutable.Env
 
 case class PingCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[Unit] {
-  val httpMethod: Method = Method.HEAD
+  val httpMethod = Head
 
-  val successCodes: Set[Int] = Set(204)
+  val successStatuses = Set(204).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -32,8 +32,5 @@ case class PingCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[U
    */
   val serverURLPathElements = Seq(serviceInfo.uuid)
 
-  override def buildResultData(
-    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): Unit = {}
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

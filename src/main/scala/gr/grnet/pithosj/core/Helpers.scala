@@ -20,7 +20,6 @@ package gr.grnet.pithosj.core
 import java.util
 import java.util.concurrent.{Future, TimeUnit}
 
-import com.ning.http.client.AsyncHttpClient
 import gr.grnet.common.date.DateParsers
 import gr.grnet.common.key.HeaderKey
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
@@ -82,6 +81,4 @@ sealed class Helpers {
   }
 }
 
-object Helpers extends Helpers {
-  type RequestBuilder = AsyncHttpClient#BoundRequestBuilder
-}
+object Helpers extends Helpers

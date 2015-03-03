@@ -17,10 +17,12 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{Method, StdMediaType}
+import com.twitter.finagle.httpx.Method.Head
+import com.twitter.finagle.httpx.Response
+import com.twitter.finagle.httpx.Status
+import gr.grnet.common.http.StdMediaType
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import typedkey.env.immutable.Env
 
 /**
  * Checks that a directory exists.
@@ -34,14 +36,14 @@ case class CheckExistsObjectCommand(
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.HEAD
+  def httpMethod = Head
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
   // Note that if path == "" then for the container the server will send 204 instead of 200
   // Note how 404 is actually a success status code, indicating a "false" to the original question
-  def successCodes = Set(200, 204, 404)
+  def successStatuses = Set(200, 204, 404).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -49,14 +51,10 @@ case class CheckExistsObjectCommand(
    */
   def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
 
-  override def buildResultData(
-    responseHeaders: Env,
-    statusCode: Int,
-    statusText: String,
-    startMillis: Long,
-    stopMillis: Long,
-    getResponseBody: () => String
-  ) = {
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): CheckExistsObjectResultData = {
+    val status = response.status
+    val statusCode = status.code
+    val responseHeaders = response.headerMap
     val exists = statusCode != 404
     val isContainer = statusCode == 204 && path.isEmpty
     CheckExistsObjectResultData(
@@ -64,7 +62,7 @@ case class CheckExistsObjectCommand(
       isContainer = isContainer,
       container = container,
       path = path,
-      contentType = if(exists && !isContainer) responseHeaders.get(PithosHeaderKeys.Standard.Content_Type) else None,
+      contentType = if(exists && !isContainer) responseHeaders.get(PithosHeaderKeys.Standard.Content_Type.name) else None,
       contentTypeIsDirectory = contentTypeIsDirectory
     )
   }

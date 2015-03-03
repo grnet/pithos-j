@@ -17,12 +17,12 @@
 
 package gr.grnet.pithosj.core.command
 
+import com.twitter.finagle.httpx.Method.Head
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.common.date.DateParsers
-import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosResultKeys}
 import typedkey.env.MEnv
-import typedkey.env.immutable.Env
 
 
 case class GetObjectInfoCommand(
@@ -33,12 +33,12 @@ case class GetObjectInfoCommand(
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.HEAD
+  def httpMethod = Head
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(200)
+  def successStatuses = Set(200).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -70,52 +70,20 @@ case class GetObjectInfoCommand(
     PithosResultKeys.Commands.Path
   )
 
-  /**
-   * Parse a response header that is specific to this command and whose value must be of non-String type.
-   *
-   * Returns `true` iff the header is parsed.
-   *
-   * The parsed [[gr.grnet.common.key.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `env`.
-   */
-  override protected def tryParseNonStringResponseHeader(
-      env: MEnv,
-      name: String,
-      value: String
-  ) = {
-    name match {
-      case PithosHeaderKeys.Standard.Last_Modified.name ⇒
-        // Wed, 19 Sep 2012 08:18:23 GMT
-        val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-        env.update(PithosHeaderKeys.Standard.Last_Modified, parsedDate)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Object_Version_Timestamp.name ⇒
-        // Wed, 19 Sep 2012 08:18:23 GMT
-        val parsedDate = DateParsers.parse(value, DateParsers.Format2Parser)
-        env.update(PithosHeaderKeys.Pithos.X_Object_Version_Timestamp, parsedDate)
-        true
-
-      case _ ⇒
-        false
-    }
-  }
-
-  override def buildResultData(
-    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): GetObjectInfoResultData =
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): GetObjectInfoResultData = {
+    val responseHeaders = response.headerMap
     GetObjectInfoResultData(
       container = container,
       path = path,
-      ETag = responseHeaders.get(PithosHeaderKeys.Standard.ETag),
-      Content_Type = responseHeaders.get(PithosHeaderKeys.Standard.Content_Type),
-      Content_Length = responseHeaders.get(PithosHeaderKeys.Standard.Content_Length),
-      Last_Modified = responseHeaders.get(PithosHeaderKeys.Standard.Last_Modified),
-      X_Object_Hash = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Hash),
-      X_Object_Modified_By = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Modified_By),
-      X_Object_Version_Timestamp = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Version_Timestamp),
-      X_Object_UUID = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_UUID),
-      X_Object_Version = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Version)
+      ETag = responseHeaders.get(PithosHeaderKeys.Standard.ETag.name),
+      Content_Type = responseHeaders.get(PithosHeaderKeys.Standard.Content_Type.name),
+      Content_Length = responseHeaders.get(PithosHeaderKeys.Standard.Content_Length.name).map(_.toLong),
+      Last_Modified = responseHeaders.get(PithosHeaderKeys.Standard.Last_Modified.name).map(DateParsers.parse(_, DateParsers.Format2Parser)),
+      X_Object_Hash = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Hash.name),
+      X_Object_Modified_By = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Modified_By.name),
+      X_Object_Version_Timestamp = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Version_Timestamp.name).map(DateParsers.parse(_, DateParsers.Format2Parser)),
+      X_Object_UUID = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_UUID.name),
+      X_Object_Version = responseHeaders.get(PithosHeaderKeys.Pithos.X_Object_Version.name)
     )
+  }
 }

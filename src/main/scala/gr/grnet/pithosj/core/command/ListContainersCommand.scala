@@ -17,24 +17,23 @@
 
 package gr.grnet.pithosj.core.command
 
+import com.twitter.finagle.httpx.Method.Get
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.common.date.DateParsers
-import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ContainerData
 import gr.grnet.pithosj.core.http.ResponseFormats
 import gr.grnet.pithosj.core.keymap.{PithosRequestParamKeys, PithosResultKeys}
-import typedkey.env.ImEnv
-import typedkey.env.MEnv
 import typedkey.Key
+import typedkey.env.MEnv
 
 import scala.xml.XML
-
 
 case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[ListContainersResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.GET
+  def httpMethod = Get
 
   /**
    * The HTTP query parameters that are set by this command.
@@ -47,7 +46,7 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(200)
+  def successStatuses = Set(200).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -64,16 +63,9 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
     PithosResultKeys.ListContainers
   )
 
-  override def buildResultData(
-    responseHeaders: ImEnv,
-    statusCode: Int,
-    statusText: String,
-    startMillis: Long,
-    stopMillis: Long,
-    getResponseBody: () ⇒ String
-  ) = {
-
-    val body = getResponseBody()
+  // FIXME Server no longer returns XML
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): ListContainersResultData = {
+    val body = response.contentString
     val xml = XML.loadString(body)
 
     val containerResults = for {

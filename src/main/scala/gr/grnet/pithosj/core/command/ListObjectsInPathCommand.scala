@@ -17,14 +17,14 @@
 
 package gr.grnet.pithosj.core.command
 
+import com.twitter.finagle.httpx.Method.Get
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.common.date.DateParsers
-import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ObjectInPathData
 import gr.grnet.pithosj.core.http.ResponseFormats
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosRequestParamKeys, PithosResultKeys}
 import typedkey.env.MEnv
-import typedkey.env.immutable.Env
 
 import scala.xml.XML
 
@@ -36,12 +36,12 @@ case class ListObjectsInPathCommand(
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.GET
+  def httpMethod = Get
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(200)
+  def successStatuses = Set(200).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -68,55 +68,9 @@ case class ListObjectsInPathCommand(
     PithosResultKeys.ListObjectsInPath
   )
 
-  /**
-   * Parse a response header that is specific to this command and whose value must be of non-String type.
-   *
-   * Returns `true` iff the header is parsed.
-   *
-   * The parsed [[gr.grnet.common.key.HeaderKey]]
-   * and its associated non-String value are recorded in the provided `env`.
-   */
-  override protected def tryParseNonStringResponseHeader(
-    env: MEnv,
-    name: String,
-    value: String
-  ) = {
-    name match {
-      case PithosHeaderKeys.Pithos.X_Container_Block_Hash.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Container_Block_Hash, value)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Container_Block_Size.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Container_Block_Size, value.toLong)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Container_Object_Meta.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Container_Object_Meta, value)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Container_Object_Count.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Container_Object_Count, value.toInt)
-        true
-
-      case PithosHeaderKeys.Pithos.X_Container_Bytes_Used.name ⇒
-        env.update(PithosHeaderKeys.Pithos.X_Container_Bytes_Used, value.toLong)
-        true
-
-      case _ ⇒
-        false
-    }
-  }
-
-  override def buildResultData(
-    responseHeaders: Env,
-    statusCode: Int,
-    statusText: String,
-    startMillis: Long,
-    stopMillis: Long,
-    getResponseBody: () => String
-  ) = {
-
-    val body = getResponseBody()
+  // FIXME Server no longer returns XML
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): ListObjectsInPathResultData = {
+    val body = response.contentString
     val xml = XML.loadString(body)
 
     val objectsInPath = for {

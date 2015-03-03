@@ -15,19 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package gr.grnet.pithosj.core.command
+package gr.grnet.pithosj.impl.finagle
 
-import gr.grnet.common.http.TResult
-import scala.concurrent.Future
+import com.twitter.finagle.Httpx
+import gr.grnet.pithosj.api.PithosApi
+import gr.grnet.pithosj.core.ServiceInfo
 
 /**
- * A [[gr.grnet.pithosj.core.command.CommandExecutor]] is responsible to synchronously execute
- * a given [[gr.grnet.pithosj.core.command.PithosCommand]].
+ *
  */
-trait CommandExecutor {
-  /**
-   * Executes the given command and returns a [[scala.concurrent.Future]]
-   * with the command-specific result.
-   */
-  def execute[T](command: PithosCommand[T]): Future[TResult[T]]
+object PithosClientFactory {
+  def newClient(serverURL: String): PithosApi = {
+    val service = Httpx.newService(serverURL)
+    new PithosClient(service)
+  }
+
+  def newClient(serviceInfo: ServiceInfo): PithosApi =
+    newClient(serviceInfo.serviceURL)
 }

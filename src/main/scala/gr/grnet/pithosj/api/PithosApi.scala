@@ -19,12 +19,13 @@ package gr.grnet.pithosj.api
 
 import java.io.{File, OutputStream}
 
-import gr.grnet.common.http.{RequestBody, TResult}
+import com.twitter.io.Buf
+import gr.grnet.common.http.TResult
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.{CheckExistsObjectResultData, GetAccountInfoResultData, GetObjectInfoResultData, GetObjectResultData, ListContainersResultData, ListObjectsInPathResultData}
 import typedkey.env.immutable.Env
 
-import scala.concurrent.Future
+import com.twitter.util.Future
 
 /**
  * Provides the Pithos API.
@@ -100,7 +101,7 @@ trait PithosApi {
     serviceInfo: ServiceInfo,
     container: String,
     path: String,
-    payload: RequestBody,
+    payload: Buf,
     contentType: String
   ): Future[TResult[Unit]]
 

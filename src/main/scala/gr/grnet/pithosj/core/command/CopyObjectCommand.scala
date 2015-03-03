@@ -17,11 +17,10 @@
 
 package gr.grnet.pithosj.core.command
 
+import com.twitter.finagle.httpx.{Method, Response, Status}
 import gr.grnet.common.Paths
-import gr.grnet.common.http.Method
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import typedkey.env.ImEnv
 
 /**
  * Copies an object around.
@@ -37,12 +36,12 @@ case class CopyObjectCommand(
   /**
    * The HTTP method by which the command is implemented.
    */
-  val httpMethod = Method.COPY
+  val httpMethod = Method("COPY")
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  val successCodes = Set(201)
+  val successStatuses = Set(201).map(Status.fromCode)
 
   /**
    * The HTTP request headers that are set by this command.
@@ -54,9 +53,5 @@ case class CopyObjectCommand(
 
   def serverURLPathElements = Seq(account, fromContainer, fromPath)
 
-
-  override def buildResultData(
-    responseHeaders: ImEnv, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): Unit = {}
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

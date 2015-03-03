@@ -17,22 +17,23 @@
 
 package gr.grnet.pithosj.core.command
 
-import gr.grnet.common.http.{Method, RequestBody}
+import com.twitter.finagle.httpx.Method.Put
+import com.twitter.finagle.httpx.{Response, Status}
+import com.twitter.io.Buf
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import typedkey.env.immutable.Env
 
 case class PutObjectCommand(
   serviceInfo: ServiceInfo,
   container: String,
   path: String,
-  payload: RequestBody,
+  payload: Buf,
   contentType: String
 ) extends PithosCommandSkeleton[Unit] {
   /**
    * The HTTP method by which the command is implemented.
    */
-  def httpMethod = Method.PUT
+  def httpMethod = Put
 
   override val requestHeaders =
     newDefaultRequestHeaders.
@@ -42,7 +43,7 @@ case class PutObjectCommand(
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
    */
-  def successCodes = Set(201)
+  def successStatuses = Set(201).map(Status.fromCode)
 
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
@@ -52,8 +53,5 @@ case class PutObjectCommand(
 
   override val requestBodyOpt = Some(payload)
 
-  override def buildResultData(
-    responseHeaders: Env, statusCode: Int, statusText: String, startMillis: Long, stopMillis: Long,
-    getResponseBody: () => String
-  ): Unit = {}
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

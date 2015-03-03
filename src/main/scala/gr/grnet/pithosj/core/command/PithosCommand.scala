@@ -17,9 +17,9 @@
 
 package gr.grnet.pithosj.core.command
 
-import com.ning.http.client.AsyncHandler.STATE
-import com.ning.http.client.HttpResponseBodyPart
-import gr.grnet.common.http.{Command, RequestBody}
+import com.twitter.finagle.httpx.Status
+import com.twitter.io.Buf
+import gr.grnet.common.http.Command
 import gr.grnet.pithosj.core.ServiceInfo
 
 /**
@@ -45,15 +45,15 @@ trait PithosCommand[T] extends Command[T] {
    */
   def account: String = serviceInfo.uuid
 
-  def onBodyPartReceivedOpt: Option[HttpResponseBodyPart ⇒ STATE]
+  def onResponseOpt: Option[(Buf) ⇒ Unit]
 
   /**
    * Provides the HTTP request body, if any.
    */
-  def requestBodyOpt: Option[RequestBody]
+  def requestBodyOpt: Option[Buf]
 
   /**
    * A set of all the HTTP status codes that are considered a failure for this command.
    */
-  override def failureCodes: Set[Int] = Set() // FIXME implement
+  override def failureStatuses: Set[Status] = Set() // FIXME implement
 }

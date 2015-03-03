@@ -20,37 +20,37 @@ package gr.grnet.pithosj.core
 import java.io.{File, OutputStream}
 import java.net.URLConnection
 
-import gr.grnet.common.http.{BytesRequestBody, FileRequestBody, RequestBody, TResult}
+import com.twitter.io.Buf
+import com.twitter.util.Future
+import gr.grnet.common.http.TResult
+import gr.grnet.common.io.BufHelpers
 import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.command._
 import typedkey.env.immutable.Env
-
-import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].
  * Concrete implementations are required to provide an instance of [[gr.grnet.pithosj.core.command.CommandExecutor]]
  * as the value of `executor`.
  */
-trait PithosSkeleton extends PithosApi {
-  protected val executor: CommandExecutor
-  protected implicit val context: ExecutionContext = ExecutionContext.Implicits.global
-
+trait PithosApiSkeleton extends PithosApi {
   protected def call[T](command: PithosCommand[T]): Future[TResult[T]] = {
     try {
       command.validate match {
         case Some(error) ⇒
-          Future.failed(new RuntimeException("Could not validate %s".format(command)))
+          Future.exception(new RuntimeException("Could not validate %s".format(command)))
 
         case None ⇒
-          executor.execute(command)
+          callImpl(command)
       }
     }
     catch {
       case e: Throwable ⇒
-        Future.failed(e)
+        Future.exception(new RuntimeException("Internal error", e))
     }
   }
+
+  protected def callImpl[T](command: PithosCommand[T]): Future[TResult[T]]
 
   def ping(serviceInfo: ServiceInfo) = call(PingCommand(serviceInfo))
 
@@ -98,7 +98,7 @@ trait PithosSkeleton extends PithosApi {
         _contentType
     }
 
-    call(PutObjectCommand(serviceInfo, container, path, FileRequestBody(file), contentType))
+    call(PutObjectCommand(serviceInfo, container, path, BufHelpers.bufOfFile(file), contentType))
   }
 
   def putObject(
@@ -108,13 +108,13 @@ trait PithosSkeleton extends PithosApi {
     bytes: Array[Byte],
     contentType: String
   ) =
-    call(PutObjectCommand(serviceInfo, container, path, BytesRequestBody(bytes), contentType))
+    call(PutObjectCommand(serviceInfo, container, path, Buf.ByteArray.Owned(bytes), contentType))
 
   def putObject(
     serviceInfo: ServiceInfo,
     container: String,
     path: String,
-    payload: RequestBody,
+    payload: Buf,
     contentType: String
   ) =
     call(PutObjectCommand(serviceInfo, container, path, payload, contentType))
