@@ -155,4 +155,9 @@ trait PithosApi {
     container: String,
     path: String
   ): Future[TResult[CheckExistsObjectResultData]]
+
+  def checkExistsContainer(
+    serviceInfo: ServiceInfo,
+    container: String
+  ): Future[TResult[CheckExistsObjectResultData]] = checkExistsObject(serviceInfo, container, "")
 }
