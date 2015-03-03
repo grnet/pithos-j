@@ -18,10 +18,31 @@
 package gr.grnet.pithosj.core
 
 import java.net.URL
+import java.util.Locale
 
 case class ServiceInfo(
   serverURL: URL,
   rootPath: String,
   uuid: String,
   token: String
-)
+) {
+  val (serverHost, serverPort, isHttps) = {
+    val protocol = serverURL.getProtocol.toLowerCase(Locale.ENGLISH)
+    val isHttps = protocol match {
+      case "https" ⇒ true
+      case "http" ⇒ false
+      case _ ⇒
+        throw new Exception(s"Bad protocol $protocol")
+    }
+    val host = serverURL.getHost
+    val port =
+      serverURL.getPort match {
+        case -1 ⇒ if(isHttps) 443 else 80
+        case p ⇒ p
+      }
+
+    (host, port, isHttps)
+  }
+
+  def hostAndPort: String = s"$serverHost:$serverPort"
+}

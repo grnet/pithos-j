@@ -17,9 +17,6 @@
 
 package gr.grnet.pithosj.impl.finagle
 
-import java.net.URL
-import java.util.Locale
-
 import com.twitter.finagle.Httpx
 import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.ServiceInfo
@@ -29,29 +26,15 @@ import gr.grnet.pithosj.core.ServiceInfo
  */
 object PithosClientFactory {
   def newClient(serviceInfo: ServiceInfo): PithosApi = {
-    val serviceURL = serviceInfo.serverURL
-    val protocol = serviceURL.getProtocol.toLowerCase(Locale.ENGLISH)
-    val host = serviceURL.getHost
-    val port =
-      serviceURL.getPort match {
-        case -1 ⇒
-          protocol match {
-            case "http" ⇒ 80
-            case "https" ⇒ 443
-            case _ ⇒
-              throw new Exception(s"Bad protocol $protocol")
-          }
-
-        case p ⇒
-          p
-      }
+    val host = serviceInfo.serverHost
+    val port = serviceInfo.serverPort
+    val isHttps = serviceInfo.isHttps
 
     val client = {
-      val client = if(protocol == "https") Httpx.client.withTls(host) else Httpx.client
+      val client = if(isHttps) Httpx.client.withTls(host) else Httpx.client
       client.newClient(s"$host:$port")
     }
     val service = client.toService
     new PithosClient(service)
   }
-
 }
