@@ -17,4 +17,11 @@
 
 package gr.grnet.pithosj.core
 
-case class ServiceInfo(serviceURL: String, uuid: String, token: String)
+import java.net.URL
+
+case class ServiceInfo(
+  serverURL: URL,
+  rootPath: String,
+  uuid: String,
+  token: String
+)

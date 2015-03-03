@@ -51,7 +51,7 @@ case class CopyObjectCommand(
       update(PithosHeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath)).
       toImmutable
 
-  def serverURLPathElements = Seq(account, fromContainer, fromPath)
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, fromContainer, fromPath)
 
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

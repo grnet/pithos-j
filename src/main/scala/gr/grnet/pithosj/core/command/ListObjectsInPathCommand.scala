@@ -47,7 +47,7 @@ case class ListObjectsInPathCommand(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(serviceInfo.uuid, container)
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, container)
 
 
   override val queryParameters =

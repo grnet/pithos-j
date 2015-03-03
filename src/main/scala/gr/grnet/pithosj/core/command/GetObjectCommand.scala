@@ -66,7 +66,7 @@ case class GetObjectCommand(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(serviceInfo.uuid, container, path)
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, container, path)
 
   /**
    * Type-safe keys for `HTTP` response headers that are specific to this command.

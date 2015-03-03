@@ -52,7 +52,7 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverURLPathElements = Seq(serviceInfo.uuid)
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid)
 
   /**
    * The keys for extra result data pertaining to this command.

@@ -22,10 +22,9 @@ import com.twitter.io.Buf
 import gr.grnet.common.Paths
 import gr.grnet.common.http.{Result, TResult}
 import gr.grnet.common.key.{HeaderKey, ResultKey}
-import gr.grnet.pithosj.core.Helpers
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 import org.slf4j.LoggerFactory
-import typedkey.env.{ImEnv, MEnv}
+import typedkey.env.MEnv
 
 trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   protected val logger = LoggerFactory.getLogger(this.getClass)
@@ -64,7 +63,7 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
    * The URL does not contain any needed parameters.
    */
   def serverURLExcludingParameters: String  = {
-    Paths.buildWithFirst(serviceInfo.serviceURL, serverURLPathElements: _*)
+    Paths.buildWithFirst(serviceInfo.serverURL.toString, serverRootPath)
   }
 
   /**

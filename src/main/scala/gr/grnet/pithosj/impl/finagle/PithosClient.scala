@@ -30,10 +30,9 @@ import gr.grnet.pithosj.core.command.PithosCommand
 class PithosClient(svc: Service[Request, Response]) extends PithosApiSkeleton {
   protected def callImpl[T](command: PithosCommand[T]): Future[TResult[T]] = {
     val promise = Promise[TResult[T]]()
-    val serviceURL = command.serviceInfo.serviceURL
     val request =
       RequestBuilder().
-        url(serviceURL).
+        url(command.serverURLExcludingParameters).
         addHeaders(command.requestHeaders.toMapByName.map { case (k, v) ⇒ (k, s"$v") }.toMap).
         build(command.httpMethod, command.requestBodyOpt)
 

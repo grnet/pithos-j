@@ -30,7 +30,7 @@ case class PingCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[U
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  val serverURLPathElements = Seq(serviceInfo.uuid)
+  val serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid)
 
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }
