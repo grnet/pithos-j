@@ -20,6 +20,7 @@ package gr.grnet.pithosj.core.command
 import com.twitter.finagle.httpx.Method.Get
 import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.common.date.DateParsers
+import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ObjectInPathData
 import gr.grnet.pithosj.core.http.ResponseFormats
@@ -42,17 +43,20 @@ case class ListObjectsInPathCommand(
    */
   def successStatuses = Set(200).map(Status.fromCode)
 
+  val (actualContainer, actualPath) = {
+    if(container.isEmpty) PithosApi.splitToContainerAndPath(path)
+    else (container, path)
+  }
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, container)
-
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, actualContainer)
 
   override def queryParameters =
     Map(
       PithosRequestParamKeys.Format.name → ResponseFormats.XML.responseFormat(),
-      PithosRequestParamKeys.Path.name → path
+      PithosRequestParamKeys.Path.name   → actualPath
     )
 
   override val responseHeaderKeys = Seq(
@@ -85,7 +89,7 @@ case class ListObjectsInPathCommand(
       x_object_modified_by <- obj \ "x_object_modified_by"
     } yield {
       ObjectInPathData(
-        container = container,
+        container = actualContainer,
         path = name.text,
         contentType = content_type.text,
         contentLength = bytes.text.toLong,

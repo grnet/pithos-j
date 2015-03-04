@@ -61,7 +61,6 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
     PithosResultKeys.ListContainers
   )
 
-  // FIXME Server no longer returns XML
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): ListContainersResultData = {
     val body = response.contentString
     val xml = XML.loadString(body)

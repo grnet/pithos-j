@@ -207,6 +207,11 @@ trait PithosApi {
       path: String
   ): Future[TResult[ListObjectsInPathResultData]]
 
+  def listObjectsInPath(
+    serviceInfo: ServiceInfo,
+    path: String
+  ): Future[TResult[ListObjectsInPathResultData]] = listObjectsInPath(serviceInfo, "", path)
+
   def checkExistsObject(
     serviceInfo: ServiceInfo,
     container: String,
@@ -227,4 +232,12 @@ object PithosApi {
   @tailrec
   final def normalizeDirectoryPath(p: String): String =
     if(p.startsWith("/")) normalizeDirectoryPath(p.substring(1)) else p
+
+  final def splitToContainerAndPath(p: String): (String, String) = {
+    val i = p.indexOf('/')
+    val container = p.substring(0, i)
+    val path = p.substring(i + 1)
+
+    (container, path)
+  }
 }

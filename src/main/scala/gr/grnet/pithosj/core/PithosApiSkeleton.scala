@@ -169,7 +169,7 @@ trait PithosApiSkeleton extends PithosApi {
   ) = {
     require(path ne null, "path ne null")
 
-    call(ListObjectsInPathCommand(serviceInfo, container, path))
+    call(ListObjectsInPathCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path)))
   }
 
   def checkExistsObject(
