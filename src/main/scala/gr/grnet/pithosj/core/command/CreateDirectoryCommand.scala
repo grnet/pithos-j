@@ -36,11 +36,11 @@ case class CreateDirectoryCommand(
   /**
    * The HTTP request headers that are set by this command.
    */
-  override val requestHeaders =
-    newDefaultRequestHeaders.
-      update(PithosHeaderKeys.Standard.Content_Type, StdMediaType.Application_Directory.value()).
-      update(PithosHeaderKeys.Standard.Content_Length, 0L).
-      toImmutable
+  override def requestHeaders = super.requestHeaders ++
+      Map(
+        PithosHeaderKeys.Standard.Content_Type.name → StdMediaType.Application_Directory.value(),
+        PithosHeaderKeys.Standard.Content_Length.name → 0L.toString
+      )
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.

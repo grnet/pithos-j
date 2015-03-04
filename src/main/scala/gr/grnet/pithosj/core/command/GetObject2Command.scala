@@ -37,14 +37,11 @@ case class GetObject2Command(
   /**
    * The HTTP query parameters that are set by this command.
    */
-  override val queryParameters =
-    (version match {
-      case null ⇒
-        newQueryParameters
-
-      case _ ⇒
-        newQueryParameters.update(PithosRequestParamKeys.Version, version)
-    }).toImmutable
+  override def queryParameters =
+    version match {
+      case null | "" ⇒ Map()
+      case _ ⇒         Map(PithosRequestParamKeys.Version.name → version)
+    }
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.

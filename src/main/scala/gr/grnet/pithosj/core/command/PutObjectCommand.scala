@@ -35,10 +35,8 @@ case class PutObjectCommand(
    */
   def httpMethod = Put
 
-  override val requestHeaders =
-    newDefaultRequestHeaders.
-      update(PithosHeaderKeys.Standard.Content_Type, contentType).
-      toImmutable
+  override def requestHeaders = super.requestHeaders ++
+    Map(PithosHeaderKeys.Standard.Content_Type.name → contentType)
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -53,7 +51,7 @@ case class PutObjectCommand(
     if(container.isEmpty) Seq(serviceInfo.rootPath, serviceInfo.uuid, path)
     else                  Seq(serviceInfo.rootPath, serviceInfo.uuid, container, path)
 
-  override val requestBodyOpt = Some(payload)
+  override def requestBodyOpt = Some(payload)
 
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

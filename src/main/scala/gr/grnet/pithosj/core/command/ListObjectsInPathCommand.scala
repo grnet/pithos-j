@@ -24,7 +24,6 @@ import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.command.result.ObjectInPathData
 import gr.grnet.pithosj.core.http.ResponseFormats
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosRequestParamKeys, PithosResultKeys}
-import typedkey.env.MEnv
 
 import scala.xml.XML
 
@@ -50,11 +49,11 @@ case class ListObjectsInPathCommand(
   def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, container)
 
 
-  override val queryParameters =
-    newQueryParameters.
-      update(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
-      update(PithosRequestParamKeys.Path, path).
-      toImmutable
+  override def queryParameters =
+    Map(
+      PithosRequestParamKeys.Format.name → ResponseFormats.XML.responseFormat(),
+      PithosRequestParamKeys.Path.name → path
+    )
 
   override val responseHeaderKeys = Seq(
     PithosHeaderKeys.Pithos.X_Container_Block_Hash,
@@ -68,7 +67,6 @@ case class ListObjectsInPathCommand(
     PithosResultKeys.ListObjectsInPath
   )
 
-  // FIXME Server no longer returns XML
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): ListObjectsInPathResultData = {
     val body = response.contentString
     val xml = XML.loadString(body)

@@ -46,10 +46,8 @@ case class CopyObjectCommand(
   /**
    * The HTTP request headers that are set by this command.
    */
-  override val requestHeaders =
-    newDefaultRequestHeaders.
-      update(PithosHeaderKeys.Pithos.Destination, "/" + Paths.build(toContainer, toPath)).
-      toImmutable
+  override def requestHeaders = super.requestHeaders ++
+    Map(PithosHeaderKeys.Pithos.Destination.name → ("/" + Paths.build(toContainer, toPath)))
 
   def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, fromContainer, fromPath)
 

@@ -22,7 +22,9 @@ import com.twitter.io.Buf
 import gr.grnet.common.Paths
 import gr.grnet.common.http.{Result, TResult}
 import gr.grnet.common.key.{HeaderKey, ResultKey}
+import gr.grnet.pithosj.core.http.PithosHeader
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
+import org.jboss.netty.handler.codec.http.QueryStringEncoder
 import org.slf4j.LoggerFactory
 import typedkey.env.MEnv
 
@@ -34,7 +36,7 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   /**
    * The HTTP query parameters that are set by this command.
    */
-  val queryParameters = newQueryParameters.toImmutable
+  def queryParameters = Map[String, String]()
 
   /**
    * Type-safe keys for `HTTP` response headers that are specific to this command.
@@ -56,20 +58,32 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   /**
    * The HTTP request headers that are set by this command.
    */
-  val requestHeaders = newDefaultRequestHeaders.toImmutable
+  def requestHeaders = Map(PithosHeader.X_Auth_Token.name() → serviceInfo.token)
 
   /**
    * Computes the URL that will be used in the HTTP call.
    * The URL does not contain any needed parameters.
    */
-  def serverURLExcludingParameters: String  = {
+  def callURLExcludingParameters: String =
     Paths.buildWithFirst(serviceInfo.serverURL.toString, serverRootPath)
+
+  def callURL: String = {
+    val urlNoParams = callURLExcludingParameters
+    val encoder = new QueryStringEncoder(urlNoParams)
+
+    for {
+      (k, v) ← queryParameters
+    } {
+      encoder.addParam(k, v)
+    }
+
+    encoder.toUri.toString
   }
 
   /**
    * Provides the HTTP request body, if any.
    */
-  val requestBodyOpt: Option[Buf] = None
+  def requestBodyOpt: Option[Buf] = None
 
   protected def newDefaultRequestHeaders: MEnv =
     MEnv.ofOne(PithosHeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)

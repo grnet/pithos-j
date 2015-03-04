@@ -32,8 +32,8 @@ class PithosClient(svc: Service[Request, Response]) extends PithosApiSkeleton {
     val promise = Promise[TResult[T]]()
     val request =
       RequestBuilder().
-        url(command.serverURLExcludingParameters).
-        addHeaders(command.requestHeaders.toMapByName.map { case (k, v) ⇒ (k, s"$v") }.toMap).
+        url(command.callURL).
+        addHeaders(command.requestHeaders).
         build(command.httpMethod, command.requestBodyOpt)
 
     val startMillis = System.currentTimeMillis()

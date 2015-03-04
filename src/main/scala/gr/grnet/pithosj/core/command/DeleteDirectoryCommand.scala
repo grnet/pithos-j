@@ -21,7 +21,6 @@ import com.twitter.finagle.httpx.Method.Delete
 import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosRequestParamKeys
-import typedkey.env.ImEnv
 
 
 case class DeleteDirectoryCommand(
@@ -48,14 +47,14 @@ case class DeleteDirectoryCommand(
     if(container.isEmpty) Seq(serviceInfo.rootPath, serviceInfo.uuid, path)
     else                  Seq(serviceInfo.rootPath, serviceInfo.uuid, container, path)
 
-  override val queryParameters: ImEnv =
-    (delimiterOpt match {
+  override def queryParameters =
+    delimiterOpt match {
       case Some(delimiter) ⇒
-        newQueryParameters.update(PithosRequestParamKeys.Delimiter, delimiter)
+        Map(PithosRequestParamKeys.Delimiter.name → delimiter)
 
       case None ⇒
-        newQueryParameters
-    }).toImmutable
+        Map()
+    }
 
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

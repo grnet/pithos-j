@@ -41,14 +41,11 @@ case class GetObjectCommand(
   /**
    * The HTTP query parameters that are set by this command.
    */
-  override val queryParameters =
-    (version match {
-      case null ⇒
-        newQueryParameters
-
-      case _ ⇒
-        newQueryParameters.update(PithosRequestParamKeys.Version, version)
-    }).toImmutable
+  override def queryParameters =
+    version match {
+      case null | "" ⇒ Map()
+      case _ ⇒         Map(PithosRequestParamKeys.Version.name → version)
+    }
 
   override def onResponseOpt: Option[(Buf) ⇒ Unit] =
     Some( buf ⇒ {

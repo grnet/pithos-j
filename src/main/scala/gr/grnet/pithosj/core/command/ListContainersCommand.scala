@@ -38,10 +38,8 @@ case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommand
   /**
    * The HTTP query parameters that are set by this command.
    */
-  override val queryParameters =
-    newQueryParameters.
-      update(PithosRequestParamKeys.Format, ResponseFormats.XML.responseFormat()).
-      toImmutable
+  override def queryParameters =
+    Map(PithosRequestParamKeys.Format.name → ResponseFormats.XML.responseFormat())
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
