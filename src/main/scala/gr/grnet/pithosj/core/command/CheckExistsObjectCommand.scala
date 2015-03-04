@@ -18,8 +18,7 @@
 package gr.grnet.pithosj.core.command
 
 import com.twitter.finagle.httpx.Method.Head
-import com.twitter.finagle.httpx.Response
-import com.twitter.finagle.httpx.Status
+import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.common.http.StdMediaType
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys

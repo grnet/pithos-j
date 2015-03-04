@@ -22,9 +22,9 @@ import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.pithosj.core.ServiceInfo
 
 case class DeleteFileCommand(
-    serviceInfo: ServiceInfo,
-    container: String,
-    path: String
+  serviceInfo: ServiceInfo,
+  container: String,
+  path: String
 ) extends PithosCommandSkeleton[Unit] {
   /**
    * The HTTP method by which the command is implemented.
@@ -40,9 +40,7 @@ case class DeleteFileCommand(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverRootPathElements =
-    if(container.isEmpty) Seq(serviceInfo.rootPath, serviceInfo.uuid, path)
-    else                  Seq(serviceInfo.rootPath, serviceInfo.uuid, container, path)
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, container, path)
 
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

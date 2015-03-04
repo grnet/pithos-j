@@ -47,9 +47,7 @@ case class PutObjectCommand(
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.
    */
-  def serverRootPathElements =
-    if(container.isEmpty) Seq(serviceInfo.rootPath, serviceInfo.uuid, path)
-    else                  Seq(serviceInfo.rootPath, serviceInfo.uuid, container, path)
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, container, path)
 
   override def requestBodyOpt = Some(payload)
 

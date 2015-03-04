@@ -21,9 +21,10 @@ import com.twitter.finagle.httpx.Method.Head
 import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
-import typedkey.env.MEnv
 
-case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[GetAccountInfoResultData] {
+case class GetAccountInfoCommand(
+  serviceInfo: ServiceInfo
+) extends PithosCommandSkeleton[GetAccountInfoResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -53,7 +54,6 @@ case class GetAccountInfoCommand(serviceInfo: ServiceInfo) extends PithosCommand
     PithosHeaderKeys.Pithos.X_Account_Policy_Quota,
     PithosHeaderKeys.Pithos.X_Account_Policy_Versioning
   )
-
 
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): GetAccountInfoResultData = {
     val responseHeaders = response.headerMap

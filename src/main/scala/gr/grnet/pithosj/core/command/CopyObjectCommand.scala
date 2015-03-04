@@ -19,7 +19,6 @@ package gr.grnet.pithosj.core.command
 
 import com.twitter.finagle.httpx.{Method, Response, Status}
 import gr.grnet.common.Paths
-import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.PithosHeaderKeys
 
@@ -44,16 +43,13 @@ case class CopyObjectCommand(
    */
   val successStatuses = Set(201).map(Status.fromCode)
 
-  val (actualFromContainer, actualFromPath) = PithosApi.containerAndPath(fromContainer, fromPath)
-  val (actualToContainer  , actualToPath)   = PithosApi.containerAndPath(toContainer  , toPath)
-
   /**
    * The HTTP request headers that are set by this command.
    */
   override def requestHeaders = super.requestHeaders ++
-    Map(PithosHeaderKeys.Pithos.Destination.name → ("/" + Paths.build(actualToContainer, actualToPath)))
+    Map(PithosHeaderKeys.Pithos.Destination.name → ("/" + Paths.build(toContainer, toPath)))
 
-  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, actualFromContainer, actualFromPath)
+  def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, fromContainer, fromPath)
 
   def buildResultData(response: Response, startMillis: Long, stopMillis: Long): Unit = {}
 }

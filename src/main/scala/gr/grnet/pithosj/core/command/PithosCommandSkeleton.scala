@@ -87,9 +87,7 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
 
   protected def newDefaultRequestHeaders: MEnv =
     MEnv.ofOne(PithosHeaderKeys.Pithos.X_Auth_Token, serviceInfo.token)
-
-  protected def newQueryParameters: MEnv = MEnv()
-
+  
   def buildResult(response: Response, startMillis: Long, stopMillis: Long): TResult[T] = {
     val status = response.status
     val isSuccess = successStatuses(status)

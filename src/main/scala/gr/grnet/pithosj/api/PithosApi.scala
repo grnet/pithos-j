@@ -18,6 +18,7 @@
 package gr.grnet.pithosj.api
 
 import java.io.{File, OutputStream}
+import java.net.URLConnection
 
 import com.twitter.io.Buf
 import com.twitter.util.Future
@@ -224,6 +225,11 @@ trait PithosApi {
     path: String
   ): Future[TResult[CheckExistsObjectResultData]]
 
+  def checkExistsObject(
+    serviceInfo: ServiceInfo,
+    objectPath: String
+  ): Future[TResult[CheckExistsObjectResultData]] = checkExistsObject(serviceInfo, "", objectPath)
+
   def checkExistsContainer(
     serviceInfo: ServiceInfo,
     container: String
@@ -255,4 +261,7 @@ object PithosApi {
   final def containerAndPath(container: String, path: String): (String, String) =
     if(container.isEmpty) PithosApi.splitToContainerAndPath(path)
     else (container, path)
+
+  final def guessContentTypeFromPath(path: String): String =
+    URLConnection.guessContentTypeFromName(path)
 }

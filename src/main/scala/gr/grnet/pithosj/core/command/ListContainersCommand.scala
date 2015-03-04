@@ -29,7 +29,9 @@ import typedkey.env.MEnv
 
 import scala.xml.XML
 
-case class ListContainersCommand(serviceInfo: ServiceInfo) extends PithosCommandSkeleton[ListContainersResultData] {
+case class ListContainersCommand(
+  serviceInfo: ServiceInfo
+) extends PithosCommandSkeleton[ListContainersResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */

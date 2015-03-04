@@ -18,7 +18,6 @@
 package gr.grnet.pithosj.core
 
 import java.io.{File, OutputStream}
-import java.net.URLConnection
 
 import com.twitter.io.Buf
 import com.twitter.util.Future
@@ -30,8 +29,6 @@ import typedkey.env.immutable.Env
 
 /**
  * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].
- * Concrete implementations are required to provide an instance of [[gr.grnet.pithosj.core.command.CommandExecutor]]
- * as the value of `executor`.
  */
 trait PithosApiSkeleton extends PithosApi {
   protected def call[T](command: PithosCommand[T]): Future[TResult[T]] = {
@@ -68,8 +65,14 @@ trait PithosApiSkeleton extends PithosApi {
 
   def deleteContainer(serviceInfo: ServiceInfo, container: String) = ???
 
-  def createDirectory(serviceInfo: ServiceInfo, container: String, path: String) =
-    call(CreateDirectoryCommand(serviceInfo, container, PithosApi.normalizeDirectoryPath(path)))
+  def createDirectory(
+    serviceInfo: ServiceInfo,
+    _container: String,
+    _path: String
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    call(CreateDirectoryCommand(serviceInfo, container, path))
+  }
 
   def getObjectMeta(serviceInfo: ServiceInfo, path: String) = ???
 
@@ -77,104 +80,141 @@ trait PithosApiSkeleton extends PithosApi {
 
   def replaceObjectMeta(serviceInfo: ServiceInfo, path: String, meta: Env) = ???
 
-  def getObject(serviceInfo: ServiceInfo, container: String, path: String, version: String, out: OutputStream) =
-    call(GetObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), version, out))
+  def getObject(
+    serviceInfo: ServiceInfo,
+    _container: String,
+    _path: String,
+    version: String,
+    out: OutputStream
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    call(GetObjectCommand(serviceInfo, container, path, version, out))
+  }
 
   def getObject2(
     serviceInfo: ServiceInfo,
-    container: String,
-    path: String,
+    _container: String,
+    _path: String,
     version: String
-  ): Future[TResult[GetObject2ResultData]] =
-    call(GetObject2Command(serviceInfo, container, PithosApi.normalizeObjectPath(path), version))
+  ): Future[TResult[GetObject2ResultData]] = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    call(GetObject2Command(serviceInfo, container, path, version))
+  }
 
-  def getObjectInfo(serviceInfo: ServiceInfo, container: String, path: String) =
-    call(GetObjectInfoCommand(serviceInfo, container, path))
-
-  def putObject(
-      serviceInfo: ServiceInfo,
-      container: String,
-      path: String,
-      file: File,
-      _contentType: String
+  def getObjectInfo(
+    serviceInfo: ServiceInfo,
+    _container: String,
+    _path: String
   ) = {
-    val contentType = _contentType match {
-      case null ⇒
-        URLConnection.guessContentTypeFromName(path)
-
-      case _ ⇒
-        _contentType
-    }
-
-    call(PutObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), BufHelpers.bufOfFile(file), contentType))
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    call(GetObjectInfoCommand(serviceInfo, container, path))
   }
 
   def putObject(
     serviceInfo: ServiceInfo,
-    container: String,
-    path: String,
-    bytes: Array[Byte],
-    contentType: String
-  ) =
-    call(PutObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), Buf.ByteArray.Owned(bytes), contentType))
+    _container: String,
+    _path: String,
+    file: File,
+    _contentType: String
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    val contentType = _contentType match {
+      case null | "" ⇒ PithosApi.guessContentTypeFromPath(path)
+      case _ ⇒ _contentType
+    }
+
+    call(PutObjectCommand(serviceInfo, container, path, BufHelpers.bufOfFile(file), contentType))
+  }
 
   def putObject(
     serviceInfo: ServiceInfo,
-    container: String,
-    path: String,
+    _container: String,
+    _path: String,
+    bytes: Array[Byte],
+    _contentType: String
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    val contentType = _contentType match {
+      case null | "" ⇒ PithosApi.guessContentTypeFromPath(path)
+      case _ ⇒ _contentType
+    }
+    call(PutObjectCommand(serviceInfo, container, path, Buf.ByteArray.Owned(bytes), contentType))
+  }
+
+  def putObject(
+    serviceInfo: ServiceInfo,
+    _container: String,
+    _path: String,
     payload: Buf,
-    contentType: String
-  ) =
-    call(PutObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), payload, contentType))
+    _contentType: String
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    val contentType = _contentType match {
+      case null | "" ⇒ PithosApi.guessContentTypeFromPath(path)
+      case _ ⇒ _contentType
+    }
+    call(PutObjectCommand(serviceInfo, container, path, payload, contentType))
+  }
 
-  def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) =
-    call(DeleteFileCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path)))
+  def deleteFile(
+    serviceInfo: ServiceInfo,
+    _container: String,
+    _path: String
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    call(DeleteFileCommand(serviceInfo, container, path))
+  }
 
-  def deleteDirectory(serviceInfo: ServiceInfo, container: String, path: String) =
-    call(DeleteDirectoryCommand(serviceInfo, container, PithosApi.normalizeDirectoryPath(path)))
+  def deleteDirectory(
+    serviceInfo: ServiceInfo,
+    _container: String,
+    _path: String
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    call(DeleteDirectoryCommand(serviceInfo, container, path))
+  }
 
   def copyObject(
-      serviceInfo: ServiceInfo,
-      fromContainer: String,
-      fromPath: String,
-      toContainer: String,
-      toPath: String
-  ) =
+    serviceInfo: ServiceInfo,
+    _fromContainer: String,
+    _fromPath: String,
+    _toContainer: String,
+    _toPath: String
+  ) = {
+    val (fromContainer, fromPath) = PithosApi.containerAndPath(_fromContainer, PithosApi.normalizeDirectoryPath(_fromPath))
+    val (toContainer,     toPath) = PithosApi.containerAndPath(_toContainer,   PithosApi.normalizeDirectoryPath(_toPath))
+
     call(
-      CopyObjectCommand(
-        serviceInfo,
-        fromContainer,
-        PithosApi.normalizeObjectPath(fromPath),
-        toContainer,
-        PithosApi.normalizeObjectPath(toPath)
-      )
+      CopyObjectCommand(serviceInfo, fromContainer, fromPath, toContainer, toPath)
     )
+  }
 
   def moveObject(
-      serviceInfo: ServiceInfo,
-      fromContainer: String,
-      fromObj: String,
-      toContainer: String,
-      toObj: String
+    serviceInfo: ServiceInfo,
+    fromContainer: String,
+    fromObj: String,
+    toContainer: String,
+    toObj: String
   ) = ???
 
   def listObjectsInContainer(serviceInfo: ServiceInfo, container: String) =
     listObjectsInPath(serviceInfo, container, "")
 
   def listObjectsInPath(
-      serviceInfo: ServiceInfo,
-      container: String,
-      path: String
+    serviceInfo: ServiceInfo,
+    _container: String,
+    _path: String
   ) = {
-    require(path ne null, "path ne null")
-
-    call(ListObjectsInPathCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path)))
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
+    call(ListObjectsInPathCommand(serviceInfo, container, path))
   }
 
   def checkExistsObject(
     serviceInfo: ServiceInfo,
-    container: String,
-    path: String
-  ) =
+    _container: String,
+    _path: String
+  ) = {
+    val (container, path) = PithosApi.containerAndPath(_container, PithosApi.normalizeDirectoryPath(_path))
     call(CheckExistsObjectCommand(serviceInfo, container, path))
+  }
 }

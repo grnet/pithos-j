@@ -22,13 +22,12 @@ import com.twitter.finagle.httpx.{Response, Status}
 import gr.grnet.common.date.DateParsers
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosResultKeys}
-import typedkey.env.MEnv
 
 
 case class GetObjectInfoCommand(
-    serviceInfo: ServiceInfo,
-    container: String,
-    path: String
+  serviceInfo: ServiceInfo,
+  container: String,
+  path: String
 ) extends PithosCommandSkeleton[GetObjectInfoResultData] {
   /**
    * The HTTP method by which the command is implemented.
