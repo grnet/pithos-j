@@ -17,22 +17,18 @@
 
 package gr.grnet.pithosj.core.command
 
-import java.io.OutputStream
-
 import com.twitter.finagle.httpx.Method.Get
 import com.twitter.finagle.httpx.{Response, Status}
-import com.twitter.io.{Buf, BufInputStream, StreamIO}
 import gr.grnet.common.date.DateParsers
 import gr.grnet.pithosj.core.ServiceInfo
 import gr.grnet.pithosj.core.keymap.{PithosHeaderKeys, PithosRequestParamKeys, PithosResultKeys}
 
-case class GetObjectCommand(
+case class GetObject2Command(
   serviceInfo: ServiceInfo,
   container: String,
   path: String,
-  version: String,
-  out: OutputStream
-) extends PithosCommandSkeleton[GetObjectResultData] {
+  version: String
+) extends PithosCommandSkeleton[GetObject2ResultData] {
   /**
    * The HTTP method by which the command is implemented.
    */
@@ -49,12 +45,6 @@ case class GetObjectCommand(
       case _ ⇒
         newQueryParameters.update(PithosRequestParamKeys.Version, version)
     }).toImmutable
-
-  override def onResponseOpt: Option[(Buf) ⇒ Unit] =
-    Some( buf ⇒ {
-      val bis = new BufInputStream(buf)
-      StreamIO.copy(bis, out)
-    })
 
   /**
    * A set of all the HTTP status codes that are considered a success for this command.
@@ -93,10 +83,10 @@ case class GetObjectCommand(
     PithosResultKeys.Commands.Path
   )
 
-  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): GetObjectResultData = {
+  def buildResultData(response: Response, startMillis: Long, stopMillis: Long): GetObject2ResultData = {
     val responseHeaders = response.headerMap
-    GetObjectResultData(
-      stream = out,
+    GetObject2ResultData(
+      objBuf = response.content,
       container = container,
       path = path,
       ETag = responseHeaders.get(PithosHeaderKeys.Standard.ETag.name),

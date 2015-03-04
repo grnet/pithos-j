@@ -20,12 +20,11 @@ package gr.grnet.pithosj.api
 import java.io.{File, OutputStream}
 
 import com.twitter.io.Buf
+import com.twitter.util.Future
 import gr.grnet.common.http.TResult
 import gr.grnet.pithosj.core.ServiceInfo
-import gr.grnet.pithosj.core.command.{CheckExistsObjectResultData, GetAccountInfoResultData, GetObjectInfoResultData, GetObjectResultData, ListContainersResultData, ListObjectsInPathResultData}
+import gr.grnet.pithosj.core.command._
 import typedkey.env.immutable.Env
-
-import com.twitter.util.Future
 
 import scala.annotation.tailrec
 
@@ -55,6 +54,11 @@ trait PithosApi {
       path: String
   ): Future[TResult[Unit]]
 
+  def createDirectory(
+    serviceInfo: ServiceInfo,
+    directoryPath: String
+  ): Future[TResult[Unit]] = createDirectory(serviceInfo, "", directoryPath)
+
   def getObjectMeta(serviceInfo: ServiceInfo, path: String): Future[TResult[Unit]]
 
   def deleteObjectMeta(
@@ -76,6 +80,26 @@ trait PithosApi {
       version: String,
       out: OutputStream
   ): Future[TResult[GetObjectResultData]]
+
+  def getObject(
+    serviceInfo: ServiceInfo,
+    objectPath: String,
+    version: String,
+    out: OutputStream
+  ): Future[TResult[GetObjectResultData]] = getObject(serviceInfo, "", objectPath, version, out)
+
+  def getObject2(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String,
+    version: String
+  ): Future[TResult[GetObject2ResultData]]
+
+  def getObject2(
+    serviceInfo: ServiceInfo,
+    objectPath: String,
+    version: String
+  ): Future[TResult[GetObject2ResultData]] = getObject2(serviceInfo, "", objectPath, version)
 
   def getObjectInfo(
       serviceInfo: ServiceInfo,
@@ -112,21 +136,21 @@ trait PithosApi {
     objectPath: String,
     payload: Buf,
     contentType: String
-  ): Future[TResult[Unit]] = putObject(serviceInfo, "", PithosApi.fixObjectPath(objectPath), payload, contentType)
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
 
   def putObject(
     serviceInfo: ServiceInfo,
     objectPath: String,
     payload: File,
     contentType: String
-  ): Future[TResult[Unit]] = putObject(serviceInfo, "", PithosApi.fixObjectPath(objectPath), payload, contentType)
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
 
   def putObject(
     serviceInfo: ServiceInfo,
     objectPath: String,
     payload: Array[Byte],
     contentType: String
-  ): Future[TResult[Unit]] = putObject(serviceInfo, "", PithosApi.fixObjectPath(objectPath), payload, contentType)
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
 
   /**
    * Delete a file.
@@ -137,6 +161,11 @@ trait PithosApi {
       path: String
   ): Future[TResult[Unit]]
 
+  def deleteFile(
+    serviceInfo: ServiceInfo,
+    filePath: String
+  ): Future[TResult[Unit]] = deleteFile(serviceInfo, "", filePath)
+
   /**
    * Delete a directory.
    */
@@ -145,6 +174,11 @@ trait PithosApi {
     container: String,
     path: String
   ): Future[TResult[Unit]]
+
+  def deleteDirectory(
+    serviceInfo: ServiceInfo,
+    directoryPath: String
+  ): Future[TResult[Unit]] = deleteDirectory(serviceInfo, "", directoryPath)
 
   def copyObject(
       serviceInfo: ServiceInfo,
@@ -187,7 +221,10 @@ trait PithosApi {
 
 object PithosApi {
   @tailrec
-  final def fixObjectPath(p: String): String =
-    if(p.startsWith("/")) fixObjectPath(p.substring(1)) else p
+  final def normalizeObjectPath(p: String): String =
+    if(p.startsWith("/")) normalizeObjectPath(p.substring(1)) else p
 
+  @tailrec
+  final def normalizeDirectoryPath(p: String): String =
+    if(p.startsWith("/")) normalizeDirectoryPath(p.substring(1)) else p
 }

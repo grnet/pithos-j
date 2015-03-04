@@ -69,7 +69,7 @@ trait PithosApiSkeleton extends PithosApi {
   def deleteContainer(serviceInfo: ServiceInfo, container: String) = ???
 
   def createDirectory(serviceInfo: ServiceInfo, container: String, path: String) =
-    call(CreateDirectoryCommand(serviceInfo, container, path))
+    call(CreateDirectoryCommand(serviceInfo, container, PithosApi.normalizeDirectoryPath(path)))
 
   def getObjectMeta(serviceInfo: ServiceInfo, path: String) = ???
 
@@ -78,7 +78,15 @@ trait PithosApiSkeleton extends PithosApi {
   def replaceObjectMeta(serviceInfo: ServiceInfo, path: String, meta: Env) = ???
 
   def getObject(serviceInfo: ServiceInfo, container: String, path: String, version: String, out: OutputStream) =
-    call(GetObjectCommand(serviceInfo, container, path, version, out))
+    call(GetObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), version, out))
+
+  def getObject2(
+    serviceInfo: ServiceInfo,
+    container: String,
+    path: String,
+    version: String
+  ): Future[TResult[GetObject2ResultData]] =
+    call(GetObject2Command(serviceInfo, container, PithosApi.normalizeObjectPath(path), version))
 
   def getObjectInfo(serviceInfo: ServiceInfo, container: String, path: String) =
     call(GetObjectInfoCommand(serviceInfo, container, path))
@@ -98,7 +106,7 @@ trait PithosApiSkeleton extends PithosApi {
         _contentType
     }
 
-    call(PutObjectCommand(serviceInfo, container, PithosApi.fixObjectPath(path), BufHelpers.bufOfFile(file), contentType))
+    call(PutObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), BufHelpers.bufOfFile(file), contentType))
   }
 
   def putObject(
@@ -108,7 +116,7 @@ trait PithosApiSkeleton extends PithosApi {
     bytes: Array[Byte],
     contentType: String
   ) =
-    call(PutObjectCommand(serviceInfo, container, PithosApi.fixObjectPath(path), Buf.ByteArray.Owned(bytes), contentType))
+    call(PutObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), Buf.ByteArray.Owned(bytes), contentType))
 
   def putObject(
     serviceInfo: ServiceInfo,
@@ -117,13 +125,13 @@ trait PithosApiSkeleton extends PithosApi {
     payload: Buf,
     contentType: String
   ) =
-    call(PutObjectCommand(serviceInfo, container, PithosApi.fixObjectPath(path), payload, contentType))
+    call(PutObjectCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path), payload, contentType))
 
   def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) =
-    call(DeleteFileCommand(serviceInfo, container, path))
+    call(DeleteFileCommand(serviceInfo, container, PithosApi.normalizeObjectPath(path)))
 
   def deleteDirectory(serviceInfo: ServiceInfo, container: String, path: String) =
-    call(DeleteDirectoryCommand(serviceInfo, container, path))
+    call(DeleteDirectoryCommand(serviceInfo, container, PithosApi.normalizeDirectoryPath(path)))
 
   def copyObject(
       serviceInfo: ServiceInfo,
