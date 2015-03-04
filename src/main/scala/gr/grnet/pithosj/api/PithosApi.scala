@@ -27,6 +27,8 @@ import typedkey.env.immutable.Env
 
 import com.twitter.util.Future
 
+import scala.annotation.tailrec
+
 /**
  * Provides the Pithos API.
  */
@@ -110,21 +112,21 @@ trait PithosApi {
     objectPath: String,
     payload: Buf,
     contentType: String
-  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", PithosApi.fixObjectPath(objectPath), payload, contentType)
 
   def putObject(
     serviceInfo: ServiceInfo,
     objectPath: String,
     payload: File,
     contentType: String
-  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", PithosApi.fixObjectPath(objectPath), payload, contentType)
 
   def putObject(
     serviceInfo: ServiceInfo,
     objectPath: String,
     payload: Array[Byte],
     contentType: String
-  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", PithosApi.fixObjectPath(objectPath), payload, contentType)
 
   /**
    * Delete a file.
@@ -181,4 +183,11 @@ trait PithosApi {
     serviceInfo: ServiceInfo,
     container: String
   ): Future[TResult[CheckExistsObjectResultData]] = checkExistsObject(serviceInfo, container, "")
+}
+
+object PithosApi {
+  @tailrec
+  final def fixObjectPath(p: String): String =
+    if(p.startsWith("/")) fixObjectPath(p.substring(1)) else p
+
 }

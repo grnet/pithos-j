@@ -98,7 +98,7 @@ trait PithosApiSkeleton extends PithosApi {
         _contentType
     }
 
-    call(PutObjectCommand(serviceInfo, container, path, BufHelpers.bufOfFile(file), contentType))
+    call(PutObjectCommand(serviceInfo, container, PithosApi.fixObjectPath(path), BufHelpers.bufOfFile(file), contentType))
   }
 
   def putObject(
@@ -108,7 +108,7 @@ trait PithosApiSkeleton extends PithosApi {
     bytes: Array[Byte],
     contentType: String
   ) =
-    call(PutObjectCommand(serviceInfo, container, path, Buf.ByteArray.Owned(bytes), contentType))
+    call(PutObjectCommand(serviceInfo, container, PithosApi.fixObjectPath(path), Buf.ByteArray.Owned(bytes), contentType))
 
   def putObject(
     serviceInfo: ServiceInfo,
@@ -117,7 +117,7 @@ trait PithosApiSkeleton extends PithosApi {
     payload: Buf,
     contentType: String
   ) =
-    call(PutObjectCommand(serviceInfo, container, path, payload, contentType))
+    call(PutObjectCommand(serviceInfo, container, PithosApi.fixObjectPath(path), payload, contentType))
 
   def deleteFile(serviceInfo: ServiceInfo, container: String, path: String) =
     call(DeleteFileCommand(serviceInfo, container, path))
