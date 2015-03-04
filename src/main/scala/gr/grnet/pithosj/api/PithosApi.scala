@@ -105,6 +105,27 @@ trait PithosApi {
     contentType: String
   ): Future[TResult[Unit]]
 
+  def putObject(
+    serviceInfo: ServiceInfo,
+    objectPath: String,
+    payload: Buf,
+    contentType: String
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
+
+  def putObject(
+    serviceInfo: ServiceInfo,
+    objectPath: String,
+    payload: File,
+    contentType: String
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
+
+  def putObject(
+    serviceInfo: ServiceInfo,
+    objectPath: String,
+    payload: Array[Byte],
+    contentType: String
+  ): Future[TResult[Unit]] = putObject(serviceInfo, "", objectPath, payload, contentType)
+
   /**
    * Delete a file.
    */
