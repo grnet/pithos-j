@@ -235,9 +235,14 @@ object PithosApi {
 
   final def splitToContainerAndPath(p: String): (String, String) = {
     val i = p.indexOf('/')
-    val container = p.substring(0, i)
-    val path = p.substring(i + 1)
+    if(i == -1) {
+      (p, "")
+    }
+    else {
+      val container = p.substring(0, i)
+      val path = p.substring(i + 1)
 
-    (container, path)
+      (container, path)
+    }
   }
 }
