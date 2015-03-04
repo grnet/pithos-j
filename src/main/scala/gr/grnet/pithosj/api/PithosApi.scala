@@ -188,6 +188,12 @@ trait PithosApi {
       toPath: String
   ): Future[TResult[Unit]]
 
+  def copyObject(
+    serviceInfo: ServiceInfo,
+    srcObjectPath: String,
+    dstObjectPath: String
+  ): Future[TResult[Unit]] = copyObject(serviceInfo, "", srcObjectPath, "", dstObjectPath)
+
   def moveObject(
       serviceInfo: ServiceInfo,
       fromContainer: String,
@@ -245,4 +251,8 @@ object PithosApi {
       (container, path)
     }
   }
+
+  final def containerAndPath(container: String, path: String): (String, String) =
+    if(container.isEmpty) PithosApi.splitToContainerAndPath(path)
+    else (container, path)
 }

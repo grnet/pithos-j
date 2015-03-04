@@ -43,10 +43,8 @@ case class ListObjectsInPathCommand(
    */
   def successStatuses = Set(200).map(Status.fromCode)
 
-  val (actualContainer, actualPath) = {
-    if(container.isEmpty) PithosApi.splitToContainerAndPath(path)
-    else (container, path)
-  }
+  val (actualContainer, actualPath) = PithosApi.containerAndPath(container, path)
+
   /**
    * Computes that URL path parts that will follow the Pithos+ server URL
    * in the HTTP call.

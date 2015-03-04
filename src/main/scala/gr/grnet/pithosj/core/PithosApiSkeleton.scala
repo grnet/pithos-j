@@ -137,19 +137,18 @@ trait PithosApiSkeleton extends PithosApi {
       serviceInfo: ServiceInfo,
       fromContainer: String,
       fromPath: String,
-      _toContainer: String,
-      _toPath: String
-  ) = {
-    val toPath = Helpers.ifNull(_toPath, fromPath)
-    val toContainer = Helpers.ifNull(_toContainer, fromContainer)
-
-    fromContainer.charAt(0)
-    fromPath.charAt(0)
-    toContainer.charAt(0)
-    toPath.charAt(0)
-
-    call(CopyObjectCommand(serviceInfo, fromContainer, fromPath, toContainer, toPath))
-  }
+      toContainer: String,
+      toPath: String
+  ) =
+    call(
+      CopyObjectCommand(
+        serviceInfo,
+        fromContainer,
+        PithosApi.normalizeObjectPath(fromPath),
+        toContainer,
+        PithosApi.normalizeObjectPath(toPath)
+      )
+    )
 
   def moveObject(
       serviceInfo: ServiceInfo,
