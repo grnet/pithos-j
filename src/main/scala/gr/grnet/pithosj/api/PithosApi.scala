@@ -239,11 +239,11 @@ trait PithosApi {
 object PithosApi {
   @tailrec
   final def normalizeObjectPath(p: String): String =
-    if(p.startsWith("/")) normalizeObjectPath(p.substring(1)) else p
+    if(p.startsWith("/"))    normalizeObjectPath(p.substring(1))
+    else if(p.endsWith("/")) normalizeObjectPath(p.substring(0, p.length - 1))
+    else p
 
-  @tailrec
-  final def normalizeDirectoryPath(p: String): String =
-    if(p.startsWith("/")) normalizeDirectoryPath(p.substring(1)) else p
+  final def normalizeDirectoryPath(p: String): String = normalizeObjectPath(p)
 
   final def splitToContainerAndPath(p: String): (String, String) = {
     val i = p.indexOf('/')
