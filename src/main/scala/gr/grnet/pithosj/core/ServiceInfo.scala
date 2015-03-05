@@ -37,7 +37,7 @@ case class ServiceInfo(
     val host = serverURL.getHost
     val port =
       serverURL.getPort match {
-        case -1 ⇒ if(isHttps) 443 else 80
+        case -1 ⇒ serverURL.getDefaultPort
         case p ⇒ p
       }
 

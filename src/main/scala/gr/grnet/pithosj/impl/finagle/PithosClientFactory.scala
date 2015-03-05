@@ -17,7 +17,8 @@
 
 package gr.grnet.pithosj.impl.finagle
 
-import com.twitter.finagle.Httpx
+import java.net.URL
+
 import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.ServiceInfo
 
@@ -25,16 +26,20 @@ import gr.grnet.pithosj.core.ServiceInfo
  *
  */
 object PithosClientFactory {
+  def newClient(host: String, port: Int, useTls: Boolean): PithosApi =
+    new PithosClient(FinagleClientFactory.newClient(host, port, useTls))
+
+  def newClient(serverURL: URL): PithosApi =
+    new PithosClient(FinagleClientFactory.newClient(serverURL))
+
+  def newClient(serverURL: String): PithosApi =
+    new PithosClient(FinagleClientFactory.newClient(serverURL))
+
   def newClient(serviceInfo: ServiceInfo): PithosApi = {
     val host = serviceInfo.serverHost
     val port = serviceInfo.serverPort
-    val isHttps = serviceInfo.isHttps
+    val useTls = serviceInfo.isHttps
 
-    val client = {
-      val client = if(isHttps) Httpx.client.withTls(host) else Httpx.client
-      client.newClient(s"$host:$port")
-    }
-    val service = client.toService
-    new PithosClient(service)
+    newClient(host, port, useTls)
   }
 }
