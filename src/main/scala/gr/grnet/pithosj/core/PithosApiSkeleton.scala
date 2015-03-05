@@ -20,7 +20,7 @@ package gr.grnet.pithosj.core
 import java.io.{File, OutputStream}
 
 import com.twitter.io.Buf
-import com.twitter.util.Future
+import com.twitter.util.{Throw, Return, Future}
 import gr.grnet.common.http.TResult
 import gr.grnet.common.io.BufHelpers
 import gr.grnet.pithosj.api.PithosApi

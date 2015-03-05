@@ -25,12 +25,7 @@ case class CheckExistsObjectResultData(
   contentType: Option[String],
   contentTypeIsDirectory: (String) ⇒ Boolean
 ) {
-  def isDirectory =
-    exists && !isContainer &&
-      (contentType match {
-        case Some(ct) if contentTypeIsDirectory(ct) ⇒
-          true
-        case _ ⇒
-          false
-      })
+  def isDirectory = exists && !isContainer && contentType.exists(contentTypeIsDirectory)
+
+  def isContainerOrDirectory = isContainer || exists && contentType.exists(contentTypeIsDirectory)
 }
