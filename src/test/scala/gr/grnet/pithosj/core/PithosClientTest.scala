@@ -31,17 +31,16 @@ import org.junit.Test
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
 class PithosClientTest {
-  val SERVER_URL = System.getProperty("SERVER_URL") // https://pithos.okeanos.grnet.gr
-  val ROOT_PATH  = System.getProperty("ROOT_PATH")  // /object-store/v1
-  val UUID = System.getProperty("UUID")
-  val TOKEN = System.getProperty("TOKEN")
-  val info = new ServiceInfo(new URL(SERVER_URL), ROOT_PATH, UUID, TOKEN)
-  val pithos = PithosClientFactory.newClient(info)
+  lazy val SERVER_URL = System.getProperty("SERVER_URL") // https://pithos.okeanos.grnet.gr
+  lazy val ROOT_PATH  = System.getProperty("ROOT_PATH")  // /object-store/v1
+  lazy val UUID = System.getProperty("UUID")
+  lazy val TOKEN = System.getProperty("TOKEN")
+  lazy val info = new ServiceInfo(new URL(SERVER_URL), ROOT_PATH, UUID, TOKEN)
+  lazy val pithos = PithosClientFactory.newClient(info)
 
   def assertResult[T](result: TResult[T]): Unit = {
     assert(result.isSuccess)
   }
-
 
   def assertFutureX[T](future: Future[TResult[T]])(f: (TResult[T]) ⇒ Unit = (_:TResult[T]) ⇒ {}) = {
     val f2 =
@@ -60,7 +59,6 @@ class PithosClientTest {
   }
 
   def assertFuture[T](future: Future[TResult[T]]): Unit = assertFutureX(future)()
-
 
 //  @Test
 //  def getAccountInfo(): Unit = {
