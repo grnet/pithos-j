@@ -58,7 +58,7 @@ trait PithosCommandSkeleton[T] extends PithosCommand[T] {
   /**
    * The HTTP request headers that are set by this command.
    */
-  def requestHeaders = Map(PithosHeader.X_Auth_Token.name() → serviceInfo.token)
+  def requestHeaders = Map(PithosHeader.X_Auth_Token.headerName() → serviceInfo.token)
 
   /**
    * Computes the URL that will be used in the HTTP call.
