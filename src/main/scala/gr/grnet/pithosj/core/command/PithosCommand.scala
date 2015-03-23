@@ -28,6 +28,8 @@ import gr.grnet.pithosj.core.ServiceInfo
  * to build up an HTTP request.
  */
 trait PithosCommand[T] extends Command[T] {
+  def commandName: String = getClass.getSimpleName.dropRight("Command".length)
+
   /**
    * The application domain of this command.
    */

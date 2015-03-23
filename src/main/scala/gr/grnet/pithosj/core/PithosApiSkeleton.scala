@@ -20,7 +20,8 @@ package gr.grnet.pithosj.core
 import java.io.{File, OutputStream}
 
 import com.twitter.io.Buf
-import com.twitter.util.{Throw, Return, Future}
+import com.twitter.logging.Logger
+import com.twitter.util.Future
 import gr.grnet.common.http.TResult
 import gr.grnet.common.io.BufHelpers
 import gr.grnet.pithosj.api.PithosApi
@@ -31,6 +32,8 @@ import typedkey.env.immutable.Env
  * Skeleton implementation of [[gr.grnet.pithosj.api.PithosApi]].
  */
 trait PithosApiSkeleton extends PithosApi {
+  val log = Logger(getClass)
+
   protected def call[T](command: PithosCommand[T]): Future[TResult[T]] = {
     try {
       command.validate match {
