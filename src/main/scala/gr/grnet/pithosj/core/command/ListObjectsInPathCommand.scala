@@ -48,10 +48,12 @@ case class ListObjectsInPathCommand(
    */
   def serverRootPathElements = Seq(serviceInfo.rootPath, serviceInfo.uuid, container)
 
+  val pathQueryParam = if(path.isEmpty) "/" else path
+
   override def queryParameters =
     Map(
       PithosRequestParamKeys.Format.name → ResponseFormats.XML.responseFormat(),
-      PithosRequestParamKeys.Path.name   → path
+      PithosRequestParamKeys.Path.name   → pathQueryParam
     )
 
   override val responseHeaderKeys = Seq(
