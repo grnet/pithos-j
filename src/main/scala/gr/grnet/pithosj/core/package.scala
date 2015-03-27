@@ -22,11 +22,6 @@ import scala.concurrent.duration.Duration.Inf
 import scala.concurrent.{Await, Future}
 
 package object core {
-  // Anti-pattern. I use this in tests
-  implicit class BadFuture[T](val future: Future[T]) extends AnyVal {
-    def get(): T = Await.result(future, Inf)
-  }
-
   @inline
   final def asScala[K, V](jmap: java.util.Map[K, V]): mutable.Map[K, V] = {
     jmap match {
