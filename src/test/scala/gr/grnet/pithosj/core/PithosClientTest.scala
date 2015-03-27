@@ -21,8 +21,8 @@ import java.io.{File, FileOutputStream}
 import java.net.URL
 
 import com.twitter.io._
-import com.twitter.util.{Await, Future, Return, Throw}
-import gr.grnet.common.http.TResult
+import com.twitter.util._
+import gr.grnet.pithosj.TestBase
 import gr.grnet.pithosj.impl.finagle.PithosClientFactory
 import org.junit.Test
 
@@ -30,7 +30,7 @@ import org.junit.Test
  *
  * @author Christos KK Loverdos <loverdos@gmail.com>
  */
-class PithosClientTest {
+class PithosClientTest extends TestBase {
   lazy val SERVER_URL = System.getProperty("SERVER_URL") // https://pithos.okeanos.grnet.gr
   lazy val ROOT_PATH  = System.getProperty("ROOT_PATH")  // /object-store/v1
   lazy val UUID = System.getProperty("UUID")
@@ -38,27 +38,10 @@ class PithosClientTest {
   lazy val info = new ServiceInfo(new URL(SERVER_URL), ROOT_PATH, UUID, TOKEN)
   lazy val pithos = PithosClientFactory.newClient(info)
 
-  def assertResult[T](result: TResult[T]): Unit = {
-    assert(result.isSuccess)
-  }
-
-  def assertFutureX[T](future: Future[TResult[T]])(f: (TResult[T]) ⇒ Unit = (_:TResult[T]) ⇒ {}) = {
-    val f2 =
-      future.transform {
-        case Throw(t) ⇒
-          t.printStackTrace(System.err)
-          Future.exception(t)
-
-        case Return(result) ⇒
-          f(result)
-          println(result)
-          println(result.completionMillis)
-          Future.value(result)
-      }
-    Await.ready(f2)
-  }
-
-  def assertFuture[T](future: Future[TResult[T]]): Unit = assertFutureX(future)()
+//  @Test def dummy(): Unit = {
+//    // This is to avoid any exceptions like:
+//    // - java.lang.Exception: No runnable methods
+//  }
 
 //  @Test
 //  def getAccountInfo(): Unit = {
@@ -69,8 +52,8 @@ class PithosClientTest {
 
 //  @Test
 //  def listContainers(): Unit = {
-//    val future = pithos.listContainers(info)
-//    assertFuture(future)
+//    val f = pithos.listContainers(info)
+//    assertFuture(f)
 //  }
 
 //  @Test
@@ -90,7 +73,7 @@ class PithosClientTest {
 //  @Test
 //  def getObject2(): Unit = {
 //    val future = pithos.getObject2(info, "pithos/wadler87.pdf", "332033")
-//    assertFutureX(future) { resultData ⇒
+//    assertResultX(future) { resultData ⇒
 //      for {
 //        data ← resultData.successData
 //      } {
@@ -136,7 +119,7 @@ class PithosClientTest {
 //  @Test
 //  def checkExistsFile2(): Unit = {
 //    val future = pithos.checkExistsObject(info, "pithos/wadler87.pdf")
-//    assertFutureX(future) { resultData ⇒
+//    assertResultX(future) { resultData ⇒
 //      for {
 //        data ← resultData.successData
 //      } {
@@ -149,7 +132,7 @@ class PithosClientTest {
 //  @Test
 //  def checkExistsFile3(): Unit = {
 //    val future = pithos.checkExistsObject(info, "pithos/")
-//    assertFutureX(future) { resultData ⇒
+//    assertResultX(future) { resultData ⇒
 //      for {
 //        data ← resultData.successData
 //      } {
@@ -181,7 +164,7 @@ class PithosClientTest {
 //  @Test
 //  def listObjectsInPath(): Unit = {
 //    val future = pithos.listObjectsInPath(info, "pithos", "Papers")
-//    assertFutureX(future) { resultData ⇒
+//    assertResultX(future) { resultData ⇒
 //      for {
 //        data ← resultData.successData
 //        obj ← data.objects
@@ -194,7 +177,7 @@ class PithosClientTest {
 //  @Test
 //  def listObjectsInPath2(): Unit = {
 //    val future = pithos.listObjectsInPath(info, "pithos/Papers")
-//    assertFutureX(future) { resultData ⇒
+//    assertResultX(future) { resultData ⇒
 //      for {
 //        data ← resultData.successData
 //        obj ← data.objects
@@ -207,7 +190,7 @@ class PithosClientTest {
 //  @Test
 //  def listObjectsInPath3(): Unit = {
 //    val future = pithos.listObjectsInPath(info, "pithos")
-//    assertFutureX(future) { resultData ⇒
+//    assertResultX(future) { resultData ⇒
 //      for {
 //        data ← resultData.successData
 //        obj ← data.objects
@@ -220,7 +203,7 @@ class PithosClientTest {
 //  @Test
 //  def listObjectsInContainer(): Unit = {
 //    val future = pithos.listObjectsInContainer(info, "pithos")
-//    assertFutureX(future) { resultData ⇒
+//    assertResultX(future) { resultData ⇒
 //      for {
 //        data ← resultData.successData
 //        obj ← data.objects
@@ -268,5 +251,31 @@ class PithosClientTest {
 //  def copyObject2(): Unit = {
 //    val future = pithos.copyObject(info, "pithos/wadler87.pdf", "pithos/wadler888.pdf")
 //    assertFuture(future)
+//  }
+
+//  @Test
+//  def combinedCallWithFor(): Unit = {
+//    val f =
+//      for {
+//        a ← pithos.checkExistsObject(info, "pithos", "/wadler87.pdf")
+//        b ← pithos.listObjectsInPath(info, "pithos")
+//      } yield (a, b)
+//
+//    assertResult(f)
+//  }
+
+//  @Test
+//  def combinedCallWithTransform(): Unit = {
+//    val f1 = pithos.checkExistsObject(info, "pithos", "/wadler87.pdf")
+//    val f3 = f1.transform {
+//      case Return(r1) ⇒
+//        val f2 = pithos.listObjectsInPath(info, "pithos")
+//        f2
+//
+//      case Throw(t1) ⇒
+//        Future.rawException(t1)
+//    }
+//
+//    Await.result(f3).successData
 //  }
 }
