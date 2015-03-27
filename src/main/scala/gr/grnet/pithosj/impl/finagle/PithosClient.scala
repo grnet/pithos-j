@@ -18,10 +18,11 @@
 package gr.grnet.pithosj.impl.finagle
 
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicLong
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.httpx.{Request, RequestBuilder, Response}
-import com.twitter.util.{Future, Promise, Return, Throw}
+import com.twitter.util._
 import gr.grnet.common.http.TResult
 import gr.grnet.pithosj.core.PithosApiSkeleton
 import gr.grnet.pithosj.core.command.PithosCommand
@@ -30,9 +31,11 @@ import gr.grnet.pithosj.core.http.PithosHeader
 /**
  *
  */
-class PithosClient(svc: Service[Request, Response]) extends PithosApiSkeleton {
+class PithosClient(service: Service[Request, Response]) extends PithosApiSkeleton {
+  private[this] val successCallCounter = new AtomicLong()
+  private[this] val failureCallCounter = new AtomicLong()
+
   protected def callImpl[T](command: PithosCommand[T]): Future[TResult[T]] = {
-    val promise = Promise[TResult[T]]()
     log.ifDebug({
       val what = command.commandName
       val method = command.httpMethod.toString.toUpperCase(Locale.ENGLISH)
@@ -40,6 +43,7 @@ class PithosClient(svc: Service[Request, Response]) extends PithosApiSkeleton {
       val headers = command.requestHeaders.updated(PithosHeader.X_Auth_Token.headerName(), "***").mkString("{", ", ", "}")
       s"[$what] ==> $method $url, using headers: $headers"
     })
+
     val request =
       RequestBuilder().
         url(command.callURL).
@@ -47,10 +51,12 @@ class PithosClient(svc: Service[Request, Response]) extends PithosApiSkeleton {
         build(command.httpMethod, command.requestBodyOpt)
 
     val startMillis = System.currentTimeMillis()
-    val responseF = svc.apply(request)
-    responseF.respond {
+
+    val responseF = service(request)
+    responseF.transform[TResult[T]] {
       case Return(response) ⇒
         val stopMillis = System.currentTimeMillis()
+        successCallCounter.incrementAndGet()
 
         log.ifDebug({
           val what = command.commandName
@@ -66,18 +72,22 @@ class PithosClient(svc: Service[Request, Response]) extends PithosApiSkeleton {
         }
 
         val result = command.buildResult(response, startMillis, stopMillis)
-
-        promise.setValue(result)
+        Future.value(result)
 
       case Throw(t) ⇒
+        failureCallCounter.incrementAndGet()
+
         log.ifDebug({
           val what = command.commandName
           val error = t.toString
           s"[$what] <== ERROR $error"
         })
-        promise.setException(t)
-    }
 
-    promise
+        Future.rawException(t)
+    }
   }
+
+  def successCallCount = this.successCallCounter.get()
+  def failureCallCount = this.failureCallCounter.get()
+  def callCount = successCallCount + failureCallCount
 }

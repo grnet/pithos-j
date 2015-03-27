@@ -19,23 +19,22 @@ package gr.grnet.pithosj.impl.finagle
 
 import java.net.URL
 
-import gr.grnet.pithosj.api.PithosApi
 import gr.grnet.pithosj.core.ServiceInfo
 
 /**
  *
  */
 object PithosClientFactory {
-  def newClient(host: String, port: Int, useTls: Boolean): PithosApi =
-    new PithosClient(FinagleClientFactory.newClient(host, port, useTls))
+  def newClient(host: String, port: Int, useTls: Boolean): PithosClient =
+    new PithosClient(FinagleClientFactory.newClientService(host, port, useTls))
 
-  def newClient(serverURL: URL): PithosApi =
-    new PithosClient(FinagleClientFactory.newClient(serverURL))
+  def newClient(serverURL: URL): PithosClient =
+    new PithosClient(FinagleClientFactory.newClientService(serverURL))
 
-  def newClient(serverURL: String): PithosApi =
-    new PithosClient(FinagleClientFactory.newClient(serverURL))
+  def newClient(serverURL: String): PithosClient =
+    new PithosClient(FinagleClientFactory.newClientService(serverURL))
 
-  def newClient(serviceInfo: ServiceInfo): PithosApi = {
+  def newClient(serviceInfo: ServiceInfo): PithosClient = {
     val host = serviceInfo.serverHost
     val port = serviceInfo.serverPort
     val useTls = serviceInfo.isHttps

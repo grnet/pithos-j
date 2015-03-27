@@ -19,8 +19,9 @@ package gr.grnet.pithosj.impl.finagle
 
 import java.net.URL
 
-import com.twitter.finagle.httpx.{Request, Response}
-import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.Service
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.httpx.{Http, Request, Response}
 
 /**
  *
@@ -34,19 +35,25 @@ object FinagleClientFactory {
     (host, port, useTls)
   }
 
-  def newClient(host: String, port: Int, useTls: Boolean): Service[Request, Response] = {
-    val client = {
-      val client = if(useTls) Httpx.client.withTls(host) else Httpx.client
-      client.newClient(s"$host:$port")
-    }
-    client.toService
+  def newClientService(host: String, port: Int, useTls: Boolean, hostConnectionLimit: Int = 64): Service[Request, Response] = {
+    val hostport = s"$host:$port"
+    val clientBuilder = ClientBuilder().
+      codec(Http()).
+      name(hostport).
+      hostConnectionLimit(hostConnectionLimit).
+      hosts(hostport)
+
+    val client =
+      if(useTls) clientBuilder.tls(host).build()
+      else       clientBuilder.build()
+
+    client
   }
 
-  def newClient(serverURL: URL): Service[Request, Response] = {
+  def newClientService(serverURL: URL): Service[Request, Response] = {
     val (host, port, useTls) = getConnectionInfo(serverURL)
-    newClient(host, port, useTls)
+    newClientService(host, port, useTls)
   }
 
-  def newClient(serverURL: String): Service[Request, Response] =
-    newClient(new URL(serverURL))
+  def newClientService(serverURL: String): Service[Request, Response] = newClientService(new URL(serverURL))
 }
