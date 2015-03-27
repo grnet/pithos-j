@@ -38,7 +38,8 @@ trait PithosApiSkeleton extends PithosApi {
     try {
       command.validate match {
         case Some(error) ⇒
-          Future.exception(new RuntimeException("Could not validate %s".format(command)))
+          val name = command.commandName
+          Future.rawException(new RuntimeException(s"Could not validate $name: $error"))
 
         case None ⇒
           callImpl(command)
@@ -46,7 +47,7 @@ trait PithosApiSkeleton extends PithosApi {
     }
     catch {
       case e: Throwable ⇒
-        Future.exception(new RuntimeException("Internal error", e))
+        Future.rawException(new RuntimeException("Internal error", e))
     }
   }
 
